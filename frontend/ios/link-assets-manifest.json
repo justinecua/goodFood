@@ -1,0 +1,29 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "src/assets/fonts/Averta Cyrillic Bold.otf",
+      "sha1": "332b503578f44d806ef30856c4d3f9c27e687608"
+    },
+    {
+      "path": "src/assets/fonts/Averta-Cyrillic-Black.otf",
+      "sha1": "3c093986f2151c78ac52dff04e3957cf8b308649"
+    },
+    {
+      "path": "src/assets/fonts/Averta-Cyrillic-Regular.otf",
+      "sha1": "1490e813d6a22d3b5804a113fc2c64cc74ad2698"
+    },
+    {
+      "path": "src/assets/fonts/Averta-Cyrillic-SemiBold.otf",
+      "sha1": "83718eabd2749a6e293372c71bae5b87d742145a"
+    },
+    {
+      "path": "src/assets/fonts/Ezra-Regular.otf",
+      "sha1": "6b5f2a63d1786a3bab596bcf3c2527d36f9f03c1"
+    },
+    {
+      "path": "src/assets/fonts/Ezra-SemiBold.otf",
+      "sha1": "72d6742f776a2535a409e620a6606eb2b74955ea"
+    }
+  ]
+}
