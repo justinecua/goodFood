@@ -8,7 +8,7 @@ import LoginScreen from './src/screens/LoginScreen';
 import SubscriptionScreen from './src/screens/SubscriptionScreen';
 
 function App() {
-  return <SubscriptionScreen />;
+  return <AddDish />;
 }
 
 export default App;
