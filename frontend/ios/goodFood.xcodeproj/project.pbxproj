@@ -7,36 +7,36 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0501829F92134440B180012B /* Averta-Cyrillic-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = F7E99325D7A8450288E2B5BA /* Averta-Cyrillic-Regular.otf */; };
+		083704050C3D40F0A7EDF5FF /* Ezra-SemiBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 0B6BABB4EE744853934760DE /* Ezra-SemiBold.otf */; };
 		0C80B921A6F3F58F76C31292 /* libPods-goodFood.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5DCACB8F33CDC322A6C60F78 /* libPods-goodFood.a */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		2E0D5D4FCB69F6F3B4A7EF4B /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		AB25BA6018B34E7AA686EA50 /* Averta Cyrillic Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = F0ACB74885C14315ADDC9102 /* Averta Cyrillic Bold.otf */; };
 		BA7994C478E54650B3FE5BC1 /* Averta-Cyrillic-Black.otf in Resources */ = {isa = PBXBuildFile; fileRef = 2862D491024F41F78EFA56D0 /* Averta-Cyrillic-Black.otf */; };
-		0501829F92134440B180012B /* Averta-Cyrillic-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = F7E99325D7A8450288E2B5BA /* Averta-Cyrillic-Regular.otf */; };
 		D547FAF937D649DDA4D98F30 /* Ezra-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = B38CD91B2E6F407D9B250575 /* Ezra-Regular.otf */; };
 		E0528CE8DDC042BCAA6E8C53 /* Averta-Cyrillic-SemiBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = FCAA30FB206D418CB23F6A77 /* Averta-Cyrillic-SemiBold.otf */; };
-		083704050C3D40F0A7EDF5FF /* Ezra-SemiBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 0B6BABB4EE744853934760DE /* Ezra-SemiBold.otf */; };
-		AB25BA6018B34E7AA686EA50 /* Averta Cyrillic Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = F0ACB74885C14315ADDC9102 /* Averta Cyrillic Bold.otf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0B6BABB4EE744853934760DE /* Ezra-SemiBold.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Ezra-SemiBold.otf"; path = "../src/assets/fonts/Ezra-SemiBold.otf"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* goodFood.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = goodFood.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = goodFood/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = goodFood/Info.plist; sourceTree = "<group>"; };
 		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = goodFood/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		2862D491024F41F78EFA56D0 /* Averta-Cyrillic-Black.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Averta-Cyrillic-Black.otf"; path = "../src/assets/fonts/Averta-Cyrillic-Black.otf"; sourceTree = "<group>"; };
 		3B4392A12AC88292D35C810B /* Pods-goodFood.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-goodFood.debug.xcconfig"; path = "Target Support Files/Pods-goodFood/Pods-goodFood.debug.xcconfig"; sourceTree = "<group>"; };
 		5709B34CF0A7D63546082F79 /* Pods-goodFood.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-goodFood.release.xcconfig"; path = "Target Support Files/Pods-goodFood/Pods-goodFood.release.xcconfig"; sourceTree = "<group>"; };
 		5DCACB8F33CDC322A6C60F78 /* libPods-goodFood.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-goodFood.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = goodFood/AppDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = goodFood/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		B38CD91B2E6F407D9B250575 /* Ezra-Regular.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Ezra-Regular.otf"; path = "../src/assets/fonts/Ezra-Regular.otf"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
-		2862D491024F41F78EFA56D0 /* Averta-Cyrillic-Black.otf */ = {isa = PBXFileReference; name = "Averta-Cyrillic-Black.otf"; path = "../src/assets/fonts/Averta-Cyrillic-Black.otf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
-		F7E99325D7A8450288E2B5BA /* Averta-Cyrillic-Regular.otf */ = {isa = PBXFileReference; name = "Averta-Cyrillic-Regular.otf"; path = "../src/assets/fonts/Averta-Cyrillic-Regular.otf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
-		B38CD91B2E6F407D9B250575 /* Ezra-Regular.otf */ = {isa = PBXFileReference; name = "Ezra-Regular.otf"; path = "../src/assets/fonts/Ezra-Regular.otf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
-		FCAA30FB206D418CB23F6A77 /* Averta-Cyrillic-SemiBold.otf */ = {isa = PBXFileReference; name = "Averta-Cyrillic-SemiBold.otf"; path = "../src/assets/fonts/Averta-Cyrillic-SemiBold.otf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
-		0B6BABB4EE744853934760DE /* Ezra-SemiBold.otf */ = {isa = PBXFileReference; name = "Ezra-SemiBold.otf"; path = "../src/assets/fonts/Ezra-SemiBold.otf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
-		F0ACB74885C14315ADDC9102 /* Averta Cyrillic Bold.otf */ = {isa = PBXFileReference; name = "Averta Cyrillic Bold.otf"; path = "../src/assets/fonts/Averta Cyrillic Bold.otf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		F0ACB74885C14315ADDC9102 /* Averta Cyrillic Bold.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Averta Cyrillic Bold.otf"; path = "../src/assets/fonts/Averta Cyrillic Bold.otf"; sourceTree = "<group>"; };
+		F7E99325D7A8450288E2B5BA /* Averta-Cyrillic-Regular.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Averta-Cyrillic-Regular.otf"; path = "../src/assets/fonts/Averta-Cyrillic-Regular.otf"; sourceTree = "<group>"; };
+		FCAA30FB206D418CB23F6A77 /* Averta-Cyrillic-SemiBold.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Averta-Cyrillic-SemiBold.otf"; path = "../src/assets/fonts/Averta-Cyrillic-SemiBold.otf"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -51,6 +51,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0B9C78DCC1B6490691A2EEC1 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				2862D491024F41F78EFA56D0 /* Averta-Cyrillic-Black.otf */,
+				F7E99325D7A8450288E2B5BA /* Averta-Cyrillic-Regular.otf */,
+				B38CD91B2E6F407D9B250575 /* Ezra-Regular.otf */,
+				FCAA30FB206D418CB23F6A77 /* Averta-Cyrillic-SemiBold.otf */,
+				0B6BABB4EE744853934760DE /* Ezra-SemiBold.otf */,
+				F0ACB74885C14315ADDC9102 /* Averta Cyrillic Bold.otf */,
+			);
+			name = Resources;
+			path = "";
+			sourceTree = "<group>";
+		};
 		13B07FAE1A68108700A75B9A /* goodFood */ = {
 			isa = PBXGroup;
 			children = (
@@ -110,20 +124,6 @@
 			);
 			path = Pods;
 			sourceTree = "<group>";
-		};
-		0B9C78DCC1B6490691A2EEC1 /* Resources */ = {
-			isa = "PBXGroup";
-			children = (
-				2862D491024F41F78EFA56D0 /* Averta-Cyrillic-Black.otf */,
-				F7E99325D7A8450288E2B5BA /* Averta-Cyrillic-Regular.otf */,
-				B38CD91B2E6F407D9B250575 /* Ezra-Regular.otf */,
-				FCAA30FB206D418CB23F6A77 /* Averta-Cyrillic-SemiBold.otf */,
-				0B6BABB4EE744853934760DE /* Ezra-SemiBold.otf */,
-				F0ACB74885C14315ADDC9102 /* Averta Cyrillic Bold.otf */,
-			);
-			name = Resources;
-			sourceTree = "<group>";
-			path = "";
 		};
 /* End PBXGroup section */
 
