@@ -10,7 +10,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.container_bg
   },
   bottomNavBar: {
-    height: 80,
+    height: 10,
     backgroundColor: colors.container_bg2
   },
   iconContainer: {
