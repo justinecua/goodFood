@@ -10,6 +10,7 @@ const colors = {
   subtext: '#909294',
   subtextInput: '#c4c5c6',
   maintext: '#2A2A2A',
+  button_text: '#fff'
 };
 
 export default colors;
