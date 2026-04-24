@@ -6,11 +6,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 const MessageScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <View style={styles.container}>
-        <View style={styles.section}>
-          <Text>Messages</Text>
+      <View style={{ flex: 1 }}>
+        <View style={styles.container}>
+          <View style={styles.section}>
+            <Text>Messages</Text>
+          </View>
+          <BottomNavbar navigation={navigation} />
         </View>
-        <BottomNavbar navigation={navigation} />
       </View>
     </SafeAreaView>
   );

@@ -11,32 +11,7 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: colors.container_bg,
   },
-  // bottomNavBar: {
-  //   height: 80,
-  //   backgroundColor: colors.container_bg2,
-  // },
-  // iconContainer: {
-  //   flexDirection: 'row',
-  //   justifyContent: 'space-around',
-  //   alignItems: 'center',
-  //   paddingTop: 12,
-  // },
-  // icon: {
-  //   height: 24,
-  //   width: 24,
-  // },
-  // icon1: {
-  //   height: 26,
-  //   width: 26,
-  // },
-  // icon2: {
-  //   height: 27,
-  //   width: 27,
-  // },
-  // icon3: {
-  //   height: 28,
-  //   width: 28,
-  // },
+
   navBotton: {
     alignItems: 'center',
   },
@@ -44,7 +19,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 20,
   },
   userProfile: {
     height: 64,
@@ -57,7 +31,7 @@ const styles = StyleSheet.create({
   textStyle1: {
     fontSize: 12,
     fontFamily: 'Averta Cyrillic Bold',
-    color: colors.gray
+    color: colors.gray,
     justifyContent: 'space-between',
     backgroundColor: colors.container_bg,
   },
@@ -65,12 +39,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.container_bg2,
   },
   goodFoodText: {
-    height: 28 ,
+    height: 28,
     width: 149,
-    margin: 5
+    margin: 5,
   },
   cardBanner: {
-  backgroundColor: colors.background1,
+    backgroundColor: colors.background1,
     height: 160,
     width: '100%',
     borderRadius: 20,
@@ -82,7 +56,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingRight: 30 
+    paddingRight: 30,
   },
   bannerButton: {
     backgroundColor: '#E5E5E5',
@@ -93,13 +67,13 @@ const styles = StyleSheet.create({
   bannerButtonText: {
     color: '#2e8b57',
     fontWeight: '600',
-    fontSize:12,
+    fontSize: 12,
     fontFamily: 'Ezra-SemiBold',
   },
   cardBannerImage: {
     height: 150,
     width: 170,
-    borderRadius: 15
+    borderRadius: 15,
   },
   bannerText: {
     padding: 0,
@@ -109,7 +83,7 @@ const styles = StyleSheet.create({
   },
   bannerText1: {
     fontSize: 25,
-    color: '#f8f8f8'
+    color: '#f8f8f8',
     paddingTop: 12,
   },
   icon: {
@@ -139,22 +113,22 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     paddingHorizontal: 20,
     height: 55,
-    marginTop: 25
+    marginTop: 25,
   },
   searchBarText: {
     fontFamily: 'Ezra-SemiBold',
-    fontSize: 12
+    fontSize: 12,
   },
   searchLens: {
     height: 25,
-    width: 25
+    width: 25,
   },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginTop: 25,
-    marginBottom: 5
+    marginBottom: 5,
   },
   sectionHeaderText: {
     fontFamily: 'Ezra-SemiBold',
@@ -170,7 +144,7 @@ const styles = StyleSheet.create({
   },
   dishSubContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
   },
   dishCard: {
     flexDirection: 'column',
@@ -191,13 +165,13 @@ const styles = StyleSheet.create({
     height: 2,
     width: 50,
     margin: 10,
-    borderRadius: 100
+    borderRadius: 100,
   },
   dishText: {
     fontFamily: 'Ezra-SemiBold',
     color: colors.subtext,
     fontSize: 11,
-    marginBottom:5
+    marginBottom: 5,
   },
   restaurantContainer: {
     flexDirection: 'column',
@@ -218,14 +192,14 @@ const styles = StyleSheet.create({
   },
   restaurantCardImage: {
     height: 60,
-    width: 60
+    width: 60,
   },
   restaurantText: {
     fontFamily: 'Ezra-SemiBold',
     color: colors.subtext,
     fontSize: 11,
-    marginTop: 9
-  }
+    marginTop: 9,
+  },
 
   userProfile: {
     height: 55,

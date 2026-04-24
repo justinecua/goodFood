@@ -11,6 +11,7 @@ import Notifications from '../screens/RestaurantNotificationScreen';
 import SubscriptionScreen from '../screens/SubscriptionScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import MessageScreen from '../screens/MessageScreen';
+import RestaurantInboxScreen from '../screens/RestaurantInboxScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -27,7 +28,10 @@ const AppNavigator = () => {
             component={RestaurantHomeScreen}
           />
           <Stack.Screen name="AddDish" component={AddDish} />
-          <Stack.Screen name="MessageScreen" component={MessageScreen} />
+          <Stack.Screen
+            name="MessageScreen"
+            component={RestaurantInboxScreen}
+          />
           <Stack.Screen name="DishDetails" component={DishDetails} />
           <Stack.Screen name="Notifications" component={Notifications} />
           <Stack.Screen name="Subscription" component={SubscriptionScreen} />
