@@ -5,6 +5,8 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
     paddingHorizontal: 25,
+    paddingTop: 20,
+    paddingBottom: 20,
     backgroundColor: colors.container_bg2,
   },
   card: {
@@ -32,6 +34,23 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontFamily: 'Ezra-SemiBold',
     color: colors.button,
+  },
+  bottomContainer: {
+    gap: 10,
+    marginTop: 10,
+  },
+  addDishButton: {
+    backgroundColor: colors.button,
+    height: 52,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  addDishButtonText: {
+    color: colors.button_text,
+    fontFamily: 'Ezra-SemiBold',
+    fontSize: 15,
+    fontWeight: '600',
   },
 });
 

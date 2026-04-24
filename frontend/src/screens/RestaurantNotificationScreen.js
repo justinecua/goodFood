@@ -1,5 +1,9 @@
-import { View, Text, Image, TextInput, TouchableOpacity } from 'react-native';
+ 
+import { useState } from 'react';
+import { Dropdown } from 'react-native-element-dropdown';
+import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
 import styles from '../styles/RestaurantNotificationScreenStyle';
+import colors from '../constants/colors';
 import BottomNavbar from '../components/shared/BottomNavbar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
