@@ -4,11 +4,7 @@ import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
 import styles from '../styles/RestaurantAddDishScreenStyle';
 import colors from '../constants/colors';
 import PreviewLogo from '../assets/images/previewLogo.png';
-import chatnavbar from '../assets/images/chatnavbar.png';
-import dishnavbar from '../assets/images/dishnavbar.png';
-import homenavbar from '../assets/images/homenavbar.png';
-import notifnavbar from '../assets/images/notifnavbar.png';
-import usercircle from '../assets/images/usercircle.png';
+import BottomNavbar from '../components/shared/BottomNavbar';
 
 const AddDish = () => {
   const [category, setCategory] = useState(null);
@@ -34,7 +30,9 @@ const AddDish = () => {
 
       <View style={styles.midContainer}>
         <TouchableOpacity style={styles.addDishInput}>
-          <Text style={styles.placeholderText}>Image (Click to upload image)</Text>
+          <Text style={styles.placeholderText}>
+            Image (Click to upload image)
+          </Text>
         </TouchableOpacity>
 
         <View style={styles.imagePreviewContainer}>
@@ -63,7 +61,7 @@ const AddDish = () => {
           valueField="value"
           placeholder="Category"
           value={category}
-          onChange={(item) => setCategory(item.value)}
+          onChange={item => setCategory(item.value)}
           renderRightIcon={() => <Text style={styles.dropdownArrow}>▼</Text>}
         />
         <Dropdown
@@ -75,7 +73,7 @@ const AddDish = () => {
           valueField="value"
           placeholder="Availability"
           value={availability}
-          onChange={(item) => setAvailability(item.value)}
+          onChange={item => setAvailability(item.value)}
           renderRightIcon={() => <Text style={styles.dropdownArrow}>▼</Text>}
         />
         <TextInput
@@ -94,28 +92,9 @@ const AddDish = () => {
           <Text style={styles.addDishButtonText}>Submit</Text>
         </TouchableOpacity>
       </View>
-      <View style={styles.bottomNavigationBar}>
-        <TouchableOpacity style={styles.navItem}>
-          <Image style={styles.navIconImage} source={homenavbar} />
-          <Text style={styles.navIconText}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Image style={styles.navIconImage} source={chatnavbar} />
-          <Text style={styles.navIconText}>Messages</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Image style={styles.navIconImage} source={dishnavbar} />
-          <Text style={styles.navIconText}>Dish</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Image style={styles.navIconImage} source={notifnavbar} />
-          <Text style={styles.navIconText}>Notification</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Image style={styles.navIconImage} source={usercircle} />
-          <Text style={styles.navIconText}>Profile</Text>
-        </TouchableOpacity>
-      </View>
+
+      {/* Bottom NavBar */}
+      <BottomNavbar />
     </View>
   );
 };
