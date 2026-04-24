@@ -27,14 +27,12 @@ const AddDish = () => {
       <View style={styles.headerContainer}>
         <Text style={styles.heading}>Add Dish</Text>
       </View>
-
       <View style={styles.midContainer}>
         <TouchableOpacity style={styles.addDishInput}>
           <Text style={styles.placeholderText}>
             Image (Click to upload image)
           </Text>
         </TouchableOpacity>
-
         <View style={styles.imagePreviewContainer}>
           <Image style={styles.UpperLogo} source={PreviewLogo} />
           <Text style={styles.imagePreviewText}>Image Preview</Text>

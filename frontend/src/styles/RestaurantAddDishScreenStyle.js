@@ -12,6 +12,7 @@ const styles = StyleSheet.create({
   },
   headerContainer: {
     alignItems: 'center',
+    marginTop: 30,
   },
   heading: {
     fontFamily: 'Ezra-SemiBold',
@@ -20,6 +21,7 @@ const styles = StyleSheet.create({
     color: colors.maintext,
   },
   midContainer: {
+    marginTop: 30,
     flex: 1,
     gap: 10,
     justifyContent: 'center',
@@ -39,7 +41,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   descriptionInput: {
-    height: 90,
+    height: 130,
     paddingTop: 12,
     paddingHorizontal: 20,
   },
@@ -70,7 +72,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   dropdownContainer: {
-    height: 48,
+    height: 50,
     paddingHorizontal: 20,
     borderRadius: 16,
     backgroundColor: colors.container_bg,

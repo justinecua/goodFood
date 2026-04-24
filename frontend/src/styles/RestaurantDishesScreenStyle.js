@@ -35,6 +35,23 @@ const styles = StyleSheet.create({
     fontFamily: 'Ezra-SemiBold',
     color: colors.button,
   },
+  bottomContainer: {
+    gap: 10,
+    marginTop: 10,
+  },
+  addDishButton: {
+    backgroundColor: colors.button,
+    height: 52,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  addDishButtonText: {
+    color: colors.button_text,
+    fontFamily: 'Ezra-SemiBold',
+    fontSize: 15,
+    fontWeight: '600',
+  },
 });
 
 export default styles;

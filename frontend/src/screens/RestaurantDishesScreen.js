@@ -1,26 +1,31 @@
- 
 import { useState } from 'react';
 import { Dropdown } from 'react-native-element-dropdown';
 import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
-import styles from '../styles/RestaurantNotificationScreenStyle';
+import styles from '../styles/RestaurantAddDishScreenStyle';
 import colors from '../constants/colors';
 import BottomNavbar from '../components/shared/BottomNavbar';
 
-const NotificationScreen = () => {
+const RestaurantDishesScreen = () => {
   return (
     <View style={styles.background}>
       <View style={styles.headerContainer}>
-        <Text style={styles.heading}>Notifications</Text>
+        <Text style={styles.heading}>Restaurant Dishes</Text>
       </View>
       <View style={styles.midContainer}>
         <View style={styles.card}>
-          <Text style={styles.cardText}>New Reservation Request</Text>
+          <Text style={styles.cardText}>Ari Pics</Text>
         </View>
       </View>
-      {/* Bottom NavBar */}
+      <View style={styles.bottomContainer}>
+        <TouchableOpacity style={styles.addDishButton}>
+          <Text style={styles.addDishButtonText}>Add Dish</Text>
+        </TouchableOpacity>
+      </View>
+        {/* Bottom NavBar */}
       <BottomNavbar />
     </View>
   );
 };
 
-export default NotificationScreen;
+export default RestaurantDishesScreen; 
+
