@@ -5,8 +5,6 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
     paddingHorizontal: 25,
-    paddingTop: 20,
-    paddingBottom: 20,
     backgroundColor: colors.container_bg2,
   },
   card: {

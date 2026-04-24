@@ -5,21 +5,25 @@ import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
 import styles from '../styles/RestaurantNotificationScreenStyle';
 import colors from '../constants/colors';
 import BottomNavbar from '../components/shared/BottomNavbar';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-const NotificationScreen = () => {
+const NotificationScreen = ({ navigation }) => {
   return (
-    <View style={styles.background}>
-      <View style={styles.headerContainer}>
-        <Text style={styles.heading}>Notifications</Text>
-      </View>
-      <View style={styles.midContainer}>
-        <View style={styles.card}>
-          <Text style={styles.cardText}>New Reservation Request</Text>
+    <SafeAreaView style={{ flex: 1 }}>
+      <View style={{ flex: 1 }}>
+        <View style={styles.background}>
+          <View style={styles.headerContainer}>
+            <Text style={styles.heading}>Notifications</Text>
+          </View>
+          <View style={styles.midContainer}>
+            <View style={styles.card}>
+              <Text style={styles.cardText}>New Reservation Request</Text>
+            </View>
+          </View>
         </View>
+        <BottomNavbar navigation={navigation} />
       </View>
-      {/* Bottom NavBar */}
-      <BottomNavbar />
-    </View>
+    </SafeAreaView>
   );
 };
 

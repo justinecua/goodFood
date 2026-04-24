@@ -15,17 +15,13 @@ const styles = StyleSheet.create({
     marginVertical: 30,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 10,
+    marginRight: 7,
   },
-  bottomsubHeading: {
-    width: '100%',
-    padding: 20,
-    textAlign: 'center',
-    fontFamily: 'Averta-Cyrillic-SemiBold',
-  },
+
   bottomsubHeadingLogin: {
     color: colors.button,
     fontFamily: 'Averta Cyrillic Bold',
+    fontWeight: 700,
   },
 
   topContainer: {},
@@ -34,20 +30,23 @@ const styles = StyleSheet.create({
     fontSize: 33,
     marginBottom: 20,
     color: colors.maintext,
+    fontWeight: 600,
   },
   subHeadings: {
     fontFamily: 'Averta-Cyrillic-SemiBold',
     fontSize: 21,
     color: colors.subtext,
+    fontWeight: 500,
   },
   subHeadings2: {
     fontFamily: 'Averta-Cyrillic-SemiBold',
     fontSize: 21,
     color: colors.subtext,
     marginBottom: 40,
+    fontWeight: 500,
   },
   midContainer: {
-    gap: 20,
+    gap: 12,
   },
   registerInput: {
     height: 60,
