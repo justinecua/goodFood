@@ -3,7 +3,7 @@ import styles from '../styles/RegisterScreenStyles';
 import colors from '../constants/colors';
 import goodFoodGreen from '../assets/images/goodFood_green.png';
 
-const LoginScreen = () => {
+const LoginScreen = ({ navigation }) => {
   return (
     <View style={styles.background}>
       <View style={styles.UpperLogoContainer}>
@@ -19,7 +19,7 @@ const LoginScreen = () => {
         </View>
         <View style={styles.midContainer}>
           <TextInput
-            placeholder="Email Address"
+            placeholder="Username"
             placeholderTextColor={colors.subtextInput}
             style={styles.registerInput}
           ></TextInput>
@@ -37,11 +37,16 @@ const LoginScreen = () => {
             <Text style={styles.bottomsubHeading}>Don`t have an account?</Text>
           </View>
           <View>
-            <Text style={styles.bottomsubHeadingLogin}>Register</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+              <Text style={styles.bottomsubHeadingLogin}>Register</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
-        <TouchableOpacity style={styles.registerButton}>
+        <TouchableOpacity
+          style={styles.registerButton}
+          onPress={() => navigation.navigate('RestaurantHome')}
+        >
           <Text style={styles.registerButtonText}>Login</Text>
         </TouchableOpacity>
       </View>

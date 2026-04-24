@@ -3,7 +3,7 @@ import styles from '../styles/RegisterScreenStyles';
 import colors from '../constants/colors';
 import goodFoodGreen from '../assets/images/goodFood_green.png';
 
-const RegisterScreen = () => {
+const RegisterScreen = ({ navigation }) => {
   return (
     <View style={styles.background}>
       <View style={styles.UpperLogoContainer}>
@@ -23,6 +23,7 @@ const RegisterScreen = () => {
             placeholderTextColor={colors.subtextInput}
             style={styles.registerInput}
           ></TextInput>
+
           <TextInput
             placeholder="Password"
             placeholderTextColor={colors.subtextInput}
@@ -30,6 +31,11 @@ const RegisterScreen = () => {
           ></TextInput>
           <TextInput
             placeholder="Email Address"
+            placeholderTextColor={colors.subtextInput}
+            style={styles.registerInput}
+          ></TextInput>
+          <TextInput
+            placeholder="Mobile Number"
             placeholderTextColor={colors.subtextInput}
             style={styles.registerInput}
           ></TextInput>
@@ -49,12 +55,14 @@ const RegisterScreen = () => {
             </Text>
           </View>
           <View>
-            <Text style={styles.bottomsubHeadingLogin}>Login</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+              <Text style={styles.bottomsubHeadingLogin}>Login</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
         <TouchableOpacity style={styles.registerButton}>
-          <Text style={styles.registerButtonText}>Continue</Text>
+          <Text style={styles.registerButtonText}>Register</Text>
         </TouchableOpacity>
       </View>
     </View>
