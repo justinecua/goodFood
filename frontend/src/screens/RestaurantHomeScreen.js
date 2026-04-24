@@ -26,7 +26,7 @@ const RestaurantHomeScreen = () => {
           <LinearGradient
             colors={['#abdfc7', '#2e8b57']}
             start={{ x: 0, y: 0 }}
-            end={{ x: 0.5, y: 0.3 }}
+            end={{ x: 0.5, y: 0.5 }}
             style={styles.cardBanner}
           >
             <Image 
@@ -36,7 +36,7 @@ const RestaurantHomeScreen = () => {
             <View style={styles.bannerContent}>
               <Text style={styles.bannerText}>be part of</Text>
               <Image
-              style={styles.goodFoodText}
+                style={styles.goodFoodText}
                 source={ImageSource.goodFoodText}
               />
               {/* <Text style={styles.bannerText1}>goodfood</Text> */}

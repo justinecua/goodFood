@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
   },
   searchBarText: {
     fontFamily: 'Ezra-SemiBold',
-    fontSize: 11
+    fontSize: 12
   },
   searchLens: {
     height: 25,
