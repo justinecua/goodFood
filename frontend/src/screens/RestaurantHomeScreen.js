@@ -4,8 +4,10 @@ import styles from '../styles/RestaurantHomeScreenStyles';
 import colors from '../constants/colors';
 import ImageSource from '../constants/imageSource';
 import BottomNavbar from '../components/shared/BottomNavbar';
+import iconSource from '../constants/icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-const RestaurantHomeScreen = () => {
+const RestaurantHomeScreen = ({ navigation }) => {
   return (
     <View style={{ flex: 1 }}>
       <ScrollView>

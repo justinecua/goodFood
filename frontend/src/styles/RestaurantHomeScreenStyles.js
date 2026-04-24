@@ -58,6 +58,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Averta Cyrillic Bold',
     color: colors.gray
+    justifyContent: 'space-between',
+    backgroundColor: colors.container_bg,
+  },
+  bottomNavBar: {
+    backgroundColor: colors.container_bg2,
   },
   goodFoodText: {
     height: 28 ,
@@ -105,6 +110,26 @@ const styles = StyleSheet.create({
   bannerText1: {
     fontSize: 25,
     color: '#f8f8f8'
+    paddingTop: 12,
+  },
+  icon: {
+    height: 24,
+    width: 24,
+  },
+  icon1: {
+    height: 26,
+    width: 26,
+  },
+  icon2: {
+    height: 27,
+    width: 27,
+  },
+  icon3: {
+    height: 28,
+    width: 28,
+  },
+  navBotton: {
+    alignItems: 'center',
   },
   searchBarContainer: {
     flexDirection: 'row',
@@ -202,6 +227,10 @@ const styles = StyleSheet.create({
     marginTop: 9
   }
 
+  userProfile: {
+    height: 55,
+    width: 55,
+  },
 });
 
 export default styles;

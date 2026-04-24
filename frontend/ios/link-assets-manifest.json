@@ -2,12 +2,12 @@
   "migIndex": 1,
   "data": [
     {
-      "path": "src/assets/fonts/Averta Cyrillic Bold.otf",
-      "sha1": "332b503578f44d806ef30856c4d3f9c27e687608"
-    },
-    {
       "path": "src/assets/fonts/Averta-Cyrillic-Black.otf",
       "sha1": "3c093986f2151c78ac52dff04e3957cf8b308649"
+    },
+    {
+      "path": "src/assets/fonts/Averta-Cyrillic-Bold.otf",
+      "sha1": "332b503578f44d806ef30856c4d3f9c27e687608"
     },
     {
       "path": "src/assets/fonts/Averta-Cyrillic-Regular.otf",
