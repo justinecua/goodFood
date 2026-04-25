@@ -3,7 +3,7 @@ import { Dropdown } from 'react-native-element-dropdown';
 import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
 import styles from '../../styles/RestaurantNotificationScreenStyle';
 import colors from '../../constants/colors';
-import BottomNavbar from '../../components/shared/BottomNavbar';
+import RestaurantBottomNavbar from '../../components/shared/RestaurantBottomNavbar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const NotificationScreen = ({ navigation }) => {
@@ -20,7 +20,7 @@ const NotificationScreen = ({ navigation }) => {
             </View>
           </View>
         </View>
-        <BottomNavbar navigation={navigation} />
+        <RestaurantBottomNavbar navigation={navigation} />
       </View>
     </SafeAreaView>
   );

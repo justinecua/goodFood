@@ -13,7 +13,7 @@ import ImageSource from '../../constants/imageSource';
 import RestaurantBottomNavbar from '../../components/shared/RestaurantBottomNavbar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const RestaurantHomeScreen = ({ navigation }) => {
+const DinerHomeScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={{ flex: 1 }}>
@@ -21,7 +21,7 @@ const RestaurantHomeScreen = ({ navigation }) => {
           <View style={styles.background}>
             <View style={styles.upperContainer}>
               <View>
-                <Text style={styles.textStyle}>Hello, Mi Casa</Text>
+                <Text style={styles.textStyle}>Hello, Diner</Text>
                 <Text style={styles.textStyle1}>
                   Brgy. Poblacion, Quezon Avenue, Iligan ...
                 </Text>
@@ -181,4 +181,4 @@ const RestaurantHomeScreen = ({ navigation }) => {
   );
 };
 
-export default RestaurantHomeScreen;
+export default DinerHomeScreen;

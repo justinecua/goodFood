@@ -100,9 +100,10 @@ def login(data):
         password = data.get("password")
 
         query = """
-            SELECT account_id, username, password
-            FROM account_account
-            WHERE username = %s;
+            SELECT a.account_id, a.username, a.password, at.account_type
+            FROM account_account a
+            JOIN account_accounttype at ON a.account_type_id = at.acc_type_id
+            WHERE a.username = %s;
         """
 
         cursor.execute(query, [username])
@@ -111,7 +112,7 @@ def login(data):
         if not row:
             return {"error": "User not found"}
 
-        account_id, username, hashed_password = row
+        account_id, username, hashed_password, account_type = row
 
         if not check_password(password, hashed_password):
             return {"error": "Invalid Password"}
@@ -126,6 +127,7 @@ def login(data):
             "user": {
                 "account_id": account_id,
                 "username": username,
+                "account_type": account_type,
             },
         }
 

@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import styles from '../../styles/ProfileScreenStyle';
-import BottomNavbar from '../../components/shared/BottomNavbar';
+import RestaurantBottomNavbar from '../../components/shared/RestaurantBottomNavbar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { logoutAccount } from '../../api/services/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -26,6 +26,7 @@ const ProfileScreen = ({ navigation }) => {
       routes: [{ name: 'Login' }],
     });
   };
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.container}>
@@ -36,7 +37,7 @@ const ProfileScreen = ({ navigation }) => {
             <Text>Logout</Text>
           </TouchableOpacity>
         </View>
-        <BottomNavbar navigation={navigation} />
+        <RestaurantBottomNavbar navigation={navigation} />
       </View>
     </SafeAreaView>
   );
