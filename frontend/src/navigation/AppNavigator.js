@@ -4,14 +4,13 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
-import RestaurantHomeScreen from '../screens/RestaurantHomeScreen';
-import AddDish from '../screens/RestaurantAddDishScreen';
-import DishDetails from '../screens/RestaurantDishDetailsScreen';
-import Notifications from '../screens/RestaurantNotificationScreen';
+import RestaurantHomeScreen from '../screens/Owner/RestaurantHomeScreen';
+import AddDish from '../screens/Owner/RestaurantAddDishScreen';
+import DishDetails from '../screens/Owner/RestaurantDishDetailsScreen';
+import Notifications from '../screens/Owner/RestaurantNotificationScreen';
 import SubscriptionScreen from '../screens/SubscriptionScreen';
-import ProfileScreen from '../screens/ProfileScreen';
-import MessageScreen from '../screens/MessageScreen';
-import RestaurantInboxScreen from '../screens/RestaurantInboxScreen';
+import ProfileScreen from '../screens/Owner/RestaurantProfileScreen';
+import RestaurantInboxScreen from '../screens/Owner/RestaurantInboxScreen';
 
 const Stack = createNativeStackNavigator();
 

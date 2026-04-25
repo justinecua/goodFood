@@ -1,6 +1,6 @@
 import { View, Text } from 'react-native';
-import styles from '../styles/ProfileScreenStyle';
-import BottomNavbar from '../components/shared/BottomNavbar';
+import styles from '../../styles/ProfileScreenStyle';
+import BottomNavbar from '../../components/shared/BottomNavbar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const MessageScreen = ({ navigation }) => {
