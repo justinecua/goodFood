@@ -1,6 +1,6 @@
 import { View, Text, Image, TouchableOpacity } from 'react-native';
-import styles from '../styles/RestaurantDishDetailsScreenStyle';
-import TestImage from '../assets/images/goodFood_green.png';
+import styles from '../../styles/RestaurantDishDetailsScreenStyle';
+import TestImage from '../../assets/images/goodFood_green.png';
 
 const RestaurantDishDetailsScreen = () => {
   return (
@@ -15,12 +15,10 @@ const RestaurantDishDetailsScreen = () => {
           <Text style={styles.price}>₱159.00</Text>
         </View>
         <View style={styles.row}>
-        <Text style={styles.rating}>Rating 5.0</Text>
-        <Text style={styles.status}>Available</Text>
+          <Text style={styles.rating}>Rating 5.0</Text>
+          <Text style={styles.status}>Available</Text>
         </View>
-        <Text style={styles.description}>
-          Practice sir practice
-        </Text>
+        <Text style={styles.description}>Practice sir practice</Text>
         <View style={styles.buttonRow}>
           <TouchableOpacity style={styles.commentBtn}>
             <Text style={styles.commentText}>Comments</Text>

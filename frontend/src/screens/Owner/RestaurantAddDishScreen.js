@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { Dropdown } from 'react-native-element-dropdown';
 import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
-import styles from '../styles/RestaurantAddDishScreenStyle';
-import colors from '../constants/colors';
-import PreviewLogo from '../assets/images/previewLogo.png';
-import BottomNavbar from '../components/shared/BottomNavbar';
+import styles from '../../styles/RestaurantAddDishScreenStyle';
+import colors from '../../constants/colors';
+import PreviewLogo from '../../assets/images/previewLogo.png';
+import BottomNavbar from '../../components/shared/BottomNavbar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const AddDish = ({ navigation }) => {

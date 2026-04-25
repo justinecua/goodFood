@@ -7,10 +7,10 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import styles from '../styles/RestaurantHomeScreenStyles';
-import colors from '../constants/colors';
-import ImageSource from '../constants/imageSource';
-import BottomNavbar from '../components/shared/BottomNavbar';
+import styles from '../../styles/RestaurantHomeScreenStyles';
+import colors from '../../constants/colors';
+import ImageSource from '../../constants/imageSource';
+import BottomNavbar from '../../components/shared/BottomNavbar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const RestaurantHomeScreen = ({ navigation }) => {
