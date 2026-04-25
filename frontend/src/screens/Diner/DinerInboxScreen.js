@@ -1,16 +1,16 @@
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import styles from '../../styles/RestaurantInboxScreenStyle';
-import RestaurantBottomNavbar from '../../components/shared/RestaurantBottomNavbar';
+import DinerBottomNavbar from '../../components/shared/DinerBottomNavbar';
 import SearchButton from '../../assets/images/searchbutton.png';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const RestaurantInboxScreen = ({ navigation }) => {
+const DinerInboxScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={{ flex: 1 }}>
         <View style={styles.background}>
           <View style={styles.headerContainer}>
-            <Text style={styles.heading}>Inbox</Text>
+            <Text style={styles.heading}>Diner Inbox</Text>
           </View>
           <View style={styles.midContainer}>
             <TouchableOpacity style={styles.searchInput}>
@@ -25,11 +25,11 @@ const RestaurantInboxScreen = ({ navigation }) => {
           </View>
 
           {/* Bottom NavBar */}
-          <RestaurantBottomNavbar navigation={navigation} />
+          <DinerBottomNavbar navigation={navigation} />
         </View>
       </View>
     </SafeAreaView>
   );
 };
 
-export default RestaurantInboxScreen;
+export default DinerInboxScreen;
