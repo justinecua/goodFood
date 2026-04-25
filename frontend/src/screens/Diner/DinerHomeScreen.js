@@ -10,7 +10,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import styles from '../../styles/RestaurantHomeScreenStyles';
 import colors from '../../constants/colors';
 import ImageSource from '../../constants/imageSource';
-import RestaurantBottomNavbar from '../../components/shared/RestaurantBottomNavbar';
+import DinerBottomNavbar from '../../components/shared/DinerBottomNavbar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const DinerHomeScreen = ({ navigation }) => {
@@ -175,7 +175,7 @@ const DinerHomeScreen = ({ navigation }) => {
         </ScrollView>
 
         {/* Bottom NavBar */}
-        <RestaurantBottomNavbar navigation={navigation} />
+        <DinerBottomNavbar navigation={navigation} />
       </View>
     </SafeAreaView>
   );
