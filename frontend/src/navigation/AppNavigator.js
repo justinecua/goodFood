@@ -13,7 +13,12 @@ import ProfileScreen from '../screens/Owner/RestaurantProfileScreen';
 import RestaurantInboxScreen from '../screens/Owner/RestaurantInboxScreen';
 import SplashScreen from '../screens/SplashScreen';
 
+import DinerMapScreen from '../screens/Diner/DinerMapScreen';
 import DinerHomeScreen from '../screens/Diner/DinerHomeScreen';
+import DinerNotificationScreen from '../screens/Diner/DinerNotificationScreen';
+import DinerProfileScreen from '../screens/Diner/DinerProfileScreen';
+import DinerInboxScreen from '../screens/Diner/DinerInboxScreen';
+
 const Stack = createNativeStackNavigator();
 
 const AppNavigator = () => {
@@ -41,8 +46,17 @@ const AppNavigator = () => {
           <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
 
           {/* -------- Diner ----------- */}
-
           <Stack.Screen name="DinerHome" component={DinerHomeScreen} />
+          <Stack.Screen name="DinerMapScreen" component={DinerMapScreen} />
+          <Stack.Screen
+            name="DinerNotificationScreen"
+            component={DinerNotificationScreen}
+          />
+          <Stack.Screen
+            name="DinerProfileScreen"
+            component={DinerProfileScreen}
+          />
+          <Stack.Screen name="DinerInboxScreen" component={DinerInboxScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

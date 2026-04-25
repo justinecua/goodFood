@@ -4,13 +4,13 @@ import { useRoute } from '@react-navigation/native';
 import colors from '../../constants/colors';
 
 import chatnavbar from '../../assets/navBarIcons/chat_0.png';
-import dishnavbar from '../../assets/navBarIcons/fries_0.png';
+import eat from '../../assets/navBarIcons/eat_0.png';
 import homenavbar from '../../assets/navBarIcons/home_0.png';
 import notifnavbar from '../../assets/navBarIcons/notif_0.png';
 import usercircle from '../../assets/navBarIcons/profile_0.png';
 
 import chatnavbar1 from '../../assets/navBarIcons/chat_1.png';
-import dishnavbar1 from '../../assets/navBarIcons/fries_1.png';
+import eat1 from '../../assets/navBarIcons/eat_1.png';
 import homenavbar1 from '../../assets/navBarIcons/home_1.png';
 import notifnavbar1 from '../../assets/navBarIcons/notif_1.png';
 import usercircle1 from '../../assets/navBarIcons/profile_1.png';
@@ -23,17 +23,17 @@ const DinerBottomNavbar = ({ navigation }) => {
     <View style={styles.bottomNavigationBar}>
       <TouchableOpacity
         style={styles.navItem}
-        onPress={() => navigation.navigate('RestaurantHome')}
+        onPress={() => navigation.navigate('DinerHome')}
       >
         <Image
           style={styles.homeIcon}
-          source={current === 'RestaurantHome' ? homenavbar1 : homenavbar}
+          source={current === 'DinerHome' ? homenavbar1 : homenavbar}
         />
 
         <Text
           style={[
             styles.navIconText,
-            current === 'RestaurantHome' && { color: colors.button },
+            current === 'DinerHome' && { color: colors.button },
           ]}
         >
           Home
@@ -42,16 +42,16 @@ const DinerBottomNavbar = ({ navigation }) => {
 
       <TouchableOpacity
         style={styles.navItem}
-        onPress={() => navigation.navigate('MessageScreen')}
+        onPress={() => navigation.navigate('DinerInboxScreen')}
       >
         <Image
           style={styles.chatIcon}
-          source={current === 'MessageScreen' ? chatnavbar1 : chatnavbar}
+          source={current === 'DinerInboxScreen' ? chatnavbar1 : chatnavbar}
         />
         <Text
           style={[
             styles.navIconText,
-            current === 'MessageScreen' && { color: colors.button },
+            current === 'DinerInboxScreen' && { color: colors.button },
           ]}
         >
           Messages
@@ -60,34 +60,36 @@ const DinerBottomNavbar = ({ navigation }) => {
 
       <TouchableOpacity
         style={styles.navItem}
-        onPress={() => navigation.navigate('AddDish')}
+        onPress={() => navigation.navigate('DinerMapScreen')}
       >
         <Image
           style={styles.dishIcon}
-          source={current === 'AddDish' ? dishnavbar1 : dishnavbar}
+          source={current === 'DinerMapScreen' ? eat1 : eat}
         />
         <Text
           style={[
             styles.navIconText,
-            current === 'AddDish' && { color: colors.button },
+            current === 'DinerMapScreen' && { color: colors.button },
           ]}
         >
-          Dish
+          Map
         </Text>
       </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.navItem}
-        onPress={() => navigation.navigate('Notifications')}
+        onPress={() => navigation.navigate('DinerNotificationScreen')}
       >
         <Image
           style={styles.notifIcon}
-          source={current === 'Notifications' ? notifnavbar1 : notifnavbar}
+          source={
+            current === 'DinerNotificationScreen' ? notifnavbar1 : notifnavbar
+          }
         />
         <Text
           style={[
             styles.navIconText,
-            current === 'Notifications' && { color: colors.button },
+            current === 'DinerNotificationScreen' && { color: colors.button },
           ]}
         >
           Notification
@@ -96,16 +98,16 @@ const DinerBottomNavbar = ({ navigation }) => {
 
       <TouchableOpacity
         style={styles.navItem}
-        onPress={() => navigation.navigate('ProfileScreen')}
+        onPress={() => navigation.navigate('DinerProfileScreen')}
       >
         <Image
           style={styles.profileIcon}
-          source={current === 'ProfileScreen' ? usercircle1 : usercircle}
+          source={current === 'DinerProfileScreen' ? usercircle1 : usercircle}
         />
         <Text
           style={[
             styles.navIconText,
-            current === 'ProfileScreen' && { color: colors.button },
+            current === 'DinerProfileScreen' && { color: colors.button },
           ]}
         >
           Profile
