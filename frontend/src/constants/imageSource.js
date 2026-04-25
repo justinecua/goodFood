@@ -1,4 +1,4 @@
-const iconSource = {
+const ImageSource = {
   home: {
     inactive: require('../assets/navBarIcons/home_0.png'),
     //active: require('../assets/navBarIcons/home_1.png'),
@@ -20,7 +20,11 @@ const iconSource = {
     //active: require('../assets/navBarIcons/profile_1.png'),
   },
 
-  userProfile: require('../assets/images/miCasa.png')
+  userProfile: require('../assets/images/miCasa.png'),
+  cardBannerImage: require('../assets/images/friedChicken.png'),
+  searchLens: require('../assets/images/searchLens.png'),
+  fishTacos: require('../assets/images/fishTacos.png'),
+  goodFoodText: require('../assets/images/goodFoodText.png')
 };
 
-export default iconSource;
+export default ImageSource;

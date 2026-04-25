@@ -4,13 +4,13 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
-import RestaurantHomeScreen from '../screens/RestaurantHomeScreen';
-import AddDish from '../screens/RestaurantAddDishScreen';
-import DishDetails from '../screens/RestaurantDishDetailsScreen';
-import Notifications from '../screens/RestaurantNotificationScreen';
+import RestaurantHomeScreen from '../screens/Owner/RestaurantHomeScreen';
+import AddDish from '../screens/Owner/RestaurantAddDishScreen';
+import DishDetails from '../screens/Owner/RestaurantDishDetailsScreen';
+import Notifications from '../screens/Owner/RestaurantNotificationScreen';
 import SubscriptionScreen from '../screens/SubscriptionScreen';
-import ProfileScreen from '../screens/ProfileScreen';
-import MessageScreen from '../screens/MessageScreen';
+import ProfileScreen from '../screens/Owner/RestaurantProfileScreen';
+import RestaurantInboxScreen from '../screens/Owner/RestaurantInboxScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -27,7 +27,10 @@ const AppNavigator = () => {
             component={RestaurantHomeScreen}
           />
           <Stack.Screen name="AddDish" component={AddDish} />
-          <Stack.Screen name="MessageScreen" component={MessageScreen} />
+          <Stack.Screen
+            name="MessageScreen"
+            component={RestaurantInboxScreen}
+          />
           <Stack.Screen name="DishDetails" component={DishDetails} />
           <Stack.Screen name="Notifications" component={Notifications} />
           <Stack.Screen name="Subscription" component={SubscriptionScreen} />

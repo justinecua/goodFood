@@ -2,9 +2,9 @@ import { StyleSheet } from 'react-native';
 import colors from '../constants/colors';
 
 const styles = StyleSheet.create({
-  bottomContainer: { marginBottom: 50 },
+  bottomContainer: { marginBottom: 30 },
   bottomContent: {
-    marginTop: 30,
+    marginBottom: 30,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
@@ -12,7 +12,6 @@ const styles = StyleSheet.create({
   bottomSubContainer: {
     display: 'flex',
     flexDirection: 'row',
-    marginVertical: 30,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 7,
@@ -20,13 +19,13 @@ const styles = StyleSheet.create({
 
   bottomsubHeadingLogin: {
     color: colors.button,
-    fontFamily: 'Averta Cyrillic Bold',
+    fontFamily: 'Averta-Cyrillic-Bold',
     fontWeight: 700,
   },
 
   topContainer: {},
   headings: {
-    fontFamily: 'Averta Cyrillic Bold',
+    fontFamily: 'Averta-Cyrillic-Bold',
     fontSize: 33,
     marginBottom: 20,
     color: colors.maintext,
@@ -57,6 +56,32 @@ const styles = StyleSheet.create({
     color: colors.subtext,
     fontFamily: 'Ezra-SemiBold',
   },
+
+  dropdown: {
+    height: 60,
+    borderRadius: 20,
+    backgroundColor: colors.container_bg,
+    paddingHorizontal: 15,
+    borderWidth: 0,
+  },
+
+  dropdownContainer: {
+    borderRadius: 20,
+    backgroundColor: colors.container_bg,
+    borderWidth: 0,
+  },
+
+  dropdownText: {
+    paddingLeft: 7,
+    fontFamily: 'Ezra-SemiBold',
+    color: colors.subtext,
+  },
+
+  dropdownPlaceholder: {
+    fontFamily: 'Ezra-SemiBold',
+    color: colors.subtextInput,
+  },
+
   registerButton: {
     backgroundColor: colors.button,
     height: 60,
