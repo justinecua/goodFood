@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import styles from '../../styles/RestaurantInboxScreenStyle';
 import colors from '../../constants/colors';
-import BottomNavbar from '../../components/shared/BottomNavbar';
+import RestaurantBottomNavbar from '../../components/shared/RestaurantBottomNavbar';
 import SearchButton from '../../assets/images/searchbutton.png';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -33,7 +33,7 @@ const RestaurantInboxScreen = ({ navigation }) => {
           </View>
 
           {/* Bottom NavBar */}
-          <BottomNavbar navigation={navigation} />
+          <RestaurantBottomNavbar navigation={navigation} />
         </View>
       </View>
     </SafeAreaView>

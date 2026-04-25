@@ -1,56 +1,20 @@
-import { useState } from 'react';
 import {
   View,
   Text,
   Image,
   TextInput,
   TouchableOpacity,
-  Alert,
   ActivityIndicator,
 } from 'react-native';
-
 import styles from '../styles/RegisterScreenStyles';
 import colors from '../constants/colors';
 import goodFoodGreen from '../assets/images/goodFood_green.png';
-import { login } from '../api/services/auth';
+import { useLoginForm } from '../hooks/useLoginForm';
 
 const LoginScreen = ({ navigation }) => {
-  const [form, setForm] = useState({
-    username: '',
-    password: '',
-  });
-  const [isLoading, setIsLoading] = useState(false);
-  const handleChange = (key, value) => {
-    setForm(prev => ({
-      ...prev,
-      [key]: value,
-    }));
-  };
+  const { form, handleChange, handleLogin, isLoading } =
+    useLoginForm(navigation);
 
-  const handleLogin = async () => {
-    if (!form.username.trim()) {
-      Alert.alert('Validation Error', 'Username is required.');
-      return;
-    }
-
-    if (!form.password.trim()) {
-      Alert.alert('Validation Error', 'Password is required.');
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      const result = await login(form.username.trim(), form.password);
-
-      console.log('Login success:', result);
-
-      navigation.navigate('RestaurantHome');
-    } catch (error) {
-      Alert.alert('Login Failed', error.response?.data?.error || error.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
   return (
     <View style={styles.background}>
       <View style={styles.UpperLogoContainer}>

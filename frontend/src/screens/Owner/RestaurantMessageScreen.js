@@ -1,6 +1,6 @@
 import { View, Text } from 'react-native';
 import styles from '../../styles/ProfileScreenStyle';
-import BottomNavbar from '../../components/shared/BottomNavbar';
+import RestaurantBottomNavbar from '../../components/shared/RestaurantBottomNavbar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const MessageScreen = ({ navigation }) => {
@@ -11,7 +11,7 @@ const MessageScreen = ({ navigation }) => {
           <View style={styles.section}>
             <Text>Messages</Text>
           </View>
-          <BottomNavbar navigation={navigation} />
+          <RestaurantBottomNavbar navigation={navigation} />
         </View>
       </View>
     </SafeAreaView>
