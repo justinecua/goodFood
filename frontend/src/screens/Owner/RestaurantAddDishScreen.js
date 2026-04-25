@@ -4,7 +4,7 @@ import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
 import styles from '../../styles/RestaurantAddDishScreenStyle';
 import colors from '../../constants/colors';
 import PreviewLogo from '../../assets/images/previewLogo.png';
-import BottomNavbar from '../../components/shared/BottomNavbar';
+import RestaurantBottomNavbar from '../../components/shared/RestaurantBottomNavbar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const AddDish = ({ navigation }) => {
@@ -95,7 +95,7 @@ const AddDish = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
-        <BottomNavbar navigation={navigation} />
+        <RestaurantBottomNavbar navigation={navigation} />
       </View>
     </SafeAreaView>
   );

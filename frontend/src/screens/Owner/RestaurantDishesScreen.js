@@ -3,7 +3,7 @@ import { Dropdown } from 'react-native-element-dropdown';
 import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
 import styles from '../../styles/RestaurantAddDishScreenStyle';
 import colors from '../../constants/colors';
-import BottomNavbar from '../../components/shared/BottomNavbar';
+import RestaurantBottomNavbar from '../../components/shared/RestaurantBottomNavbar';
 
 const RestaurantDishesScreen = () => {
   return (
