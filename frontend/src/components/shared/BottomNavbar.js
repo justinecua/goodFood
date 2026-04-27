@@ -15,7 +15,7 @@ import homenavbar1 from '../../assets/navBarIcons/home_1.png';
 import notifnavbar1 from '../../assets/navBarIcons/notif_1.png';
 import usercircle1 from '../../assets/navBarIcons/profile_1.png';
 
-const BottomNavbar = ({ navigation }) => {
+const   BottomNavbar = ({ navigation }) => {
   const route = useRoute();
   const current = route.name;
 

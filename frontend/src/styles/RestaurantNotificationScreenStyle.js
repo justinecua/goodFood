@@ -23,6 +23,7 @@ const styles = StyleSheet.create({
     color: colors.maintext,
   },
   midContainer: {
+    marginTop: 20,
     flex: 1,
     gap: 10,
     justifyContent: 'topS',

@@ -11,7 +11,7 @@ const styles = StyleSheet.create({
   },
   headerContainer: {
     alignItems: 'center',
-    marginTop: 30,
+     marginTop: 5,
   },
   heading: {
     fontFamily: 'Ezra-SemiBold',
@@ -20,13 +20,13 @@ const styles = StyleSheet.create({
     color: colors.maintext,
   },
   midContainer: {
-    marginTop: 30,
+    marginTop: 5,
     flex: 1,
-    gap: 10,
+    gap: 18,
     justifyContent: 'center',
   },
   addDishInput: {
-    height: 48,
+    height: 50,
     paddingHorizontal: 20,
     borderRadius: 16,
     backgroundColor: colors.container_bg,
@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   dropdownContainer: {
-    height: 50,
+    height: 54,
     paddingHorizontal: 20,
     borderRadius: 16,
     backgroundColor: colors.container_bg,
@@ -91,6 +91,7 @@ const styles = StyleSheet.create({
   bottomContainer: {
     gap: 10,
     marginTop: 10,
+    marginBottom: 75,
   },
   addDishButton: {
     backgroundColor: colors.button,

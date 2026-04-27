@@ -31,7 +31,6 @@ const RestaurantInboxScreen = ({ navigation }) => {
               <Text style={styles.addDishButtonText}>Add Dish</Text>
             </TouchableOpacity>
           </View>
-
           {/* Bottom NavBar */}
           <BottomNavbar navigation={navigation} />
         </View>

@@ -12,7 +12,7 @@ const styles = StyleSheet.create({
   },
   headerContainer: {
     alignItems: 'center',
-    marginTop: 30,
+    marginTop: 5,
   },
   heading: {
     fontFamily: 'Ezra-SemiBold',
@@ -50,6 +50,7 @@ const styles = StyleSheet.create({
   bottomContainer: {
     gap: 10,
     marginTop: 10,
+    marginBottom: 70
   },
   addDishButton: {
     backgroundColor: colors.button,
