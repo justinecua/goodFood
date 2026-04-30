@@ -48,9 +48,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'account',
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
+    'account',
+    'restaurant',
+    'location',
 ]
 
 MIDDLEWARE = [
@@ -102,7 +104,7 @@ DATABASES = {
         'HOST': os.getenv('DB_HOST'),
         'PORT': os.getenv('DB_PORT'),
         'OPTIONS': {
-            'options': '-c search_path=goodFood,goodfood',  
+            'options': '-c search_path=goodfood,goodfood',  
         },
     }
 }

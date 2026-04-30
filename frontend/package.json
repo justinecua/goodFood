@@ -16,14 +16,19 @@
     "@react-navigation/native": "^7.2.2",
     "@react-navigation/native-stack": "^7.14.11",
     "axios": "^1.15.2",
+    "lucide-react": "^1.14.0",
+    "lucide-react-native": "^1.14.0",
     "react": "19.2.3",
     "react-native": "0.84.0",
     "react-native-config": "^1.6.1",
     "react-native-dropdown-picker": "^5.4.6",
     "react-native-element-dropdown": "^2.12.4",
+    "react-native-geolocation-service": "^5.3.1",
     "react-native-linear-gradient": "^2.8.3",
+    "react-native-maps": "^1.27.2",
     "react-native-safe-area-context": "^5.7.0",
-    "react-native-screens": "^4.24.0"
+    "react-native-screens": "^4.24.0",
+    "react-native-svg": "^15.15.4"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

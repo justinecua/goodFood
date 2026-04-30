@@ -99,10 +99,14 @@ def login(data):
         username = data.get("username")
         password = data.get("password")
 
+        if not username or not password:
+            return {"error": "Username and password required"}
+
         query = """
-            SELECT a.account_id, a.username, a.password, at.account_type
+            SELECT *
             FROM account_account a
-            JOIN account_accounttype at ON a.account_type_id = at.acc_type_id
+            JOIN account_accounttype at 
+            ON a.account_type_id = at.acc_type_id
             WHERE a.username = %s;
         """
 
@@ -112,22 +116,30 @@ def login(data):
         if not row:
             return {"error": "User not found"}
 
-        account_id, username, hashed_password, account_type = row
+        columns = [col[0] for col in cursor.description]
+        user = dict(zip(columns, row))
 
-        if not check_password(password, hashed_password):
+        if not check_password(password, user["password"]):
             return {"error": "Invalid Password"}
 
         refresh = RefreshToken()
-        refresh["account_id"] = account_id
-        refresh["username"] = username
+        refresh["account_id"] = user["account_id"]
+        refresh["username"] = user["username"]
 
         return {
             "access": str(refresh.access_token),
             "refresh": str(refresh),
             "user": {
-                "account_id": account_id,
-                "username": username,
-                "account_type": account_type,
+                "account_id": user["account_id"],
+                "username": user["username"],
+                "first_name": user["first_name"],
+                "last_name": user["last_name"],
+                "gender": user["gender"],
+                "birthdate": user["birthdate"],
+                "email_address": user["email_address"],
+                "mobile_number": user["mobile_number"],
+                "account_profile_photo": user["account_profile_photo"],
+                "account_type": user["account_type"],
             },
         }
 

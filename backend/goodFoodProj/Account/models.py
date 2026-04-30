@@ -1,5 +1,9 @@
 from django.db import models
 
+#dont put _id on the foreign key kay auto na mo add for ex:
+    # Correct => account_type = models.ForeignKey(AccountType, on_delete=models.CASCADE)
+    # Incorrect => account_type_id = models.ForeignKey(AccountType, on_delete=models.CASCADE)
+    
 class AccountType(models.Model):
     acc_type_id = models.AutoField(primary_key=True)
     account_type = models.CharField(max_length=255, unique=True)
