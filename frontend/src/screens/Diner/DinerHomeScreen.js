@@ -12,8 +12,22 @@ import colors from '../../constants/colors';
 import ImageSource from '../../constants/imageSource';
 import DinerBottomNavbar from '../../components/shared/DinerBottomNavbar';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const DinerHomeScreen = ({ navigation }) => {
+  const [user, setUser] = useState({});
+
+  useEffect(() => {
+    AsyncStorage.getItem('user').then(res => {
+      if (res) {
+        const user = JSON.parse(res);
+        console.log(user);
+        setUser(user);
+      }
+    });
+  }, []);
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={{ flex: 1 }}>
@@ -21,7 +35,7 @@ const DinerHomeScreen = ({ navigation }) => {
           <View style={styles.background}>
             <View style={styles.upperContainer}>
               <View>
-                <Text style={styles.textStyle}>Hello, Diner</Text>
+                <Text style={styles.textStyle}>Hello, {user?.username}</Text>
                 <Text style={styles.textStyle1}>
                   Brgy. Poblacion, Quezon Avenue, Iligan ...
                 </Text>
@@ -51,11 +65,15 @@ const DinerHomeScreen = ({ navigation }) => {
                   source={ImageSource.goodFoodText}
                 />
                 {/* <Text style={styles.bannerText1}>goodfood</Text> */}
-                <TouchableOpacity style={styles.bannerButton}>
+                <TouchableOpacity
+                  style={styles.bannerButton}
+                  onPress={() => navigation.navigate('Subscription')}
+                >
                   <Text style={styles.bannerButtonText}>Subscribe Now</Text>
                 </TouchableOpacity>
               </View>
             </LinearGradient>
+
             <View style={styles.searchBarContainer}>
               <TextInput
                 placeholder="Search foods, dishes or restaurants"

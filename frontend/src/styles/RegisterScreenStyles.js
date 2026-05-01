@@ -23,26 +23,27 @@ const styles = StyleSheet.create({
     fontWeight: 700,
   },
 
-  topContainer: {},
+  topContainer: {
+    gap: 5,
+  },
   headings: {
-    fontFamily: 'Averta-Cyrillic-Bold',
-    fontSize: 33,
-    marginBottom: 20,
+    fontFamily: 'Ezra-SemiBold',
+    fontSize: 30,
+    marginBottom: 10,
     color: colors.maintext,
     fontWeight: 600,
   },
   subHeadings: {
-    fontFamily: 'Averta-Cyrillic-SemiBold',
+    fontFamily: 'Ezra-Regular',
     fontSize: 21,
     color: colors.subtext,
-    fontWeight: 500,
   },
   subHeadings2: {
-    fontFamily: 'Averta-Cyrillic-SemiBold',
-    fontSize: 21,
+    fontFamily: 'Ezra-Regular',
+    fontSize: 18,
     color: colors.subtext,
     marginBottom: 40,
-    fontWeight: 500,
+    fontWeight: 400,
   },
   midContainer: {
     gap: 12,
@@ -104,8 +105,8 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   UpperLogoContainer: {
-    marginTop: 20,
     width: '100%',
+    paddingTop: 40,
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'flex-end',

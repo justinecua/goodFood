@@ -67,6 +67,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 12,
     justifyContent: 'space-between',
+
+    // iOS shadow
+    shadowColor: colors.subtext,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.09,
+    shadowRadius: 4,
+
+    // Android shadow
+    elevation: 3,
   },
 
   buttonContent: {
@@ -87,7 +96,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
   },
   bottomSection: {
-    gap: 8,
+    gap: 10,
   },
 
   bottomSectionTitle: {

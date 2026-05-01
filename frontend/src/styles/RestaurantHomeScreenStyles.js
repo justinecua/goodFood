@@ -7,7 +7,7 @@ const styles = StyleSheet.create({
   },
   background: {
     flex: 1,
-    padding: 25,
+    padding: 20,
     height: '100%',
     backgroundColor: colors.container_bg,
   },
@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
     paddingRight: 30,
   },
   bannerButton: {
-    backgroundColor: '#E5E5E5',
+    backgroundColor: colors.background2,
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 20,
@@ -113,7 +113,6 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     paddingHorizontal: 20,
     height: 55,
-    marginTop: 25,
   },
   searchBarText: {
     fontFamily: 'Ezra-SemiBold',
@@ -175,6 +174,7 @@ const styles = StyleSheet.create({
   },
   restaurantContainer: {
     flexDirection: 'column',
+    marginBottom: 70,
   },
   restaurantSubContainer: {
     flexDirection: 'row',
@@ -204,6 +204,44 @@ const styles = StyleSheet.create({
   userProfile: {
     height: 55,
     width: 55,
+  },
+
+  firstSteps: {
+    marginTop: 15,
+    gap: 10,
+    marginBottom: 20,
+  },
+
+  firstStepsLoading: {
+    marginVertical: 40,
+  },
+  button: {
+    backgroundColor: colors.background2,
+    padding: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 12,
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: colors.button,
+  },
+
+  buttonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  buttonText: {
+    fontFamily: 'Ezra-SemiBold',
+    fontSize: 12,
+    color: colors.button,
+  },
+
+  iconButton: {
+    backgroundColor: colors.button,
+    padding: 13,
+    marginRight: 10,
+    borderRadius: 25,
   },
 });
 
