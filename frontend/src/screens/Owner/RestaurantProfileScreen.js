@@ -82,7 +82,7 @@ const DinerProfileScreen = ({ navigation }) => {
               </View>
             </View>
           </View>
-          <Text style={styles.bottomSectionTitle}>Profile Information</Text>
+          <Text style={styles.bottomSectionTitle}>General</Text>
           <ScrollView contentContainerStyle={{ paddingBottom: 90 }}>
             <View style={styles.bottomSection}>
               <TouchableOpacity style={styles.button}>
@@ -101,7 +101,7 @@ const DinerProfileScreen = ({ navigation }) => {
                     <User size={20} color={colors.food_bg} />
                   </View>
                   <Text style={styles.buttonText}>
-                    Complete your personal information
+                    Edit Profile Information
                   </Text>
                 </View>
                 <ChevronRight size={20} color="#999" />
