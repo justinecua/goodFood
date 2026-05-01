@@ -82,7 +82,7 @@ const DinerProfileScreen = ({ navigation }) => {
               </View>
             </View>
           </View>
-          <Text style={styles.bottomSectionTitle}>Profile Information</Text>
+          <Text style={styles.bottomSectionTitle}>General</Text>
           <ScrollView contentContainerStyle={{ paddingBottom: 90 }}>
             <View style={styles.bottomSection}>
               <TouchableOpacity style={styles.button}>

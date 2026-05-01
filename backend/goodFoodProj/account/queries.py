@@ -123,6 +123,7 @@ def login(data):
             return {"error": "Invalid Password"}
 
         refresh = RefreshToken()
+        refresh["user_id"] = user["account_id"]
         refresh["account_id"] = user["account_id"]
         refresh["username"] = user["username"]
 
@@ -164,6 +165,61 @@ def logout(data):
 
     except Exception as e:
         return {"error": "Invalid token"}
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+def checkInfoIfComplete(data):
+    connection = None
+    cursor = None
+
+    try:
+        account_id = data.get("account_id")
+
+        with connections["default"].cursor() as cursor:
+            query = """
+                SELECT
+                    (
+                        first_name IS NOT NULL AND first_name != '' AND
+                        last_name IS NOT NULL AND last_name != '' AND
+                        gender IS NOT NULL AND gender != '' AND
+                        birthdate IS NOT NULL AND
+                        mobile_number IS NOT NULL AND mobile_number != ''
+                    ) AS personal_info_complete,
+
+                    EXISTS (
+                        SELECT 1
+                        FROM restaurant_restaurant rr
+                        WHERE rr.account_id = aa.account_id
+                    ) AS restaurant_info_complete
+
+                FROM account_account aa
+                WHERE aa.account_id = %s;
+            """
+
+            cursor.execute(query, [account_id])
+            row = cursor.fetchone()
+
+        if not row:
+            return {
+                "personal_info_complete": False,
+                "restaurant_info_complete": False,
+            }
+
+        return {
+            "personal_info_complete": row[0],
+            "restaurant_info_complete": row[1],
+        }
+
+    except Exception as error:
+        print(f"Error: {error}")
+        return {
+            "personal_info_complete": False,
+            "restaurant_info_complete": False,
+        }
+
     finally:
         if cursor:
             cursor.close()

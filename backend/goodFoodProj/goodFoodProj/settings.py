@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+     "rest_framework_simplejwt",
     'rest_framework_simplejwt.token_blacklist',
     'account',
     'restaurant',
@@ -84,6 +85,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'goodFoodProj.wsgi.application'
 
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+}
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
@@ -104,7 +110,7 @@ DATABASES = {
         'HOST': os.getenv('DB_HOST'),
         'PORT': os.getenv('DB_PORT'),
         'OPTIONS': {
-            'options': '-c search_path=goodFood,goodfood',  
+            'options': '-c search_path=goodFood,goodfood',  #database name, then schema 
         },
     }
 }
