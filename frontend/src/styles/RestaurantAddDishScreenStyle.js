@@ -135,8 +135,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   homeIcon: {
-    width: 27,
-    height: 27,
+    marginTop: -3,
+    width: 26,
+    height: 26,
     resizeMode: 'contain',
   },
   chatIcon: {
@@ -161,6 +162,12 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   navIconText: {
+    marginTop: 2,
+    color: colors.subtextInput,
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  homenavIconText: {
     marginTop: 2,
     color: colors.subtextInput,
     fontSize: 10,

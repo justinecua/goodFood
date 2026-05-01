@@ -5,15 +5,39 @@ import {
   Image,
   TextInput,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import styles from '../../styles/RestaurantHomeScreenStyles';
-import colors from '../../constants/colors';
 import ImageSource from '../../constants/imageSource';
 import RestaurantBottomNavbar from '../../components/shared/RestaurantBottomNavbar';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { SquarePlus, ChevronRight, CircleUser } from 'lucide-react-native';
+import colors from '../../constants/colors';
+import { checkInfoComplete } from '../../api/services/home';
 
 const RestaurantHomeScreen = ({ navigation }) => {
+  const [user, setUser] = useState({});
+  const [infoStatus, setInfoStatus] = useState(null);
+  const [loadingInfo, setLoadingInfo] = useState(true);
+
+  useEffect(() => {
+    AsyncStorage.getItem('user').then(res => {
+      if (res) {
+        const user = JSON.parse(res);
+        console.log(user);
+        setUser(user);
+      }
+    });
+
+    checkInfoComplete()
+      .then(data => setInfoStatus(data))
+      .catch(error => console.log(error))
+      .finally(() => setLoadingInfo(false));
+  }, []);
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={{ flex: 1 }}>
@@ -21,7 +45,7 @@ const RestaurantHomeScreen = ({ navigation }) => {
           <View style={styles.background}>
             <View style={styles.upperContainer}>
               <View>
-                <Text style={styles.textStyle}>Hello, Mi Casa</Text>
+                <Text style={styles.textStyle}>Hello, {user?.username}</Text>
                 <Text style={styles.textStyle1}>
                   Brgy. Poblacion, Quezon Avenue, Iligan ...
                 </Text>
@@ -51,11 +75,67 @@ const RestaurantHomeScreen = ({ navigation }) => {
                   source={ImageSource.goodFoodText}
                 />
                 {/* <Text style={styles.bannerText1}>goodfood</Text> */}
-                <TouchableOpacity style={styles.bannerButton}>
+                <TouchableOpacity
+                  style={styles.bannerButton}
+                  onPress={() => navigation.navigate('Subscription')}
+                >
                   <Text style={styles.bannerButtonText}>Subscribe Now</Text>
                 </TouchableOpacity>
               </View>
             </LinearGradient>
+
+            {loadingInfo ? (
+              <View style={styles.firstStepsLoading}>
+                <ActivityIndicator size="small" color={colors.button} />
+              </View>
+            ) : (
+              infoStatus &&
+              (!infoStatus.personal_info_complete ||
+                !infoStatus.restaurant_info_complete) && (
+                <View style={styles.firstSteps}>
+                  {!infoStatus.personal_info_complete && (
+                    <TouchableOpacity
+                      style={styles.button}
+                      onPress={() =>
+                        navigation.navigate(
+                          'RestaurantProfileInformationScreen',
+                        )
+                      }
+                    >
+                      <View style={styles.buttonContent}>
+                        <View style={styles.iconButton}>
+                          <CircleUser size={20} color={colors.background} />
+                        </View>
+                        <Text style={styles.buttonText}>
+                          Complete your personal information
+                        </Text>
+                      </View>
+                      <ChevronRight size={20} color={colors.button} />
+                    </TouchableOpacity>
+                  )}
+
+                  {!infoStatus.restaurant_info_complete && (
+                    <TouchableOpacity
+                      style={styles.button}
+                      onPress={() =>
+                        navigation.navigate('RestaurantInformation')
+                      }
+                    >
+                      <View style={styles.buttonContent}>
+                        <View style={styles.iconButton}>
+                          <SquarePlus size={20} color={colors.background} />
+                        </View>
+                        <Text style={styles.buttonText}>
+                          Add Restaurant information
+                        </Text>
+                      </View>
+                      <ChevronRight size={20} color={colors.button} />
+                    </TouchableOpacity>
+                  )}
+                </View>
+              )
+            )}
+
             <View style={styles.searchBarContainer}>
               <TextInput
                 placeholder="Search foods, dishes or restaurants"

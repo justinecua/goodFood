@@ -27,8 +27,8 @@ const LoginScreen = ({ navigation }) => {
         </View>
 
         <View style={styles.topContainer}>
-          <Text style={styles.subHeadings}>Welcome back</Text>
-          <Text style={styles.subHeadings2}>You have been missed</Text>
+          <Text style={styles.subHeadings}>Welcome back,</Text>
+          <Text style={styles.subHeadings2}>you have been missed!</Text>
         </View>
 
         <View style={styles.midContainer}>
