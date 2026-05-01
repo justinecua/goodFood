@@ -32,7 +32,7 @@ const DinerBottomNavbar = ({ navigation }) => {
 
         <Text
           style={[
-            styles.navIconText,
+            styles.homenavIconText,
             current === 'DinerHome' && { color: colors.button },
           ]}
         >

@@ -7,7 +7,8 @@ from .queries import (
     getAccountType,
     registerAccount,
     login,
-    logout
+    logout,
+    checkInfoIfComplete
 )
 
 def print_test(request):
@@ -41,3 +42,10 @@ class LogoutAccount(APIView):
     def post(self, request):
         data = logout(request.data)
         return Response(data)
+
+class CheckInfoComplete(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        result = checkInfoIfComplete(request.data)
+        return Response(result)
