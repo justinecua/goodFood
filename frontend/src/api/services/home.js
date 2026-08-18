@@ -13,3 +13,15 @@ export async function checkInfoComplete() {
 
   return response.data;
 }
+
+export async function addAdditionalInfo(formData) {
+  try {
+    const response = await axios.post(
+      `${BACKEND_API_URL}/add-additional-info/`,
+      formData,
+    );
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.error || error.message);
+  }
+}
