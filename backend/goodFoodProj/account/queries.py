@@ -225,3 +225,45 @@ def checkInfoIfComplete(data):
             cursor.close()
         if connection:
             connection.close()
+
+def addAdditionalInfo(data):
+    try:
+        connection = connections['default']
+        cursor = connection.cursor()
+
+        profile_photo = data.get('profile_image', None)
+
+        query = """
+            UPDATE account_account
+            SET
+                first_name = %s,
+                last_name = %s,
+                birthdate = %s,
+                gender = %s,
+                account_profile_photo = %s
+            WHERE account_id = %s;
+        """
+
+        params = (
+            data.get('firstname'),
+            data.get('lastname'),
+            data.get('birthdate'),
+            data.get('gender'),
+            profile_photo,
+            data.get('account_id'),
+        )
+
+        cursor.execute(query, params)
+        connection.commit()
+
+        return {"message": "Account updated with additional info"}
+
+    except Exception as error:
+        print(f"Error: {error}")
+        return {"error": str(error)}
+
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()

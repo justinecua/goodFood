@@ -24,7 +24,7 @@ const RegisterScreen = ({ navigation }) => {
     items,
     setItems,
     isLoading,
-  } = useRegisterForm(navigation);
+  } = useRegisterForm(navigation); //hook
 
   return (
     <View style={styles.background}>
