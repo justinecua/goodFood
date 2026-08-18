@@ -8,7 +8,8 @@ from .queries import (
     registerAccount,
     login,
     logout,
-    checkInfoIfComplete
+    checkInfoIfComplete,
+    addAdditionalInfo
 )
 
 def print_test(request):
@@ -48,4 +49,12 @@ class CheckInfoComplete(APIView):
 
     def post(self, request):
         result = checkInfoIfComplete(request.data)
+        return Response(result)
+
+class AddAdditionalInfo(APIView):
+    permission_classes = [permissions.AllowAny]
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request):
+        result = addAdditionalInfo(request.data)
         return Response(result)

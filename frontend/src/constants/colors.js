@@ -13,7 +13,7 @@ const colors = {
   button_text: '#fff',
   background1: '#218355',
   background2: '#FFFFFF',
-  underlineColor: '#3cb57c'
+  underlineColor: '#3cb57c',
 };
 
 export default colors;

@@ -1,51 +1,210 @@
+import { useState } from 'react';
 import {
   View,
-  ScrollView,
   Text,
   Image,
   TextInput,
   TouchableOpacity,
+  Platform,
+  Modal,
 } from 'react-native';
+import { launchImageLibrary } from 'react-native-image-picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import RestaurantBottomNavbar from '../../components/shared/RestaurantBottomNavbar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import styles from '../../styles/RestaurantProfileInformationScreenStyle';
 import colors from '../../constants/colors';
+import GenderDropdown from '../../components/register/GenderDropdown';
+import { Camera } from 'lucide-react-native';
+import { useAddInformationForm } from '../../hooks/useAddInformationForm';
 
 const RestaurantProfileInformationScreen = ({ navigation }) => {
+  const {
+    form,
+    handleChange,
+    handleAddInformation,
+    open,
+    setOpen,
+    isLoading,
+    profileImage,
+    setProfileImage,
+    birthdate,
+    setBirthdate,
+    showDatePicker,
+    setShowDatePicker,
+    selectedDate,
+    setSelectedDate,
+    tempDate,
+    setTempDate,
+    gender,
+    setGender,
+    genderItems,
+    setGenderItems,
+  } = useAddInformationForm(navigation);
+
+  const pickProfileImage = () => {
+    launchImageLibrary({ mediaType: 'photo' }, res => {
+      console.log(res);
+      const uri = res.assets?.[0]?.uri;
+      if (uri) setProfileImage(uri);
+    });
+  };
+
+  const handleDateChange = (event, date) => {
+    if (Platform.OS === 'android') {
+      setShowDatePicker(false);
+      if (event.type === 'set' && date) {
+        setSelectedDate(date);
+        handleChange('birthdate', date.toLocaleDateString());
+      }
+    } else {
+      if (date) setTempDate(date);
+    }
+  };
+
+  const handleIOSConfirm = () => {
+    setSelectedDate(tempDate);
+    handleChange('birthdate', tempDate.toLocaleDateString());
+    setShowDatePicker(false);
+  };
+
+  const handleIOSCancel = () => {
+    setTempDate(selectedDate);
+    setShowDatePicker(false);
+  };
+
+  const showDatepicker = () => {
+    setTempDate(selectedDate);
+    setShowDatePicker(true);
+  };
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
+      {/* iOS date picker */}
+      {Platform.OS === 'ios' && (
+        <Modal transparent visible={showDatePicker} animationType="slide">
+          <View style={styles.modalContainer}>
+            <View style={styles.modalSubContainer}>
+              <View style={styles.modalContentContainer}>
+                <TouchableOpacity onPress={handleIOSCancel}>
+                  <Text style={styles.modalCancel}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleIOSConfirm}>
+                  <Text style={styles.modalDone}>Done</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.modalDateTimePicker}>
+                <DateTimePicker
+                  testID="dateTimePicker"
+                  value={tempDate}
+                  mode="date"
+                  display="spinner"
+                  onChange={handleDateChange}
+                  style={{ width: 320 }}
+                />
+              </View>
+            </View>
+          </View>
+        </Modal>
+      )}
+
       <View style={styles.container}>
         <View style={styles.headerContainer}>
           <Text style={styles.heading}>Add Information</Text>
+          <Text style={styles.subheading}>Tell us a bit about yourself</Text>
         </View>
+
         <View style={styles.section}>
           <View style={styles.midContainer}>
-            <TextInput
-              placeholder="First Name"
-              placeholderTextColor={colors.subtextInput}
-              style={styles.addDishInput}
-            />
+            <View style={styles.profileImageWrapper}>
+              <TouchableOpacity
+                style={styles.profileImageButton}
+                onPress={pickProfileImage}
+                activeOpacity={0.8}
+              >
+                {profileImage ? (
+                  <Image
+                    source={{ uri: profileImage }}
+                    style={styles.profileImage}
+                  />
+                ) : (
+                  <Text style={styles.profileImageText}>Add Photo</Text>
+                )}
+              </TouchableOpacity>
+              <View style={styles.cameraBadge}>
+                <Camera size={16} color="#fff" />
+              </View>
+            </View>
+            <View style={styles.midSubContainer}>
+              <Text style={styles.inputLabel}>First Name</Text>
+              <TextInput
+                value={form.firstname}
+                onChangeText={text => handleChange('firstname', text)}
+                placeholder="Enter your first name"
+                placeholderTextColor={colors.subtextInput}
+                style={styles.addDishInput}
+              />
 
-            <TextInput
-              placeholder="Last Name"
-              placeholderTextColor={colors.subtextInput}
-              style={styles.addDishInput}
-            />
+              <Text style={styles.inputLabel}>Last Name</Text>
+              <TextInput
+                value={form.lastname}
+                onChangeText={text => handleChange('lastname', text)}
+                placeholder="Enter your last name"
+                placeholderTextColor={colors.subtextInput}
+                style={styles.addDishInput}
+              />
 
-            <TextInput
-              placeholder="Gender"
-              placeholderTextColor={colors.subtextInput}
-              style={styles.addDishInput}
-            />
+              {/* Gender Dropdown */}
+              <Text style={styles.inputLabel}>Gender</Text>
+              <GenderDropdown
+                open={open}
+                value={gender}
+                items={genderItems}
+                setOpen={setOpen}
+                setValue={value => handleChange('gender', value)}
+                setItems={setGenderItems}
+                styles={styles}
+              />
 
-            <TextInput
-              placeholder="Birthdate"
-              placeholderTextColor={colors.subtextInput}
-              style={styles.addDishInput}
-              keyboardType="numeric"
-            />
+              <Text style={styles.inputLabel}>Birthdate</Text>
+              <TouchableOpacity onPress={showDatepicker}>
+                <TextInput
+                  value={form.birthdate}
+                  placeholder="Select your birthdate"
+                  placeholderTextColor={colors.subtextInput}
+                  style={styles.addDishInput}
+                  editable={false}
+                  pointerEvents="none"
+                />
+              </TouchableOpacity>
+
+              {/* Android date picker */}
+              {Platform.OS === 'android' && showDatePicker && (
+                <DateTimePicker
+                  testID="dateTimePicker"
+                  value={selectedDate}
+                  mode="date"
+                  display="default"
+                  onChange={handleDateChange}
+                />
+              )}
+
+              <View style={styles.bottomContainer}>
+                <TouchableOpacity style={styles.cancelDishButton}>
+                  <Text style={styles.cancelDishButtonText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.addDishButton}
+                  onPress={handleAddInformation}
+                >
+                  <Text style={styles.addDishButtonText}>Submit</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
           </View>
         </View>
+
         <RestaurantBottomNavbar navigation={navigation} />
       </View>
     </SafeAreaView>

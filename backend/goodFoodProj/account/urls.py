@@ -5,7 +5,8 @@ from .views import (
     RegisterAccount,
     LoginAccount,
     LogoutAccount,
-    CheckInfoComplete
+    CheckInfoComplete,
+    AddAdditionalInfo
 )
 
 urlpatterns = [
@@ -13,5 +14,6 @@ urlpatterns = [
     path("register/", RegisterAccount.as_view(), name="register"),
     path("login/", LoginAccount.as_view(), name="login"),
     path("check-info-complete/", CheckInfoComplete.as_view(),  name="check-info-complete"),
+    path("add-additional-info/", AddAdditionalInfo.as_view(),  name="add-additional-info"),
     path('logout/', LogoutAccount.as_view()),
 ]

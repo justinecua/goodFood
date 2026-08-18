@@ -7,7 +7,7 @@ export const useRegisterForm = navigation => {
   const [open, setOpen] = useState(false);
   const [role, setRole] = useState(null);
   const [items, setItems] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); //refresh indicator
 
   const [form, setForm] = useState({
     username: '',
