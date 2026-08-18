@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.24.0",
+    "@react-native-community/datetimepicker": "^9.1.0",
     "@react-native-picker/picker": "^2.11.4",
     "@react-native/new-app-screen": "0.84.0",
     "@react-navigation/native": "^7.2.2",
@@ -26,6 +27,7 @@
     "react-native-dropdown-picker": "^5.4.6",
     "react-native-element-dropdown": "^2.12.4",
     "react-native-geolocation-service": "^5.3.1",
+    "react-native-image-picker": "^8.2.1",
     "react-native-linear-gradient": "^2.8.3",
     "react-native-maps": "^1.27.2",
     "react-native-safe-area-context": "^5.7.0",
