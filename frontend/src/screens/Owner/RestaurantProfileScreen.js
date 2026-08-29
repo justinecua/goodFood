@@ -9,10 +9,12 @@ import {
 import styles from '../../styles/ProfileScreenStyle';
 import RestaurantBottomNavbar from '../../components/shared/RestaurantBottomNavbar';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { logoutAccount } from '../../api/services/auth';
+import { useFocusEffect } from '@react-navigation/native';
+import { clearSession, logoutAccount } from '../../api/services/auth';
+import { mediaUrl } from '../../constants/config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import pfp from '../../assets/images/pfp.jpg';
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   User,
   LogOut,
@@ -29,6 +31,10 @@ const DinerProfileScreen = ({ navigation }) => {
   const [user, setUser] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
+  const photoUrl = mediaUrl(user?.account_profile_photo);
+  const profilePicture = photoUrl ? { uri: photoUrl } : pfp;
+
+
   const handleLogout = async () => {
     try {
       setIsLoading(true);
@@ -43,9 +49,7 @@ const DinerProfileScreen = ({ navigation }) => {
       setIsLoading(false);
     }
 
-    await AsyncStorage.removeItem('accessToken');
-    await AsyncStorage.removeItem('refreshToken');
-    await AsyncStorage.removeItem('user');
+    await clearSession();
 
     navigation.reset({
       index: 0,
@@ -53,15 +57,13 @@ const DinerProfileScreen = ({ navigation }) => {
     });
   };
 
-  useEffect(() => {
-    AsyncStorage.getItem('user').then(res => {
-      if (res) {
-        const user = JSON.parse(res);
-        console.log(user);
-        setUser(user);
-      }
-    });
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      AsyncStorage.getItem('user').then(res => {
+        if (res) setUser(JSON.parse(res));
+      });
+    }, []),
+  );
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -72,7 +74,10 @@ const DinerProfileScreen = ({ navigation }) => {
         <View style={styles.section}>
           <View style={styles.profileBanner}>
             <View style={styles.leftprofileBanner}>
-              <Image style={styles.profileImage} source={pfp} />
+             <Image
+              style={styles.profileImage}
+              source={profilePicture}
+            />
             </View>
             <View style={styles.rightprofileBanner}>
               <Text style={styles.username}>{user?.username}</Text>
