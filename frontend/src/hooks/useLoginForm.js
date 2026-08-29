@@ -32,13 +32,19 @@ export const useLoginForm = navigation => {
       const result = await login(form.username.trim(), form.password);
       const { user } = result;
 
-      if (user.account_type === 'Restaurant Owner') {
-        navigation.navigate('RestaurantHome');
-      } else if (user.account_type === 'Diner') {
-        navigation.navigate('DinerHome');
-      } else {
+      const home =
+        user.account_type === 'Restaurant Owner'
+          ? 'RestaurantHome'
+          : user.account_type === 'Diner'
+          ? 'DinerHome'
+          : null;
+
+      if (!home) {
         Alert.alert('Error', 'Unknown account type');
+        return;
       }
+
+      navigation.reset({ index: 0, routes: [{ name: home }] });
     } catch (error) {
       Alert.alert('Login Failed', error.response?.data?.error || error.message);
     } finally {
