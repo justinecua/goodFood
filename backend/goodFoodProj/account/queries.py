@@ -5,6 +5,7 @@ from rest_framework import status
 from django.contrib.auth.hashers import make_password, check_password
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.db import connections, IntegrityError
+from django.core.files.storage import default_storage
 
 def getAccountType():
     try:
@@ -227,11 +228,24 @@ def checkInfoIfComplete(data):
             connection.close()
 
 def addAdditionalInfo(data):
+    connection = None
+    cursor = None
     try:
+        account_id = data.get('account_id')
+        if not account_id:
+            return {"error": "account_id is required"}
+
+        # Persist the upload through Django storage and keep only the path in
+        # the DB. A raw file object cannot be passed as a SQL parameter.
+        profile_photo_path = None
+        uploaded = data.get('profile_image')
+        if uploaded is not None and hasattr(uploaded, 'read'):
+            profile_photo_path = default_storage.save(
+                f"account_photos/{uploaded.name}", uploaded
+            )
+
         connection = connections['default']
         cursor = connection.cursor()
-
-        profile_photo = data.get('profile_image', None)
 
         query = """
             UPDATE account_account
@@ -240,8 +254,11 @@ def addAdditionalInfo(data):
                 last_name = %s,
                 birthdate = %s,
                 gender = %s,
-                account_profile_photo = %s
-            WHERE account_id = %s;
+                account_profile_photo = COALESCE(%s, account_profile_photo)
+            WHERE account_id = %s
+            RETURNING account_id, username, first_name, last_name, gender,
+                      birthdate, email_address, mobile_number,
+                      account_profile_photo;
         """
 
         params = (
@@ -249,14 +266,24 @@ def addAdditionalInfo(data):
             data.get('lastname'),
             data.get('birthdate'),
             data.get('gender'),
-            profile_photo,
-            data.get('account_id'),
+            profile_photo_path,
+            account_id,
         )
 
         cursor.execute(query, params)
+        row = cursor.fetchone()
         connection.commit()
 
-        return {"message": "Account updated with additional info"}
+        if not row:
+            return {"error": "Account not found"}
+
+        columns = [col[0] for col in cursor.description]
+        updated_user = dict(zip(columns, row))
+
+        return {
+            "message": "Account updated with additional info",
+            "user": updated_user,
+        }
 
     except Exception as error:
         print(f"Error: {error}")
