@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     width: 80,
     height: 80,
-    objectFit: 'cover',
+  
   },
   username: {
     fontSize: 19,
