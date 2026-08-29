@@ -44,9 +44,13 @@ const RestaurantProfileInformationScreen = ({ navigation }) => {
 
   const pickProfileImage = () => {
     launchImageLibrary({ mediaType: 'photo' }, res => {
-      console.log(res);
-      const uri = res.assets?.[0]?.uri;
-      if (uri) setProfileImage(uri);
+      if (res.didCancel) return;
+      if (res.errorCode) {
+        console.log('image picker error', res.errorCode, res.errorMessage);
+        return;
+      }
+      const asset = res.assets?.[0];
+      if (asset?.uri) setProfileImage(asset);
     });
   };
 
@@ -123,9 +127,9 @@ const RestaurantProfileInformationScreen = ({ navigation }) => {
                 onPress={pickProfileImage}
                 activeOpacity={0.8}
               >
-                {profileImage ? (
+                {profileImage?.uri ? (
                   <Image
-                    source={{ uri: profileImage }}
+                    source={{ uri: profileImage.uri }}
                     style={styles.profileImage}
                   />
                 ) : (
@@ -162,7 +166,7 @@ const RestaurantProfileInformationScreen = ({ navigation }) => {
                 value={gender}
                 items={genderItems}
                 setOpen={setOpen}
-                setValue={value => handleChange('gender', value)}
+                setValue={setGender}
                 setItems={setGenderItems}
                 styles={styles}
               />
