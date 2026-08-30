@@ -93,4 +93,3 @@ dishes/categories/branches incl. not-found, change password, profile
 email/mobile), manage.py check, makemigrations --check, ESLint + Prettier
 on all changed frontend files.
 
-Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
