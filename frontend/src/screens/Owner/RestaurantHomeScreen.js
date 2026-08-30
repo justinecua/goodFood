@@ -118,7 +118,7 @@ const RestaurantHomeScreen = ({ navigation }) => {
                     <TouchableOpacity
                       style={styles.button}
                       onPress={() =>
-                        navigation.navigate('RestaurantInformation')
+                        navigation.navigate('RestaurantInformationScreen')
                       }
                     >
                       <View style={styles.buttonContent}>
