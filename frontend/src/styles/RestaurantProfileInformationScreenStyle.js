@@ -2,6 +2,15 @@ import { StyleSheet } from 'react-native';
 import colors from '../constants/colors';
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
+  formScroll: {
+    paddingBottom: 120,
+  },
+  buttonDisabled: {
+    opacity: 0.7,
+  },
   container: {
     flex: 1,
     justifyContent: 'space-between',
@@ -19,7 +28,6 @@ const styles = StyleSheet.create({
 
   midSubContainer: {
     gap: 6,
-    padding: 15,
     justifyContent: 'center',
     width: '100%',
     padding: 10,
@@ -29,7 +37,6 @@ const styles = StyleSheet.create({
   headerContainer: {
     alignItems: 'center',
     marginTop: 15,
-    marginBottom: 4,
   },
   heading: {
     fontFamily: 'Ezra-SemiBold',
@@ -42,7 +49,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.subtextInput,
     marginTop: 4,
-    marginBottom: 4,
   },
 
   stepContainer: {
@@ -130,6 +136,28 @@ const styles = StyleSheet.create({
     color: colors.subtext,
     fontFamily: 'Ezra-SemiBold',
     justifyContent: 'center',
+  },
+
+  multilineInput: {
+    height: 96,
+    paddingTop: 14,
+    paddingBottom: 14,
+  },
+
+  coverImageButton: {
+    width: '100%',
+    height: 150,
+    borderRadius: 16,
+    backgroundColor: colors.container_bg,
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+    marginTop: 4,
+    marginBottom: 4,
+  },
+  coverImage: {
+    width: '100%',
+    height: '100%',
   },
 
   bottomContainer: {

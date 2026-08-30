@@ -4,18 +4,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const BACKEND_API_URL = Config.BACKEND_API_URL;
 
-export async function checkInfoComplete() {
-  const user = JSON.parse(await AsyncStorage.getItem('user'));
-
-  const response = await axios.post(`${BACKEND_API_URL}/check-info-complete/`, {
-    account_id: user.account_id,
-  });
-
-  return response.data;
+async function currentAccountId() {
+  const user = JSON.parse((await AsyncStorage.getItem('user')) || '{}');
+  return user.account_id ?? null;
 }
 
-export async function addAdditionalInfo(formData) {
-  const url = `${BACKEND_API_URL}/add-additional-info/`;
+async function postMultipart(path, formData) {
+  const url = `${BACKEND_API_URL}${path}`;
   try {
     const response = await axios.post(url, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
@@ -26,12 +21,11 @@ export async function addAdditionalInfo(formData) {
     if (error.response) {
       // Server answered with a non-2xx status.
       throw new Error(
-        error.response.data?.error ||
-          `Server error ${error.response.status}`,
+        error.response.data?.error || `Server error ${error.response.status}`,
       );
     }
     // No response at all — DNS/connection/timeout/malformed body.
-    console.log('addAdditionalInfo transport failure', {
+    console.log('multipart transport failure', {
       url,
       code: error.code,
       message: error.message,
@@ -41,4 +35,32 @@ export async function addAdditionalInfo(formData) {
         'Check that the backend is running and the device is on the same network.',
     );
   }
+}
+
+export async function checkInfoComplete() {
+  const account_id = await currentAccountId();
+
+  const response = await axios.post(`${BACKEND_API_URL}/check-info-complete/`, {
+    account_id,
+  });
+
+  return response.data;
+}
+
+export async function addAdditionalInfo(formData) {
+  return postMultipart('/add-additional-info/', formData);
+}
+
+export async function getRestaurantInfo() {
+  const account_id = await currentAccountId();
+
+  const response = await axios.post(`${BACKEND_API_URL}/get-restaurant-info/`, {
+    account_id,
+  });
+
+  return response.data;
+}
+
+export async function addRestaurantInfo(formData) {
+  return postMultipart('/add-restaurant-info/', formData);
 }
