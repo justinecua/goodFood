@@ -44,6 +44,18 @@ export async function addDishCategory(formData) {
   return postMultipart('/add-dish-category/', formData);
 }
 
+export async function updateDishCategory(formData) {
+  return postMultipart('/update-dish-category/', formData);
+}
+
+export async function deleteDishCategory(dishCategoryId) {
+  const response = await axios.post(
+    `${BACKEND_API_URL}/delete-dish-category/`,
+    { dish_category_id: dishCategoryId },
+  );
+  return response.data;
+}
+
 export async function getDishes() {
   const account_id = await currentAccountId();
 
@@ -54,6 +66,25 @@ export async function getDishes() {
   return response.data;
 }
 
+export async function getDish(dishId) {
+  const response = await axios.post(`${BACKEND_API_URL}/get-dish/`, {
+    dish_id: dishId,
+  });
+
+  return response.data;
+}
+
 export async function addDish(formData) {
   return postMultipart('/add-dish/', formData);
+}
+
+export async function updateDish(formData) {
+  return postMultipart('/update-dish/', formData);
+}
+
+export async function deleteDish(dishId) {
+  const response = await axios.post(`${BACKEND_API_URL}/delete-dish/`, {
+    dish_id: dishId,
+  });
+  return response.data;
 }

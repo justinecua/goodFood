@@ -1,0 +1,289 @@
+2026-08-30 — owner manage area + profile/settings (5th change of the day)
+
+Follows on from 2026-08-30-restaurant-details-and-dishes.txt. That change
+crammed dishes, categories and branches into MyRestaurantScreen and the
+restaurant info form. This splits them into their own screens, adds the
+detail/edit/delete paths, and fills in the rest of the owner profile menu
+(change photo, change password, settings, privacy, about).
+
+Three batches of work, committed together:
+  1. split the manage area into separate screens + back buttons + empty
+     states + AM/PM on operating hours
+  2. dish detail screen, seed data, wire up the profile menu rows
+  3. edit/delete for dishes/categories/branches, profile email+mobile,
+     change password, settings screen with a light/dark toggle
+
+
+Files
+  new   backend/goodFoodProj/dish/management/commands/seed_dishes.py
+        frontend/src/components/shared/ScreenHeader.js
+        frontend/src/components/shared/EmptyState.js
+        frontend/src/contexts/ThemeContext.js
+        frontend/src/screens/Owner/MenuScreen.js
+        frontend/src/screens/Owner/DishCategoriesScreen.js
+        frontend/src/screens/Owner/BranchesScreen.js
+        frontend/src/screens/Owner/BranchFormScreen.js
+        frontend/src/screens/Owner/ChangeProfilePictureScreen.js
+        frontend/src/screens/Owner/ChangePasswordScreen.js
+        frontend/src/screens/Owner/RestaurantSettingsScreen.js
+        frontend/src/screens/Owner/PrivacyPolicyScreen.js
+        frontend/src/screens/Owner/AboutScreen.js
+        frontend/src/styles/OwnerListScreenStyle.js
+        frontend/src/styles/BranchFormScreenStyle.js
+        frontend/src/styles/ChangePasswordScreenStyle.js
+        frontend/src/styles/ChangeProfilePictureScreenStyle.js
+        frontend/src/styles/InfoScreenStyle.js
+  edit  backend/goodFoodProj/dish/queries.py, views.py, urls.py
+        backend/goodFoodProj/restaurant/queries.py, views.py, urls.py
+        backend/goodFoodProj/account/queries.py, views.py, urls.py
+        frontend/src/api/services/dish.js, home.js, auth.js
+        frontend/src/hooks/useRestaurantInfoForm.js
+        frontend/src/hooks/useAddDishForm.js
+        frontend/src/hooks/useAddInformationForm.js
+        frontend/src/utils/validatorAdditionalInfo.js
+        frontend/src/constants/colors.js
+        frontend/src/navigation/AppNavigator.js
+        frontend/src/components/shared/RestaurantBottomNavbar.js
+        frontend/src/screens/Owner/MyRestaurantScreen.js
+        frontend/src/screens/Owner/RestaurantInformationScreen.js
+        frontend/src/screens/Owner/RestaurantDishDetailsScreen.js
+        frontend/src/screens/Owner/AddDishScreen.js
+        frontend/src/screens/Owner/AddDishCategoryScreen.js
+        frontend/src/screens/Owner/RestaurantProfileScreen.js
+        frontend/src/screens/Owner/RestaurantProfileInformationScreen.js
+        frontend/src/screens/Owner/RestaurantHomeScreen.js
+        frontend/src/screens/Owner/RestaurantNotificationScreen.js
+        frontend/src/screens/Owner/RestaurantInboxScreen.js
+        + the matching style files
+
+
+Manage area split into its own screens
+
+MyRestaurantScreen used to render the dish list, the category list and the
+branch cards inline. It now shows the restaurant/location/hours/cuisine
+cards plus a "Manage" card with three nav rows:
+
+  Menu            -> MenuScreen           list of dishes
+  Dish Categories -> DishCategoriesScreen list of categories
+  Branches        -> BranchesScreen       list of branch locations
+
+Each of those screens has a back button (new components/shared/
+ScreenHeader.js - a chevron-left + centred title, used everywhere in the
+manage section now) and keeps the bottom navbar. RestaurantBottomNavbar
+gained a MENU_ROUTES list so the "Menu" tab stays highlighted on all of
+them (MyRestaurant, Menu, DishCategories, Branches, AddDish,
+AddDishCategory, RestaurantInformationScreen).
+
+The Add buttons live on the list screens, not on MyRestaurantScreen:
+MenuScreen has "Add Dish" + "Categories", BranchesScreen has "Add Branch".
+
+OwnerListScreenStyle.js is shared by all three list screens (row layout,
+thumbnails, the floating action bar).
+
+
+Empty states
+
+New components/shared/EmptyState.js (icon + title + message, plus a
+`compact` variant). Used on:
+  - MenuScreen / DishCategoriesScreen / BranchesScreen when the list is
+    empty
+  - RestaurantHomeScreen - the "Top Dishes" / "Top Restaurants" sections
+    were showing hardcoded mock cards (Fish Tacos, fake rankings); those
+    are gone, replaced with a compact empty state until the ranking
+    endpoints exist
+  - RestaurantNotificationScreen - "No notifications"
+  - RestaurantInboxScreen - "No messages yet" (also removed a stray
+    "Add Dish" button that had been left on this screen)
+
+
+Operating hours: AM/PM
+
+The hours inputs were 24-hour HH:MM, which is awkward on mobile. They're
+now a 12-hour hour:minute field plus an AM/PM toggle per open/close time.
+useRestaurantInfoForm.js keeps `opening_period` / `closing_period` in form
+state and converts at the API boundary with to24h() / from24h() - the
+backend TimeField still stores 24-hour, so nothing changed server-side.
+Round-trip was checked: 12 AM -> 00:00, 12 PM -> 12:00, "1:5" -> 13:05.
+
+
+Dish detail + edit/delete
+
+- dish/queries.py getDish() - SELECT d.*, category name, plus the image
+  rows ordered is_primary first. Route POST /api/get-dish/ {dish_id}.
+- RestaurantDishDetailsScreen reworked: tapped from MenuScreen (rows are
+  TouchableOpacity now), reloads on focus, shows all the dish fields, and
+  has Delete + Edit buttons at the bottom.
+- Edit reuses AddDishScreen. useAddDishForm(navigation, editing) takes the
+  dish object; when editing it prefills every field (price as a string,
+  the existing photo via mediaUrl), only uploads the photo if it's a fresh
+  local pick, appends dish_id, and calls updateDish instead of addDish.
+- updateDish() in dish/queries.py: UPDATE dish_dish ... WHERE dish_id;
+  rowcount 0 -> "Dish not found"; a new photo flips the old primary image
+  to is_primary = FALSE and inserts the new one as primary.
+- deleteDish() - DELETE FROM dish_dish WHERE dish_id.
+- Routes: POST /api/update-dish/ (multipart), /api/delete-dish/ {dish_id}.
+
+
+Category edit/delete
+
+- DishCategoriesScreen rows are tappable -> AddDishCategoryScreen with the
+  category as a param. That screen is add-or-edit now: prefilled name +
+  description, a "Delete category" link at the bottom when editing.
+- updateDishCategory() / deleteDishCategory() in dish/queries.py, rowcount
+  checked. Delete note: Dish.dish_category is ON DELETE SET NULL, so dishes
+  in a deleted category just become uncategorised (no cascade).
+- Routes: POST /api/update-dish-category/, /api/delete-dish-category/
+  {dish_category_id}.
+
+
+Branches moved off the restaurant info form
+
+This is the bigger structural change. Branches used to be synced inside
+addRestaurantInfo() - it deleted every branch for the restaurant and
+reinserted from the form's branch cards. That can't coexist with a
+per-branch edit/delete screen (saving the restaurant form would wipe any
+branch added on its own screen).
+
+So branches are now fully standalone:
+  - removed the branch parsing + the delete-then-reinsert block from
+    addRestaurantInfo(); removed the branch cards from
+    RestaurantInformationScreen and all branch state/helpers/validation
+    from useRestaurantInfoForm.js
+  - new addBranch() / updateBranch() / deleteBranch() in
+    restaurant/queries.py. addBranch resolves the restaurant from
+    account_id (newest one) and errors with "Add your restaurant
+    information first" if there isn't one. update/delete check rowcount.
+  - Routes: POST /api/add-branch/ {account_id, branch_name, address,
+    contact_number, latitude?, longitude?}, /api/update-branch/
+    {branch_id, ...}, /api/delete-branch/ {branch_id}
+  - new BranchFormScreen.js (add + edit + delete), reached from
+    BranchesScreen ("Add Branch" button, or tap a row to edit)
+
+getRestaurantInfo() still returns `branches` - BranchesScreen reads it for
+the list.
+
+
+Profile menu wired up
+
+RestaurantProfileScreen (exported as DinerProfileScreen - still misnamed)
+had rows with no onPress. They now navigate:
+
+  avatar / Change Profile Picture -> ChangeProfilePicture
+  Edit Profile Information        -> RestaurantProfileInformationScreen
+  Change Password                 -> ChangePassword          (new row)
+  My Restaurants                  -> MyRestaurant
+  Plan and Billing                -> Subscription
+  Settings                        -> RestaurantSettings       (new row)
+  Privacy Policy                  -> PrivacyPolicy
+  About                           -> About
+
+New screens:
+- ChangeProfilePictureScreen - preview + "Choose from gallery" + Save.
+  Calls a new photo-only endpoint (see below), merges the returned user
+  into AsyncStorage, goes back.
+- ChangePasswordScreen - current / new / confirm, client-side checks
+  (all filled, new >= 6 chars, new == confirm), then changePassword().
+- PrivacyPolicyScreen / AboutScreen - static text, shared InfoScreenStyle.
+
+
+Profile info screen: email + mobile, and the Cancel button
+
+RestaurantProfileInformationScreen is used for two things: onboarding (from
+RestaurantHome, sends name/gender/birthdate only) and profile editing (from
+the profile menu). It now also shows Email and Mobile Number, prefilled
+from the stored user.
+
+Backend: addAdditionalInfo() SET clause gained
+  email_address = COALESCE(NULLIF(%s, ''), email_address),
+  mobile_number = COALESCE(NULLIF(%s, ''), mobile_number)
+so an empty value never overwrites - onboarding, which doesn't send these,
+is unaffected. Added an IntegrityError branch for the unique constraints
+("That mobile number is already in use" / "That email is already in use").
+
+validatorAdditionalInfo.js only checks email/mobile when those keys are in
+the form (`'email' in form`), so the onboarding call still validates just
+the three original fields.
+
+Cancel button: it had no onPress at all, so it did nothing. Now
+`navigation.goBack()`. Successful save also goBack()s instead of forcing a
+jump to RestaurantHome.
+
+
+New account endpoints
+
+- POST /api/update-profile-photo/ (multipart {account_id, profile_image})
+  -> updateProfilePhoto() - photo-only column update. Needed because
+  addAdditionalInfo() would null out name/gender/birthdate if only a photo
+  was sent.
+- POST /api/change-password/ {account_id, current_password, new_password}
+  -> changePassword() - SELECT the hash, check_password() the current one,
+  make_password() the new one. Min 6 chars, checked server-side too.
+- auth.js changePassword() reads account_id from the stored user blob (no
+  token is attached to requests - see architecture notes).
+
+
+Settings screen + theme scaffolding
+
+RestaurantSettingsScreen: an "Appearance" card with Light / Dark rows, the
+active one ticked. Persists the choice.
+
+Scope note - this is scaffolding, not a themed app yet:
+- contexts/ThemeContext.js - ThemeProvider wraps AppNavigator, useTheme()
+  gives { mode, setMode, colors, ready }, writes `themeMode` to
+  AsyncStorage.
+- constants/colors.js now exports lightColors and darkColors. The DEFAULT
+  export is still lightColors, so every screen that does
+  `import colors from '../constants/colors'` (i.e. almost all of them) is
+  completely unaffected by the toggle.
+- Only RestaurantSettingsScreen actually reads useTheme().colors right now,
+  as a visible proof the switch works. Converting the rest of the screens
+  is a separate job.
+
+
+Seed data
+
+`python manage.py seed_dishes` - adds ~6 Filipino dishes (Kare-Kare,
+Crispy Pata, Sinigang na Hipon, Lumpiang Shanghai, Halo-Halo, Iced
+Kalamansi) with their categories to the newest restaurant. Flags:
+--account, --restaurant, --fresh. Idempotent by dish name (get_or_create).
+Uses the ORM, not raw SQL, since it's a dev tool.
+
+
+Still depends on reconcile_db
+
+Same as the previous change - the dish_* tables and the nullable
+operating-hours columns only exist after reconcile_db + migrate, which
+still haven't run on the shared DB. Until then: dish endpoints, branch
+endpoints (restaurant_restaurant_branch predates this but the FK rename
+matters), saving hours, and seed_dishes will all error.
+
+    cd backend/goodFoodProj
+    python manage.py reconcile_db
+    python manage.py migrate
+    python manage.py seed_dishes      # optional
+
+
+Checked
+- backend: the new raw-SQL paths on a throwaway postgres-shaped sqlite DB
+  - updateDish / deleteDish (incl. rowcount-0 "not found"), new photo
+    becoming primary
+  - updateDishCategory / deleteDishCategory
+  - addBranch (incl. "add your restaurant info first") / updateBranch /
+    deleteBranch
+  - addAdditionalInfo with and without email/mobile, changePassword
+    (wrong current password, short new password, success)
+  - manage.py check, makemigrations --check (no drift)
+- frontend: ESLint (0 errors) + Prettier on every changed/new file
+- AM/PM to24h/from24h round-trip in node
+
+
+Notes / follow-ups
+- Full theme adoption is deferred. The dark palette exists but no screen
+  outside Settings uses it.
+- updateBranch/deleteBranch don't check that the branch belongs to the
+  signed-in owner - every endpoint is still AllowAny, so this is in line
+  with the rest of the API for now.
+- RestaurantProfileScreen is still exported as `DinerProfileScreen` - not
+  renamed here to keep the diff focused.
+- ChangeProfilePicture and the profile-info screen both write the user
+  back to AsyncStorage; there's no single "refresh user" helper yet.

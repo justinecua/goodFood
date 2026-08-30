@@ -7,6 +7,8 @@ from .views import (
     LogoutAccount,
     CheckInfoComplete,
     AddAdditionalInfo,
+    UpdateProfilePhoto,
+    ChangePassword,
 )
 
 urlpatterns = [
@@ -15,5 +17,7 @@ urlpatterns = [
     path("login/", LoginAccount.as_view(), name="login"),
     path("check-info-complete/", CheckInfoComplete.as_view(),  name="check-info-complete"),
     path("add-additional-info/", AddAdditionalInfo.as_view(),  name="add-additional-info"),
+    path("update-profile-photo/", UpdateProfilePhoto.as_view(), name="update-profile-photo"),
+    path("change-password/", ChangePassword.as_view(), name="change-password"),
     path('logout/', LogoutAccount.as_view()),
 ]
