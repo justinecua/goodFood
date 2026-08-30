@@ -6,7 +6,7 @@ from .views import (
     LoginAccount,
     LogoutAccount,
     CheckInfoComplete,
-    AddAdditionalInfo
+    AddAdditionalInfo,
 )
 
 urlpatterns = [
