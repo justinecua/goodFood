@@ -1,0 +1,131 @@
+2026-08-30 — rest of the restaurant info, plus dishes (4th change of the day)
+
+The restaurant info form (2026-08-30.txt) only covered the Restaurant and
+Location tables. This adds the parts of the schema the owner still can't
+reach - operating hours, cuisine categories, branches - and the first dish
+screens.
+
+Files
+  new   backend/goodFoodProj/dish/queries.py
+        backend/goodFoodProj/dish/urls.py
+        frontend/src/api/services/dish.js
+        frontend/src/hooks/useAddDishForm.js
+        frontend/src/screens/Owner/AddDishScreen.js
+        frontend/src/screens/Owner/AddDishCategoryScreen.js
+        frontend/src/styles/AddDishScreenStyle.js
+        frontend/src/styles/AddDishCategoryScreenStyle.js
+  edit  backend/goodFoodProj/restaurant/queries.py
+        backend/goodFoodProj/restaurant/models.py
+        backend/goodFoodProj/restaurant/migrations/0001_initial.py
+        backend/goodFoodProj/reconcile_existing_db.sql
+        backend/goodFoodProj/dish/views.py            (was a stub)
+        backend/goodFoodProj/goodFoodProj/urls.py     (include dish.urls)
+        frontend/src/hooks/useRestaurantInfoForm.js
+        frontend/src/screens/Owner/RestaurantInformationScreen.js
+        frontend/src/screens/Owner/MyRestaurantScreen.js
+        frontend/src/navigation/AppNavigator.js
+        frontend/src/styles/RestaurantProfileInformationScreenStyle.js
+        frontend/src/styles/MyRestaurantScreenStyle.js
+
+
+Operating hours, categories, branches
+
+restaurant/queries.py:
+- getRestaurantInfo() now also returns operating_hours, categories and
+  branches (each a list; empty when there's no restaurant)
+- addRestaurantInfo() takes three more multipart fields - operating_hours,
+  categories, branches - each a JSON string. It parses them and syncs each
+  table by deleting the restaurant's rows and reinserting.
+- a section is only synced when its key is present in the request. The
+  frontend always sends all three; older callers that don't send them are
+  left alone.
+- category names are shared across restaurants, so any that don't exist are
+  created: INSERT INTO restaurant_category ... ON CONFLICT (category_name)
+  DO NOTHING, then look up the id and link it in
+  restaurant_restaurant_category.
+
+Schema change: Operating_Hours.opening_time and closing_time are now
+nullable, so a day marked "closed" stores no times. This touches an
+existing table, so:
+- restaurant/models.py and restaurant/migrations/0001_initial.py updated to
+  match (0001 is recorded/skipped on the real DB - see backend-schema.txt)
+- reconcile_existing_db.sql gained:
+      ALTER TABLE restaurant_operating_hours
+        ALTER COLUMN opening_time DROP NOT NULL;
+      ALTER TABLE restaurant_operating_hours
+        ALTER COLUMN closing_time DROP NOT NULL;
+  (DROP NOT NULL is a no-op if the column is already nullable, so it's safe
+  to re-run.)
+
+Frontend (useRestaurantInfoForm.js / RestaurantInformationScreen.js):
+- operating hours: a fixed 7-day list (Mon-Sun). Each row has HH:MM text
+  inputs for open/close and a "Closed" pill. Saved hours are merged onto
+  this template on load so every day still shows.
+- categories: a text field + Add button; entries show as removable chips.
+- branches: a repeatable card (name, address, contact, lat, long) with an
+  "Add branch" button. Partly-filled branch rows are caught in validation;
+  fully-empty ones are ignored.
+- times are sent as HH:MM and come back from the API as HH:MM:SS, so the
+  hook trims them
+
+
+Dishes
+
+dish/queries.py (same flat raw-SQL style as the others):
+- getDishCategories() / addDishCategory() - Dish_Category has no restaurant
+  FK in the model, so categories are global
+- getDishes() - resolves the restaurant from account_id, LEFT JOINs the
+  category name and a subquery for the primary image
+- addDish() - resolves the restaurant from account_id, validates name +
+  price, coerces the three boolean flags from their string form, and saves
+  one photo to dish_dish_images via default_storage
+
+Routes, mounted at /api/ via dish.urls:
+  POST /api/get-dish-categories/
+  POST /api/add-dish-category/    (multipart)
+  POST /api/get-dishes/
+  POST /api/add-dish/             (multipart)
+
+Screens:
+- AddDishScreen.js + useAddDishForm.js - every Dish field: name, price,
+  description, a category dropdown (react-native-element-dropdown), the
+  signature / best-seller / available toggles, prep notes, how-to-eat, and
+  one photo
+- AddDishCategoryScreen.js - name + description, with the existing
+  categories listed below. Inline state, no hook.
+- api/services/dish.js - its own copy of the postMultipart helper so the
+  dish endpoints stay self-contained
+- AppNavigator registers AddDish and AddDishCategory
+
+MyRestaurantScreen:
+- new cards for operating hours, categories and branches
+- a Menu card with "Add Dish" and "Dish Category" buttons and the list of
+  dishes (thumbnail, name, category, price)
+- loads getRestaurantInfo() and getDishes() together on focus
+
+
+Depends on reconcile_db
+
+The dish_* tables and the operating-hours DROP NOT NULL both come from
+reconcile_db + migrate, which haven't run on the shared DB yet
+(reconcile_db --check still says "yes"). Until then the dish endpoints and
+saving hours/categories/branches will error.
+
+    cd backend/goodFoodProj
+    python manage.py reconcile_db
+    python manage.py migrate
+
+
+Checked
+- the raw-SQL create + edit paths on a throwaway DB (postgres-shaped):
+  create then edit a restaurant with hours/categories/branches, add a
+  category, add a dish, list dishes, and the validation branches
+- manage.py check, makemigrations --check (no drift), fresh-DB migrate
+- ESLint + Prettier on the changed frontend files
+
+
+Notes
+- addDishCategory has no uniqueness check - the model doesn't define one, so
+  duplicate category names are allowed
+- MyRestaurantScreen calls getDishes() even before a restaurant exists; the
+  backend returns { dishes: [] } in that case

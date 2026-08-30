@@ -1,0 +1,81 @@
+2026-08-30 — backend data model from the ER diagram (3rd change of the day)
+
+Builds out the rest of the backend schema: seven new Django apps and the
+models to go with them, plus three models added to the restaurant app. This
+is the data layer only - models, admin and migrations, no views/URLs/queries.
+
+New apps (models.py, admin.py, apps.py, migrations/)
+  dish          Dish_Category, Dish, Dish_Images
+  review        Restaurant_Review, Dish_Review
+  ranking       Restaurant_Ranking, Dish_Ranking
+  subscription  Plan, Subscription, Subscription_Payment
+  messaging     Conversation, Message
+  favorite      Favorite
+  notification  Notification
+
+restaurant app
+  + Restaurant_Branch, Category, Restaurant_Category
+  + updated_at on Restaurant
+
+Account, AccountType and Location already existed and weren't re-modelled.
+
+
+Model notes
+- PK names follow the diagram: dish_id, branch_id, res_review_id, etc.
+  (AutoField(primary_key=True)). The junction table Restaurant_Category
+  keeps Django's default id.
+- on_delete: CASCADE for owned rows (dishes, images, reviews, messages,
+  payments, branches, favorites, notifications, rankings), SET_NULL for
+  Restaurant.location and Dish.dish_category, PROTECT for Subscription.plan
+- money is DecimalField(10,2); review ratings DecimalField(3,2); computed
+  ranking scores DecimalField(6,3)
+- images are ImageField, matching the existing Restaurant model
+- Favorite.restaurant and Favorite.dish are both nullable
+- the diagram's Dish_Ranking has a stray "FK dish_ranking_id" - read as
+  restaurant_id; the model has FKs to both Restaurant and Dish
+- table names are Django defaults (dish_dish, review_restaurant_review,
+  subscription_plan, ...)
+
+Apps are registered in INSTALLED_APPS in dependency order (account,
+location, restaurant, dish, then the rest).
+
+
+Migrations
+
+manage.py check is clean and makemigrations --check finds no drift. On a
+fresh sqlite DB, migrate applies the whole graph with no errors - including
+the dish step that fails on the real DB (below).
+
+makemigrations regenerated restaurant/0001_initial.py and
+location/0001_initial.py. Both apps had migration records in the DB but no
+files (pre-existing - account is the same). They're recorded as applied,
+so migrate skips them. Restaurant.restaurant_id is BigAutoField because the
+real restaurant_restaurant.id column is bigint.
+
+Why migrate breaks on the shared DB, and the fix:
+- restaurant_restaurant's PK is `id`, but every new FK expects
+  restaurant_id. dish.0001 applied, then dish.0002 failed adding the FK
+  ("column restaurant_id ... does not exist").
+- dish was rolled back with `migrate dish zero` - nothing is half-applied.
+- reconcile_existing_db.sql applies what the skipped restaurant.0001_initial
+  would have: rename id -> restaurant_id, add updated_at (DEFAULT now()),
+  rename operating_hours -> operating_hours_id, create the three new tables.
+- restaurant/queries.py was updated to use restaurant_id / updated_at (it
+  used `id` / `ORDER BY id`). The SQL and the code change go together - run
+  the SQL before hitting those endpoints again.
+
+To apply on the existing DB:
+
+    python manage.py reconcile_db    # runs the .sql via psycopg2, in a
+                                     # transaction. --check tells you if
+                                     # it's still needed.
+    python manage.py migrate
+
+On a fresh DB, just migrate - don't run reconcile_db (it would fail on the
+RENAME).
+
+
+Not done
+- no serializers / views / URLs / queries for the new models yet
+- Account.created_at (in the diagram) not added - the account app was left
+  untouched

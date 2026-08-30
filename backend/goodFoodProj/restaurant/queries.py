@@ -1,3 +1,5 @@
+import json
+
 from django.db import connections, IntegrityError
 from django.core.files.storage import default_storage
 
@@ -13,7 +15,7 @@ def getRestaurantInfo(data):
             SELECT *
             FROM restaurant_restaurant
             WHERE account_id = %s
-            ORDER BY id DESC
+            ORDER BY restaurant_id DESC
             LIMIT 1;
         """
 
@@ -21,10 +23,18 @@ def getRestaurantInfo(data):
         row = cursor.fetchone()
 
         if not row:
-            return {"restaurant": None, "location": None}
+            return {
+                "restaurant": None,
+                "location": None,
+                "operating_hours": [],
+                "categories": [],
+                "branches": [],
+            }
 
         columns = [col[0] for col in cursor.description]
         restaurant = dict(zip(columns, row))
+
+        restaurant_id = restaurant["restaurant_id"]
 
         location = None
 
@@ -42,7 +52,54 @@ def getRestaurantInfo(data):
                 location_columns = [col[0] for col in cursor.description]
                 location = dict(zip(location_columns, location_row))
 
-        return {"restaurant": restaurant, "location": location}
+        # Operating hours (one row per saved day).
+        cursor.execute(
+            """
+            SELECT *
+            FROM restaurant_operating_hours
+            WHERE restaurant_id = %s
+            ORDER BY operating_hours_id;
+            """,
+            [restaurant_id],
+        )
+        hours_columns = [col[0] for col in cursor.description]
+        operating_hours = [dict(zip(hours_columns, r)) for r in cursor.fetchall()]
+
+        # Cuisine categories linked to this restaurant.
+        cursor.execute(
+            """
+            SELECT c.category_id, c.category_name
+            FROM restaurant_category c
+            JOIN restaurant_restaurant_category rc
+                ON rc.category_id = c.category_id
+            WHERE rc.restaurant_id = %s
+            ORDER BY c.category_name;
+            """,
+            [restaurant_id],
+        )
+        category_columns = [col[0] for col in cursor.description]
+        categories = [dict(zip(category_columns, r)) for r in cursor.fetchall()]
+
+        # Branches.
+        cursor.execute(
+            """
+            SELECT *
+            FROM restaurant_restaurant_branch
+            WHERE restaurant_id = %s
+            ORDER BY branch_id;
+            """,
+            [restaurant_id],
+        )
+        branch_columns = [col[0] for col in cursor.description]
+        branches = [dict(zip(branch_columns, r)) for r in cursor.fetchall()]
+
+        return {
+            "restaurant": restaurant,
+            "location": location,
+            "operating_hours": operating_hours,
+            "categories": categories,
+            "branches": branches,
+        }
 
     except Exception as error:
         print(f"Error: {error}")
@@ -74,6 +131,35 @@ def addRestaurantInfo(data):
         latitude = data.get("latitude")
         longitude = data.get("longitude")
 
+        # Operating hours / categories / branches arrive as JSON strings because
+        # the request is multipart. Parse them, defaulting to an empty list.
+        operating_hours = data.get("operating_hours")
+        if operating_hours:
+            try:
+                operating_hours = json.loads(operating_hours)
+            except (TypeError, ValueError):
+                operating_hours = []
+        else:
+            operating_hours = []
+
+        categories = data.get("categories")
+        if categories:
+            try:
+                categories = json.loads(categories)
+            except (TypeError, ValueError):
+                categories = []
+        else:
+            categories = []
+
+        branches = data.get("branches")
+        if branches:
+            try:
+                branches = json.loads(branches)
+            except (TypeError, ValueError):
+                branches = []
+        else:
+            branches = []
+
         if not account_id:
             return {"error": "account_id is required"}
 
@@ -99,10 +185,10 @@ def addRestaurantInfo(data):
         # Check if this account already has a restaurant.
         cursor.execute(
             """
-            SELECT id, location_id
+            SELECT restaurant_id, location_id
             FROM restaurant_restaurant
             WHERE account_id = %s
-            ORDER BY id DESC
+            ORDER BY restaurant_id DESC
             LIMIT 1;
             """,
             [account_id],
@@ -152,8 +238,9 @@ def addRestaurantInfo(data):
                     email = %s,
                     location_id = %s,
                     restaurant_logo_img = COALESCE(%s, restaurant_logo_img),
-                    restaurant_cover_img = COALESCE(%s, restaurant_cover_img)
-                WHERE id = %s;
+                    restaurant_cover_img = COALESCE(%s, restaurant_cover_img),
+                    updated_at = NOW()
+                WHERE restaurant_id = %s;
                 """,
                 (
                     restaurant_name,
@@ -184,9 +271,10 @@ def addRestaurantInfo(data):
                 """
                 INSERT INTO restaurant_restaurant
                     (account_id, location_id, restaurant_name, restaurant_description,
-                     address, contact_number, email, created_at,
+                     address, contact_number, email, created_at, updated_at,
                      restaurant_logo_img, restaurant_cover_img)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, NOW(), %s, %s);
+                VALUES (%s, %s, %s, %s, %s, %s, %s, NOW(), NOW(), %s, %s)
+                RETURNING restaurant_id;
                 """,
                 (
                     account_id,
@@ -200,6 +288,104 @@ def addRestaurantInfo(data):
                     cover_path,
                 ),
             )
+            restaurant_id = cursor.fetchone()[0]
+
+        # Replace the operating hours with what was sent (only when the field
+        # was part of the request).
+        if "operating_hours" in data:
+            cursor.execute(
+                "DELETE FROM restaurant_operating_hours WHERE restaurant_id = %s;",
+                [restaurant_id],
+            )
+            for item in operating_hours:
+                day_of_week = (item.get("day_of_week") or "").strip()
+                if not day_of_week:
+                    continue
+
+                is_closed = bool(item.get("is_closed"))
+                opening_time = (item.get("opening_time") or "").strip() or None
+                closing_time = (item.get("closing_time") or "").strip() or None
+
+                if is_closed:
+                    opening_time = None
+                    closing_time = None
+                elif not opening_time or not closing_time:
+                    continue
+
+                cursor.execute(
+                    """
+                    INSERT INTO restaurant_operating_hours
+                        (restaurant_id, day_of_week, opening_time, closing_time, is_closed)
+                    VALUES (%s, %s, %s, %s, %s);
+                    """,
+                    (restaurant_id, day_of_week, opening_time, closing_time, is_closed),
+                )
+
+        # Replace the linked categories. Category names are shared across
+        # restaurants, so create any that do not exist yet.
+        if "categories" in data:
+            cursor.execute(
+                "DELETE FROM restaurant_restaurant_category WHERE restaurant_id = %s;",
+                [restaurant_id],
+            )
+            for name in categories:
+                name = (name or "").strip()
+                if not name:
+                    continue
+
+                cursor.execute(
+                    """
+                    INSERT INTO restaurant_category (category_name)
+                    VALUES (%s)
+                    ON CONFLICT (category_name) DO NOTHING;
+                    """,
+                    [name],
+                )
+                cursor.execute(
+                    "SELECT category_id FROM restaurant_category WHERE category_name = %s;",
+                    [name],
+                )
+                category_id = cursor.fetchone()[0]
+
+                cursor.execute(
+                    """
+                    INSERT INTO restaurant_restaurant_category (restaurant_id, category_id)
+                    VALUES (%s, %s)
+                    ON CONFLICT (restaurant_id, category_id) DO NOTHING;
+                    """,
+                    (restaurant_id, category_id),
+                )
+
+        # Replace the branches.
+        if "branches" in data:
+            cursor.execute(
+                "DELETE FROM restaurant_restaurant_branch WHERE restaurant_id = %s;",
+                [restaurant_id],
+            )
+            for item in branches:
+                branch_name = (item.get("branch_name") or "").strip()
+                branch_address = (item.get("address") or "").strip()
+                branch_contact = (item.get("contact_number") or "").strip()
+
+                if not branch_name or not branch_address or not branch_contact:
+                    continue
+
+                cursor.execute(
+                    """
+                    INSERT INTO restaurant_restaurant_branch
+                        (restaurant_id, branch_name, address, contact_number,
+                         latitude, longitude, created_at)
+                    VALUES (%s, %s, %s, %s, %s, %s, NOW());
+                    """,
+                    (
+                        restaurant_id,
+                        branch_name,
+                        branch_address,
+                        branch_contact,
+                        (item.get("latitude") or "").strip() or None,
+                        (item.get("longitude") or "").strip() or None,
+                    ),
+                )
 
         connection.commit()
 
