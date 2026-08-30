@@ -10,4 +10,3 @@ add the My Restaurant screen on the owner Menu tab
 - RestaurantBottomNavbar: the Menu tab now opens "MyRestaurant" and
   highlights on that route
 
-Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
