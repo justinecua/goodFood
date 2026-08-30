@@ -51,6 +51,10 @@ export async function addAdditionalInfo(formData) {
   return postMultipart('/add-additional-info/', formData);
 }
 
+export async function updateProfilePhoto(formData) {
+  return postMultipart('/update-profile-photo/', formData);
+}
+
 export async function getRestaurantInfo() {
   const account_id = await currentAccountId();
 
@@ -63,4 +67,19 @@ export async function getRestaurantInfo() {
 
 export async function addRestaurantInfo(formData) {
   return postMultipart('/add-restaurant-info/', formData);
+}
+
+export async function addBranch(formData) {
+  return postMultipart('/add-branch/', formData);
+}
+
+export async function updateBranch(formData) {
+  return postMultipart('/update-branch/', formData);
+}
+
+export async function deleteBranch(branchId) {
+  const response = await axios.post(`${BACKEND_API_URL}/delete-branch/`, {
+    branch_id: branchId,
+  });
+  return response.data;
 }

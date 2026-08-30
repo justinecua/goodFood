@@ -131,8 +131,10 @@ def addRestaurantInfo(data):
         latitude = data.get("latitude")
         longitude = data.get("longitude")
 
-        # Operating hours / categories / branches arrive as JSON strings because
-        # the request is multipart. Parse them, defaulting to an empty list.
+        # Operating hours and categories arrive as JSON strings because the
+        # request is multipart. Parse them, defaulting to an empty list.
+        # (Branches are managed separately - see addBranch / updateBranch /
+        # deleteBranch.)
         operating_hours = data.get("operating_hours")
         if operating_hours:
             try:
@@ -150,15 +152,6 @@ def addRestaurantInfo(data):
                 categories = []
         else:
             categories = []
-
-        branches = data.get("branches")
-        if branches:
-            try:
-                branches = json.loads(branches)
-            except (TypeError, ValueError):
-                branches = []
-        else:
-            branches = []
 
         if not account_id:
             return {"error": "account_id is required"}
@@ -356,36 +349,8 @@ def addRestaurantInfo(data):
                     (restaurant_id, category_id),
                 )
 
-        # Replace the branches.
-        if "branches" in data:
-            cursor.execute(
-                "DELETE FROM restaurant_restaurant_branch WHERE restaurant_id = %s;",
-                [restaurant_id],
-            )
-            for item in branches:
-                branch_name = (item.get("branch_name") or "").strip()
-                branch_address = (item.get("address") or "").strip()
-                branch_contact = (item.get("contact_number") or "").strip()
-
-                if not branch_name or not branch_address or not branch_contact:
-                    continue
-
-                cursor.execute(
-                    """
-                    INSERT INTO restaurant_restaurant_branch
-                        (restaurant_id, branch_name, address, contact_number,
-                         latitude, longitude, created_at)
-                    VALUES (%s, %s, %s, %s, %s, %s, NOW());
-                    """,
-                    (
-                        restaurant_id,
-                        branch_name,
-                        branch_address,
-                        branch_contact,
-                        (item.get("latitude") or "").strip() or None,
-                        (item.get("longitude") or "").strip() or None,
-                    ),
-                )
+        # Branches are managed on their own screen - see addBranch /
+        # updateBranch / deleteBranch below.
 
         connection.commit()
 
@@ -398,6 +363,147 @@ def addRestaurantInfo(data):
             return {"error": "That email is already used by another restaurant"}
 
         return {"error": "Duplicate data detected"}
+
+    except Exception as error:
+        print(f"Error: {error}")
+        return {"error": str(error)}
+
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+
+def addBranch(data):
+    try:
+        connection = connections['default']
+        cursor = connection.cursor()
+
+        account_id = data.get("account_id")
+        branch_name = (data.get("branch_name") or "").strip()
+        address = (data.get("address") or "").strip()
+        contact_number = (data.get("contact_number") or "").strip()
+        latitude = (data.get("latitude") or "").strip() or None
+        longitude = (data.get("longitude") or "").strip() or None
+
+        if not account_id:
+            return {"error": "account_id is required"}
+
+        if not branch_name or not address or not contact_number:
+            return {"error": "Branch name, address and contact number are required"}
+
+        cursor.execute(
+            """
+            SELECT restaurant_id
+            FROM restaurant_restaurant
+            WHERE account_id = %s
+            ORDER BY restaurant_id DESC
+            LIMIT 1;
+            """,
+            [account_id],
+        )
+        row = cursor.fetchone()
+
+        if not row:
+            return {"error": "Add your restaurant information first"}
+
+        restaurant_id = row[0]
+
+        cursor.execute(
+            """
+            INSERT INTO restaurant_restaurant_branch
+                (restaurant_id, branch_name, address, contact_number,
+                 latitude, longitude, created_at)
+            VALUES (%s, %s, %s, %s, %s, %s, NOW())
+            RETURNING branch_id;
+            """,
+            (restaurant_id, branch_name, address, contact_number, latitude, longitude),
+        )
+        branch_id = cursor.fetchone()[0]
+        connection.commit()
+
+        return {"message": "Branch added", "branch_id": branch_id}
+
+    except Exception as error:
+        print(f"Error: {error}")
+        return {"error": str(error)}
+
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+
+def updateBranch(data):
+    try:
+        connection = connections['default']
+        cursor = connection.cursor()
+
+        branch_id = data.get("branch_id")
+        branch_name = (data.get("branch_name") or "").strip()
+        address = (data.get("address") or "").strip()
+        contact_number = (data.get("contact_number") or "").strip()
+        latitude = (data.get("latitude") or "").strip() or None
+        longitude = (data.get("longitude") or "").strip() or None
+
+        if not branch_id:
+            return {"error": "branch_id is required"}
+
+        if not branch_name or not address or not contact_number:
+            return {"error": "Branch name, address and contact number are required"}
+
+        cursor.execute(
+            """
+            UPDATE restaurant_restaurant_branch
+            SET branch_name = %s,
+                address = %s,
+                contact_number = %s,
+                latitude = %s,
+                longitude = %s
+            WHERE branch_id = %s;
+            """,
+            (branch_name, address, contact_number, latitude, longitude, branch_id),
+        )
+        connection.commit()
+
+        if cursor.rowcount == 0:
+            return {"error": "Branch not found"}
+
+        return {"message": "Branch updated"}
+
+    except Exception as error:
+        print(f"Error: {error}")
+        return {"error": str(error)}
+
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+
+def deleteBranch(data):
+    try:
+        connection = connections['default']
+        cursor = connection.cursor()
+
+        branch_id = data.get("branch_id")
+
+        if not branch_id:
+            return {"error": "branch_id is required"}
+
+        cursor.execute(
+            "DELETE FROM restaurant_restaurant_branch WHERE branch_id = %s;",
+            [branch_id],
+        )
+        connection.commit()
+
+        if cursor.rowcount == 0:
+            return {"error": "Branch not found"}
+
+        return {"message": "Branch deleted"}
 
     except Exception as error:
         print(f"Error: {error}")

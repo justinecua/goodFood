@@ -30,4 +30,3 @@ Multipart hardening
 - the image picker keeps the whole asset (uri/fileName/type) and handles
   cancel/error
 
-Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>

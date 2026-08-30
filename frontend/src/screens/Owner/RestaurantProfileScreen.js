@@ -24,6 +24,8 @@ import {
   ChevronRight,
   Camera,
   GlobeLock,
+  KeyRound,
+  Settings,
 } from 'lucide-react-native';
 import colors from '../../constants/colors';
 
@@ -33,7 +35,6 @@ const DinerProfileScreen = ({ navigation }) => {
 
   const photoUrl = mediaUrl(user?.account_profile_photo);
   const profilePicture = photoUrl ? { uri: photoUrl } : pfp;
-
 
   const handleLogout = async () => {
     try {
@@ -74,10 +75,12 @@ const DinerProfileScreen = ({ navigation }) => {
         <View style={styles.section}>
           <View style={styles.profileBanner}>
             <View style={styles.leftprofileBanner}>
-             <Image
-              style={styles.profileImage}
-              source={profilePicture}
-            />
+              <TouchableOpacity
+                onPress={() => navigation.navigate('ChangeProfilePicture')}
+                activeOpacity={0.8}
+              >
+                <Image style={styles.profileImage} source={profilePicture} />
+              </TouchableOpacity>
             </View>
             <View style={styles.rightprofileBanner}>
               <Text style={styles.username}>{user?.username}</Text>
@@ -90,7 +93,10 @@ const DinerProfileScreen = ({ navigation }) => {
           <Text style={styles.bottomSectionTitle}>General</Text>
           <ScrollView contentContainerStyle={{ paddingBottom: 90 }}>
             <View style={styles.bottomSection}>
-              <TouchableOpacity style={styles.button}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => navigation.navigate('ChangeProfilePicture')}
+              >
                 <View style={styles.buttonContent}>
                   <View style={styles.iconButton}>
                     <Camera size={20} color={colors.food_bg} />
@@ -100,7 +106,12 @@ const DinerProfileScreen = ({ navigation }) => {
                 <ChevronRight size={20} color="#999" />
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.button}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() =>
+                  navigation.navigate('RestaurantProfileInformationScreen')
+                }
+              >
                 <View style={styles.buttonContent}>
                   <View style={styles.iconButton}>
                     <User size={20} color={colors.food_bg} />
@@ -112,7 +123,23 @@ const DinerProfileScreen = ({ navigation }) => {
                 <ChevronRight size={20} color="#999" />
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.button}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => navigation.navigate('ChangePassword')}
+              >
+                <View style={styles.buttonContent}>
+                  <View style={styles.iconButton}>
+                    <KeyRound size={20} color={colors.food_bg} />
+                  </View>
+                  <Text style={styles.buttonText}>Change Password</Text>
+                </View>
+                <ChevronRight size={20} color="#999" />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => navigation.navigate('MyRestaurant')}
+              >
                 <View style={styles.buttonContent}>
                   <View style={styles.iconButton}>
                     <Heart size={20} color={colors.food_bg} />
@@ -122,7 +149,10 @@ const DinerProfileScreen = ({ navigation }) => {
                 <ChevronRight size={20} color="#999" />
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.button}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => navigation.navigate('Subscription')}
+              >
                 <View style={styles.buttonContent}>
                   <View style={styles.iconButton}>
                     <CircleDollarSign size={20} color={colors.food_bg} />
@@ -132,7 +162,10 @@ const DinerProfileScreen = ({ navigation }) => {
                 <ChevronRight size={20} color="#999" />
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.button}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => navigation.navigate('PrivacyPolicy')}
+              >
                 <View style={styles.buttonContent}>
                   <View style={styles.iconButton}>
                     <GlobeLock size={20} color={colors.food_bg} />
@@ -142,7 +175,23 @@ const DinerProfileScreen = ({ navigation }) => {
                 <ChevronRight size={20} color="#999" />
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.button}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => navigation.navigate('RestaurantSettings')}
+              >
+                <View style={styles.buttonContent}>
+                  <View style={styles.iconButton}>
+                    <Settings size={20} color={colors.food_bg} />
+                  </View>
+                  <Text style={styles.buttonText}>Settings</Text>
+                </View>
+                <ChevronRight size={20} color="#999" />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => navigation.navigate('About')}
+              >
                 <View style={styles.buttonContent}>
                   <View style={styles.iconButton}>
                     <Info size={20} color={colors.food_bg} />

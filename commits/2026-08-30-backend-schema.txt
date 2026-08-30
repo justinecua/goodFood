@@ -35,4 +35,3 @@ updated_at, create the three new tables:
 A fresh database just needs migrate. manage.py check is clean and a
 fresh-DB migrate applies the whole graph.
 
-Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>

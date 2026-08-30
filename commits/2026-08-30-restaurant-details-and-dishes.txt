@@ -40,4 +40,3 @@ endpoints and saving hours/categories/branches will error.
 Checked: raw-SQL create + edit paths on a throwaway DB, manage.py check,
 fresh-DB migrate, ESLint + Prettier on the changed frontend files.
 
-Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>

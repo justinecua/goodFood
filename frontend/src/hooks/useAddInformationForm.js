@@ -20,6 +20,8 @@ export const useAddInformationForm = navigation => {
     lastname: '',
     gender: '',
     birthdate: '',
+    email: '',
+    mobile: '',
   });
 
   const [open, setOpen] = useState(false);
@@ -53,6 +55,8 @@ export const useAddInformationForm = navigation => {
         birthdate: u.birthdate
           ? new Date(u.birthdate).toLocaleDateString()
           : '',
+        email: u.email_address || '',
+        mobile: u.mobile_number || '',
       }));
       if (u.gender) setGender(u.gender);
       if (u.birthdate) setSelectedDate(new Date(u.birthdate));
@@ -87,7 +91,10 @@ export const useAddInformationForm = navigation => {
     const accountId = stored ? JSON.parse(stored).account_id : null;
 
     if (!accountId) {
-      Alert.alert('Update Failed', 'You are not signed in. Please log in again.');
+      Alert.alert(
+        'Update Failed',
+        'You are not signed in. Please log in again.',
+      );
       return;
     }
 
@@ -97,6 +104,8 @@ export const useAddInformationForm = navigation => {
     formData.append('lastname', payload.lastname.trim());
     formData.append('gender', payload.gender);
     formData.append('birthdate', toISODate(selectedDate));
+    formData.append('email_address', (payload.email || '').trim());
+    formData.append('mobile_number', (payload.mobile || '').trim());
 
     // Only upload a freshly picked local file — not the existing remote photo.
     if (isLocalFileUri(profileImage?.uri)) {
@@ -126,10 +135,10 @@ export const useAddInformationForm = navigation => {
         );
       }
 
-      Alert.alert('Success', 'Account information added successfully.', [
+      Alert.alert('Success', 'Profile information saved.', [
         {
           text: 'OK',
-          onPress: () => navigation.navigate('RestaurantHome'),
+          onPress: () => navigation.goBack(),
         },
       ]);
     } catch (error) {

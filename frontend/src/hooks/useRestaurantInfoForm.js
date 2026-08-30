@@ -34,25 +34,44 @@ export const DAYS = [
 
 const emptyForm = () => Object.fromEntries(FIELDS.map(key => [key, '']));
 
-// One editable row per day, all closed by default until the owner fills it in.
+// One editable row per day. Times are held in 12-hour form (e.g. "9:00")
+// with a separate AM/PM flag; they're converted to 24-hour "HH:MM" on submit.
 const emptyHours = () =>
   DAYS.map(day => ({
     day_of_week: day,
     opening_time: '',
+    opening_period: 'AM',
     closing_time: '',
+    closing_period: 'PM',
     is_closed: false,
   }));
 
-const emptyBranch = () => ({
-  branch_name: '',
-  address: '',
-  contact_number: '',
-  latitude: '',
-  longitude: '',
-});
+// "13:30:00" (from the API) -> { time: "1:30", period: "PM" }.
+const from24h = value => {
+  const raw = String(value || '').trim();
+  if (!raw) return { time: '', period: 'AM' };
+  const [hStr, mStr = '00'] = raw.split(':');
+  let hour = parseInt(hStr, 10);
+  if (Number.isNaN(hour)) return { time: '', period: 'AM' };
+  const period = hour >= 12 ? 'PM' : 'AM';
+  hour %= 12;
+  if (hour === 0) hour = 12;
+  return { time: `${hour}:${mStr.slice(0, 2).padStart(2, '0')}`, period };
+};
 
-// "09:00:00" -> "09:00"; null -> "".
-const toShortTime = value => (value ? String(value).slice(0, 5) : '');
+// { "9:00", "AM" } -> "09:00" for the backend TimeField. "" if unparseable.
+const to24h = (time, period) => {
+  const raw = String(time || '').trim();
+  if (!raw) return '';
+  const [hStr, mStr = '0'] = raw.split(':');
+  let hour = parseInt(hStr, 10);
+  let min = parseInt(mStr, 10);
+  if (Number.isNaN(hour)) return '';
+  if (Number.isNaN(min)) min = 0;
+  hour %= 12;
+  if (period === 'PM') hour += 12;
+  return `${String(hour).padStart(2, '0')}:${String(min).padStart(2, '0')}`;
+};
 
 // A picked-from-gallery image has a local uri; a prefilled one is an http URL.
 const isNewUpload = image => !!image?.uri && !/^https?:/i.test(image.uri);
@@ -63,7 +82,6 @@ export const useRestaurantInfoForm = navigation => {
   const [coverImage, setCoverImage] = useState(null);
   const [operatingHours, setOperatingHours] = useState(emptyHours);
   const [categories, setCategories] = useState([]);
-  const [branches, setBranches] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (key, value) => {
@@ -92,18 +110,6 @@ export const useRestaurantInfoForm = navigation => {
     setCategories(prev => prev.filter(c => c !== name));
   };
 
-  const addBranch = () => setBranches(prev => [...prev, emptyBranch()]);
-
-  const removeBranch = index => {
-    setBranches(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const setBranch = (index, key, value) => {
-    setBranches(prev =>
-      prev.map((row, i) => (i === index ? { ...row, [key]: value } : row)),
-    );
-  };
-
   // If the account already has a restaurant, load it so this screen edits it.
   useEffect(() => {
     getRestaurantInfo()
@@ -129,32 +135,24 @@ export const useRestaurantInfoForm = navigation => {
               const match = data.operating_hours.find(
                 h => h.day_of_week === row.day_of_week,
               );
-              return match
-                ? {
-                    day_of_week: row.day_of_week,
-                    opening_time: toShortTime(match.opening_time),
-                    closing_time: toShortTime(match.closing_time),
-                    is_closed: !!match.is_closed,
-                  }
-                : row;
+              if (!match) return row;
+
+              const open = from24h(match.opening_time);
+              const close = from24h(match.closing_time);
+              return {
+                day_of_week: row.day_of_week,
+                opening_time: open.time,
+                opening_period: open.time ? open.period : 'AM',
+                closing_time: close.time,
+                closing_period: close.time ? close.period : 'PM',
+                is_closed: !!match.is_closed,
+              };
             }),
           );
         }
 
         if (Array.isArray(data.categories)) {
           setCategories(data.categories.map(c => c.category_name));
-        }
-
-        if (Array.isArray(data.branches)) {
-          setBranches(
-            data.branches.map(b => ({
-              branch_name: b.branch_name ?? '',
-              address: b.address ?? '',
-              contact_number: b.contact_number ?? '',
-              latitude: b.latitude ?? '',
-              longitude: b.longitude ?? '',
-            })),
-          );
         }
       })
       .catch(err => console.log('getRestaurantInfo failed:', err.message));
@@ -183,18 +181,6 @@ export const useRestaurantInfoForm = navigation => {
       );
       return false;
     }
-    const badBranch = branches.find(
-      b =>
-        (b.branch_name.trim() || b.address.trim() || b.contact_number.trim()) &&
-        !(b.branch_name.trim() && b.address.trim() && b.contact_number.trim()),
-    );
-    if (badBranch) {
-      Alert.alert(
-        'Validation Error',
-        'Each branch needs a name, address and contact number.',
-      );
-      return false;
-    }
     return true;
   };
 
@@ -210,17 +196,23 @@ export const useRestaurantInfoForm = navigation => {
       return;
     }
 
+    // Send the hours in 24-hour form, which is what the backend TimeField wants.
+    const hoursPayload = operatingHours.map(row => ({
+      day_of_week: row.day_of_week,
+      is_closed: row.is_closed,
+      opening_time: row.is_closed
+        ? ''
+        : to24h(row.opening_time, row.opening_period),
+      closing_time: row.is_closed
+        ? ''
+        : to24h(row.closing_time, row.closing_period),
+    }));
+
     const body = new FormData();
     body.append('account_id', String(accountId));
     FIELDS.forEach(key => body.append(key, form[key].trim()));
-    body.append('operating_hours', JSON.stringify(operatingHours));
+    body.append('operating_hours', JSON.stringify(hoursPayload));
     body.append('categories', JSON.stringify(categories));
-    body.append(
-      'branches',
-      JSON.stringify(
-        branches.filter(b => b.branch_name.trim() && b.address.trim()),
-      ),
-    );
     appendImage(body, 'restaurant_logo_img', logoImage, 'logo.jpg');
     appendImage(body, 'restaurant_cover_img', coverImage, 'cover.jpg');
 
@@ -253,10 +245,6 @@ export const useRestaurantInfoForm = navigation => {
     categories,
     addCategory,
     removeCategory,
-    branches,
-    addBranch,
-    removeBranch,
-    setBranch,
     isLoading,
     handleSubmit,
   };

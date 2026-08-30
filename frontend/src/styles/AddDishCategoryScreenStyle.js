@@ -58,13 +58,16 @@ const styles = StyleSheet.create({
     paddingBottom: 14,
   },
 
+  bottomContainer: {
+    gap: 10,
+    marginTop: 18,
+  },
   submitButton: {
     backgroundColor: colors.button,
     height: 52,
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 16,
   },
   submitButtonText: {
     color: colors.button_text,
@@ -72,41 +75,36 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
   },
+  cancelButton: {
+    backgroundColor: 'transparent',
+    borderWidth: 1.5,
+    borderColor: colors.button,
+    height: 52,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    color: colors.button,
+    fontFamily: 'Ezra-SemiBold',
+    fontSize: 15,
+  },
   buttonDisabled: {
     opacity: 0.7,
   },
 
-  existingWrap: {
-    marginTop: 26,
-    gap: 10,
-  },
-  existingTitle: {
-    fontFamily: 'Ezra-SemiBold',
-    fontWeight: '600',
-    fontSize: 14,
-    color: colors.maintext,
-  },
-  existingRow: {
+  deleteLink: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 10,
-    backgroundColor: colors.container_bg,
-    borderRadius: 14,
-    padding: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    height: 44,
+    marginTop: 6,
   },
-  existingTextWrap: {
-    flex: 1,
-    gap: 2,
-  },
-  existingName: {
+  deleteLinkText: {
+    color: '#c0392b',
     fontFamily: 'Ezra-SemiBold',
     fontSize: 13,
-    color: colors.maintext,
-  },
-  existingDesc: {
-    fontFamily: 'Ezra-Regular',
-    fontSize: 11,
-    color: colors.subtext,
   },
 
   bottomNavigationBar: {
