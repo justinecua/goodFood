@@ -1,0 +1,26 @@
+add the restaurant information screen with its own backend app
+
+Backend - new restaurant app
+- restaurant/queries.py: getRestaurantInfo + addRestaurantInfo, raw SQL in
+  the same flat style as account/queries.py (inline SQL, no helpers,
+  try/except IntegrityError/except/finally, explicit commit)
+- addRestaurantInfo is create-or-update: it upserts the location_location
+  row, then inserts or updates restaurant_restaurant. COALESCE keeps the
+  current logo/cover when no new file is sent.
+- restaurant/views.py: GetRestaurantInfo + AddRestaurantInfo (AllowAny)
+- restaurant/urls.py mounted at /api/ from goodFoodProj/urls.py
+- these two functions were built inside account/ first, then moved out;
+  account/ is back to how it was (checkInfoIfComplete stays there)
+
+Frontend
+- RestaurantInformationScreen.js rewritten - it was a broken copy of the
+  personal-info screen. Now: small TextField/LogoField/CoverField
+  components and a flat list of fields in a ScrollView.
+- useRestaurantInfoForm.js: one FIELDS array drives the form, the prefill
+  (edit mode), validation and the multipart body. Only a newly picked
+  local image is uploaded; an unchanged remote one is left alone.
+- home.js: getRestaurantInfo + addRestaurantInfo, plus a shared
+  postMultipart() helper that addAdditionalInfo() now uses too
+- AppNavigator registers the screen; the RestaurantHome card points at the
+  correct route name
+

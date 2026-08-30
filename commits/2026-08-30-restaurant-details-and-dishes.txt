@@ -1,0 +1,42 @@
+finish restaurant info (hours/categories/branches) and add dishes
+
+The restaurant info form only covered the Restaurant and Location tables.
+This wires up the rest of the schema the owner can fill in, and adds the
+first dish screens.
+
+Restaurant info - operating hours, cuisine categories, branches
+- restaurant/queries.py: getRestaurantInfo now returns operating_hours,
+  categories and branches; addRestaurantInfo accepts them as JSON strings
+  in the multipart body and syncs each with delete-then-reinsert. A section
+  is only touched when its key is in the request, so old callers are
+  unaffected. Missing categories are created on the fly
+  (INSERT ... ON CONFLICT (category_name) DO NOTHING).
+- Operating_Hours.opening_time / closing_time are now nullable so a
+  "closed" day stores no time. Migration 0001_initial updated to match and
+  reconcile_existing_db.sql gained the matching DROP NOT NULL.
+- useRestaurantInfoForm.js / RestaurantInformationScreen.js: a 7-day hours
+  table (HH:MM inputs + a Closed toggle), a category chip input, and a
+  repeatable branch card.
+
+Dishes
+- new dish app data layer: getDishCategories, addDishCategory, getDishes,
+  addDish in dish/queries.py; dish/views.py + dish/urls.py mounted at /api/.
+  Dish_Category has no restaurant FK (per the model) so categories are
+  shared. addDish resolves the restaurant from account_id and saves one
+  photo to dish_dish_images.
+- AddDishScreen.js + useAddDishForm.js: every Dish field, an
+  element-dropdown category picker, one photo
+- AddDishCategoryScreen.js: name + description, lists existing categories
+- api/services/dish.js
+- MyRestaurantScreen: shows the new sections and a Menu card with
+  "Add Dish" / "Dish Category" buttons and the dish list; loads
+  getRestaurantInfo + getDishes together on focus
+- AppNavigator registers AddDish and AddDishCategory
+
+The dish_* tables and the hours DROP NOT NULL come from reconcile_db +
+migrate, which haven't been run on the shared DB yet - until then the dish
+endpoints and saving hours/categories/branches will error.
+
+Checked: raw-SQL create + edit paths on a throwaway DB, manage.py check,
+fresh-DB migrate, ESLint + Prettier on the changed frontend files.
+

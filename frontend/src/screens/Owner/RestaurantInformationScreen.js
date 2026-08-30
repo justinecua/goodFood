@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   View,
   Text,
@@ -9,7 +10,7 @@ import {
 } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Camera } from 'lucide-react-native';
+import { Camera, X, Plus } from 'lucide-react-native';
 import RestaurantBottomNavbar from '../../components/shared/RestaurantBottomNavbar';
 import styles from '../../styles/RestaurantProfileInformationScreenStyle';
 import colors from '../../constants/colors';
@@ -82,6 +83,88 @@ const CoverField = ({ image, onPress }) => (
   </View>
 );
 
+// Two-segment AM / PM switch.
+const PeriodToggle = ({ value, onChange }) => (
+  <View style={styles.periodToggle}>
+    {['AM', 'PM'].map(option => (
+      <TouchableOpacity
+        key={option}
+        style={[
+          styles.periodOption,
+          value === option && styles.periodOptionActive,
+        ]}
+        onPress={() => onChange(option)}
+      >
+        <Text
+          style={[
+            styles.periodOptionText,
+            value === option && styles.periodOptionTextActive,
+          ]}
+        >
+          {option}
+        </Text>
+      </TouchableOpacity>
+    ))}
+  </View>
+);
+
+// One time field: a "9:00" input plus its AM/PM toggle.
+const TimeField = ({ label, time, period, onTime, onPeriod }) => (
+  <View style={styles.hoursTimeRow}>
+    <Text style={styles.hoursTimeLabel}>{label}</Text>
+    <TextInput
+      value={time}
+      onChangeText={onTime}
+      placeholder="9:00"
+      placeholderTextColor={colors.subtextInput}
+      keyboardType="numbers-and-punctuation"
+      style={styles.hoursInput}
+    />
+    <PeriodToggle value={period} onChange={onPeriod} />
+  </View>
+);
+
+// One day: opening + closing time (with AM/PM), or a "Closed" toggle.
+const HoursRow = ({ row, onChange }) => (
+  <View style={styles.hoursRow}>
+    <View style={styles.hoursHeader}>
+      <Text style={styles.hoursDay}>{row.day_of_week}</Text>
+      <TouchableOpacity
+        style={[styles.closedPill, row.is_closed && styles.closedPillActive]}
+        onPress={() => onChange('is_closed', !row.is_closed)}
+      >
+        <Text
+          style={[
+            styles.closedPillText,
+            row.is_closed && styles.closedPillTextActive,
+          ]}
+        >
+          Closed
+        </Text>
+      </TouchableOpacity>
+    </View>
+
+    {!row.is_closed && (
+      <>
+        <TimeField
+          label="Opens"
+          time={row.opening_time}
+          period={row.opening_period}
+          onTime={text => onChange('opening_time', text)}
+          onPeriod={value => onChange('opening_period', value)}
+        />
+        <TimeField
+          label="Closes"
+          time={row.closing_time}
+          period={row.closing_period}
+          onTime={text => onChange('closing_time', text)}
+          onPeriod={value => onChange('closing_period', value)}
+        />
+      </>
+    )}
+  </View>
+);
+
 const RestaurantInformationScreen = ({ navigation }) => {
   const {
     form,
@@ -90,9 +173,21 @@ const RestaurantInformationScreen = ({ navigation }) => {
     setLogoImage,
     coverImage,
     setCoverImage,
+    operatingHours,
+    setHour,
+    categories,
+    addCategory,
+    removeCategory,
     isLoading,
     handleSubmit,
   } = useRestaurantInfoForm(navigation);
+
+  const [categoryText, setCategoryText] = useState('');
+
+  const submitCategory = () => {
+    addCategory(categoryText);
+    setCategoryText('');
+  };
 
   return (
     <SafeAreaView style={styles.screen}>
@@ -174,6 +269,55 @@ const RestaurantInformationScreen = ({ navigation }) => {
                 value={form.longitude}
                 onChangeText={text => handleChange('longitude', text)}
               />
+
+              {/* -------- Operating hours -------- */}
+              <Text style={styles.sectionTitle}>Operating Hours</Text>
+              <Text style={styles.sectionHint}>
+                Enter a time like 9:00 and pick AM or PM. Leave a day blank or
+                mark it closed.
+              </Text>
+              {operatingHours.map(row => (
+                <HoursRow
+                  key={row.day_of_week}
+                  row={row}
+                  onChange={(key, value) =>
+                    setHour(row.day_of_week, key, value)
+                  }
+                />
+              ))}
+
+              {/* -------- Cuisine categories -------- */}
+              <Text style={styles.sectionTitle}>Cuisine Categories</Text>
+              <View style={styles.categoryInputRow}>
+                <TextInput
+                  value={categoryText}
+                  onChangeText={setCategoryText}
+                  onSubmitEditing={submitCategory}
+                  placeholder="e.g. Filipino, Cafe, Seafood"
+                  placeholderTextColor={colors.subtextInput}
+                  style={[styles.addDishInput, styles.categoryInput]}
+                />
+                <TouchableOpacity
+                  style={styles.categoryAddButton}
+                  onPress={submitCategory}
+                >
+                  <Plus size={18} color="#fff" />
+                </TouchableOpacity>
+              </View>
+              {categories.length > 0 && (
+                <View style={styles.chipWrap}>
+                  {categories.map(name => (
+                    <TouchableOpacity
+                      key={name}
+                      style={styles.chip}
+                      onPress={() => removeCategory(name)}
+                    >
+                      <Text style={styles.chipText}>{name}</Text>
+                      <X size={13} color={colors.button} />
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
 
               <View style={styles.bottomContainer}>
                 <TouchableOpacity

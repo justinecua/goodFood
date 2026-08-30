@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   View,
   Text,
@@ -11,6 +10,7 @@ import {
 import { launchImageLibrary } from 'react-native-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import RestaurantBottomNavbar from '../../components/shared/RestaurantBottomNavbar';
+import ScreenHeader from '../../components/shared/ScreenHeader';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import styles from '../../styles/RestaurantProfileInformationScreenStyle';
 import colors from '../../constants/colors';
@@ -28,8 +28,6 @@ const RestaurantProfileInformationScreen = ({ navigation }) => {
     isLoading,
     profileImage,
     setProfileImage,
-    birthdate,
-    setBirthdate,
     showDatePicker,
     setShowDatePicker,
     selectedDate,
@@ -114,10 +112,11 @@ const RestaurantProfileInformationScreen = ({ navigation }) => {
       )}
 
       <View style={styles.container}>
-        <View style={styles.headerContainer}>
-          <Text style={styles.heading}>Add Information</Text>
-          <Text style={styles.subheading}>Tell us a bit about yourself</Text>
-        </View>
+        <ScreenHeader
+          title="Profile Information"
+          subtitle="Your personal details"
+          onBack={() => navigation.goBack()}
+        />
 
         <View style={styles.section}>
           <View style={styles.midContainer}>
@@ -194,15 +193,43 @@ const RestaurantProfileInformationScreen = ({ navigation }) => {
                 />
               )}
 
+              <Text style={styles.inputLabel}>Email</Text>
+              <TextInput
+                value={form.email}
+                onChangeText={text => handleChange('email', text)}
+                placeholder="you@example.com"
+                placeholderTextColor={colors.subtextInput}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                style={styles.addDishInput}
+              />
+
+              <Text style={styles.inputLabel}>Mobile Number</Text>
+              <TextInput
+                value={form.mobile}
+                onChangeText={text => handleChange('mobile', text)}
+                placeholder="09xxxxxxxxx"
+                placeholderTextColor={colors.subtextInput}
+                keyboardType="phone-pad"
+                style={styles.addDishInput}
+              />
+
               <View style={styles.bottomContainer}>
-                <TouchableOpacity style={styles.cancelDishButton}>
+                <TouchableOpacity
+                  style={styles.cancelDishButton}
+                  onPress={() => navigation.goBack()}
+                >
                   <Text style={styles.cancelDishButtonText}>Cancel</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={styles.addDishButton}
+                  style={[
+                    styles.addDishButton,
+                    isLoading && styles.buttonDisabled,
+                  ]}
                   onPress={handleAddInformation}
+                  disabled={isLoading}
                 >
-                  <Text style={styles.addDishButtonText}>Submit</Text>
+                  <Text style={styles.addDishButtonText}>Save</Text>
                 </TouchableOpacity>
               </View>
             </View>

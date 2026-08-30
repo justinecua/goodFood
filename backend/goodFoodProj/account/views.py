@@ -10,6 +10,8 @@ from .queries import (
     logout,
     checkInfoIfComplete,
     addAdditionalInfo,
+    updateProfilePhoto,
+    changePassword,
 )
 
 def print_test(request):
@@ -57,4 +59,19 @@ class AddAdditionalInfo(APIView):
 
     def post(self, request):
         result = addAdditionalInfo(request.data)
+        return Response(result)
+
+class UpdateProfilePhoto(APIView):
+    permission_classes = [permissions.AllowAny]
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request):
+        result = updateProfilePhoto(request.data)
+        return Response(result)
+
+class ChangePassword(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        result = changePassword(request.data)
         return Response(result)

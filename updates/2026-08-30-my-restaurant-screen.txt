@@ -1,0 +1,55 @@
+2026-08-30 — My Restaurant screen (2nd change of the day)
+
+A "My Restaurant" screen for the owner that shows every detail of their
+restaurant, or an empty state when nothing's been added yet. It's reached
+from the Menu tab of the bottom navbar, which used to open the unfinished
+Add Dish screen.
+
+Files
+  new   frontend/src/screens/Owner/MyRestaurantScreen.js
+        frontend/src/styles/MyRestaurantScreenStyle.js
+  edit  frontend/src/navigation/AppNavigator.js
+        frontend/src/components/shared/RestaurantBottomNavbar.js
+
+
+The screen
+
+Data comes from getRestaurantInfo() (POST /api/get-restaurant-info/),
+reloaded on every focus with useFocusEffect so edits made on
+RestaurantInformationScreen show immediately.
+
+Three states:
+- loading            -> spinner
+- no restaurant yet  -> store icon, "No information yet", and an
+                        "Add Restaurant Information" button
+- restaurant present -> cover photo (or a placeholder), the logo
+                        overlapping it, name + description, a Contact card
+                        (address, contact number, email), a Location card
+                        (city, province, region, country, lat, long), an
+                        "Edit Information" button, and an "Added on <date>"
+                        footnote from created_at
+
+Blank fields render a muted "Not provided" so nothing is silently hidden.
+A small DetailRow component renders each label/value pair; formatDate()
+turns created_at into a readable date. The stylesheet reuses the existing
+colour tokens and the Ezra font.
+
+
+Navigation
+
+AppNavigator: removed the AddDish import and its <Stack.Screen> (the
+RestaurantAddDishScreen was an unfinished placeholder), added
+MyRestaurantScreen as route "MyRestaurant".
+
+RestaurantBottomNavbar: the Menu tab now navigates to "MyRestaurant" and
+highlights on that route.
+
+
+Notes
+- RestaurantAddDishScreen.js is now unreferenced. Left in place for now;
+  safe to delete. (An add-dish flow was built on 2026-08-30 - see the
+  restaurant-details-and-dishes log - but on new screens.)
+- pre-existing duplicate-key lint warnings in RestaurantHomeScreenStyles.js
+  are unrelated and untouched
+- if frontend/.env points at a stale IP the fetch fails and the screen
+  shows the empty state

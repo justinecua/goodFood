@@ -15,9 +15,21 @@ import homenavbar1 from '../../assets/navBarIcons/home_1.png';
 import notifnavbar1 from '../../assets/navBarIcons/notif_1.png';
 import usercircle1 from '../../assets/navBarIcons/profile_1.png';
 
+// Screens that belong under the "Menu" tab, so it stays highlighted on them.
+const MENU_ROUTES = [
+  'MyRestaurant',
+  'Menu',
+  'DishCategories',
+  'Branches',
+  'AddDish',
+  'AddDishCategory',
+  'RestaurantInformationScreen',
+];
+
 const RestaurantBottomNavbar = ({ navigation }) => {
   const route = useRoute();
   const current = route.name;
+  const menuActive = MENU_ROUTES.includes(current);
 
   return (
     <View style={styles.bottomNavigationBar}>
@@ -60,19 +72,16 @@ const RestaurantBottomNavbar = ({ navigation }) => {
 
       <TouchableOpacity
         style={styles.navItem}
-        onPress={() => navigation.navigate('AddDish')}
+        onPress={() => navigation.navigate('MyRestaurant')}
       >
         <Image
           style={styles.dishIcon}
-          source={current === 'AddDish' ? dishnavbar1 : dishnavbar}
+          source={menuActive ? dishnavbar1 : dishnavbar}
         />
         <Text
-          style={[
-            styles.navIconText,
-            current === 'AddDish' && { color: colors.button },
-          ]}
+          style={[styles.navIconText, menuActive && { color: colors.button }]}
         >
-          Dish
+          Menu
         </Text>
       </TouchableOpacity>
 

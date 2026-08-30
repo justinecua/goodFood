@@ -20,10 +20,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  userProfile: {
-    height: 64,
-    width: 64,
-  },
   textStyle: {
     fontSize: 20,
     fontFamily: 'Ezra-SemiBold',
@@ -102,9 +98,6 @@ const styles = StyleSheet.create({
     height: 28,
     width: 28,
   },
-  navBotton: {
-    alignItems: 'center',
-  },
   searchBarContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -172,6 +165,14 @@ const styles = StyleSheet.create({
     color: colors.subtext,
     fontSize: 11,
     marginBottom: 5,
+  },
+  emptySection: {
+    backgroundColor: colors.background2,
+    borderRadius: 14,
+    marginTop: 12,
+  },
+  emptySectionLast: {
+    marginBottom: 70,
   },
   restaurantContainer: {
     flexDirection: 'column',

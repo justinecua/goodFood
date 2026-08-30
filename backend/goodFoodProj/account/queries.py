@@ -247,6 +247,8 @@ def addAdditionalInfo(data):
         connection = connections['default']
         cursor = connection.cursor()
 
+        # email_address / mobile_number are only overwritten when a non-empty
+        # value is sent, so the onboarding flow (which omits them) is unaffected.
         query = """
             UPDATE account_account
             SET
@@ -254,6 +256,8 @@ def addAdditionalInfo(data):
                 last_name = %s,
                 birthdate = %s,
                 gender = %s,
+                email_address = COALESCE(NULLIF(%s, ''), email_address),
+                mobile_number = COALESCE(NULLIF(%s, ''), mobile_number),
                 account_profile_photo = COALESCE(%s, account_profile_photo)
             WHERE account_id = %s
             RETURNING account_id, username, first_name, last_name, gender,
@@ -266,6 +270,8 @@ def addAdditionalInfo(data):
             data.get('lastname'),
             data.get('birthdate'),
             data.get('gender'),
+            data.get('email_address'),
+            data.get('mobile_number'),
             profile_photo_path,
             account_id,
         )
@@ -284,6 +290,121 @@ def addAdditionalInfo(data):
             "message": "Account updated with additional info",
             "user": updated_user,
         }
+
+    except IntegrityError as e:
+        error_msg = str(e)
+
+        if "mobile_number" in error_msg:
+            return {"error": "That mobile number is already in use"}
+
+        if "email_address" in error_msg:
+            return {"error": "That email is already in use"}
+
+        return {"error": "Duplicate data detected"}
+
+    except Exception as error:
+        print(f"Error: {error}")
+        return {"error": str(error)}
+
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+def changePassword(data):
+    connection = None
+    cursor = None
+    try:
+        account_id = data.get('account_id')
+        current_password = data.get('current_password')
+        new_password = data.get('new_password')
+
+        if not account_id:
+            return {"error": "account_id is required"}
+
+        if not current_password or not new_password:
+            return {"error": "Current and new password are required"}
+
+        if len(new_password) < 6:
+            return {"error": "New password must be at least 6 characters"}
+
+        connection = connections['default']
+        cursor = connection.cursor()
+
+        cursor.execute(
+            "SELECT password FROM account_account WHERE account_id = %s;",
+            [account_id],
+        )
+        row = cursor.fetchone()
+
+        if not row:
+            return {"error": "Account not found"}
+
+        if not check_password(current_password, row[0]):
+            return {"error": "Current password is incorrect"}
+
+        cursor.execute(
+            "UPDATE account_account SET password = %s WHERE account_id = %s;",
+            (make_password(new_password), account_id),
+        )
+        connection.commit()
+
+        return {"message": "Password changed"}
+
+    except Exception as error:
+        print(f"Error: {error}")
+        return {"error": str(error)}
+
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+def updateProfilePhoto(data):
+    connection = None
+    cursor = None
+    try:
+        account_id = data.get('account_id')
+        if not account_id:
+            return {"error": "account_id is required"}
+
+        # A raw file object cannot be a SQL parameter - save it through Django
+        # storage and keep only the path.
+        photo_path = None
+        uploaded = data.get('profile_image')
+        if uploaded is not None and hasattr(uploaded, 'read'):
+            photo_path = default_storage.save(
+                f"account_photos/{uploaded.name}", uploaded
+            )
+
+        if not photo_path:
+            return {"error": "No image was uploaded"}
+
+        connection = connections['default']
+        cursor = connection.cursor()
+
+        query = """
+            UPDATE account_account
+            SET account_profile_photo = %s
+            WHERE account_id = %s
+            RETURNING account_id, username, first_name, last_name, gender,
+                      birthdate, email_address, mobile_number,
+                      account_profile_photo;
+        """
+
+        cursor.execute(query, (photo_path, account_id))
+        row = cursor.fetchone()
+        connection.commit()
+
+        if not row:
+            return {"error": "Account not found"}
+
+        columns = [col[0] for col in cursor.description]
+        updated_user = dict(zip(columns, row))
+
+        return {"message": "Profile photo updated", "user": updated_user}
 
     except Exception as error:
         print(f"Error: {error}")

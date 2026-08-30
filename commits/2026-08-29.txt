@@ -1,0 +1,32 @@
+keep users signed in for a day; fix owner profile info + photo flow
+
+Session persistence
+- login() stores a loginAt timestamp next to the tokens/user
+- new getActiveSession() / clearSession() in api/services/auth.js, 24h TTL
+- SplashScreen restores a still-valid session and goes straight to the
+  role's home screen; only shows Login when there's no session or it expired
+- login resets the nav stack to home; logout goes through clearSession()
+
+Owner "Add Information" now actually saves
+- send account_id (the update was running WHERE account_id = NULL and
+  reporting success anyway)
+- gender was being sent as the dropdown's setValue callback, not a string
+- send birthdate as YYYY-MM-DD; navigate to the real RestaurantHome route
+- backend: save the uploaded photo with default_storage, COALESCE the
+  column so an existing photo survives, require account_id, return
+  "Account not found" on 0 rows, RETURNING the updated user row
+
+Profile photo not showing
+- add constants/config.js with mediaUrl() to turn a stored relative path
+  ("account_photos/19.jpg") into a full /media/ URL
+- profile screens render the avatar through mediaUrl() with a bundled
+  fallback and re-read the cached user on focus
+- the info screen prefills from the cached user (edit mode) and merges the
+  returned user back into AsyncStorage after a save
+
+Multipart hardening
+- addAdditionalInfo(): explicit multipart header, 20s timeout, and an error
+  message that separates "server errored" from "couldn't reach server"
+- the image picker keeps the whole asset (uri/fileName/type) and handles
+  cancel/error
+
