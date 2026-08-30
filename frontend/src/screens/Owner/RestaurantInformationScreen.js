@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   View,
   Text,
@@ -9,7 +10,7 @@ import {
 } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Camera } from 'lucide-react-native';
+import { Camera, X, Plus } from 'lucide-react-native';
 import RestaurantBottomNavbar from '../../components/shared/RestaurantBottomNavbar';
 import styles from '../../styles/RestaurantProfileInformationScreenStyle';
 import colors from '../../constants/colors';
@@ -82,6 +83,49 @@ const CoverField = ({ image, onPress }) => (
   </View>
 );
 
+// One day's opening / closing time, or a "Closed" toggle.
+const HoursRow = ({ row, onChange }) => (
+  <View style={styles.hoursRow}>
+    <Text style={styles.hoursDay}>{row.day_of_week}</Text>
+
+    {row.is_closed ? (
+      <Text style={styles.hoursClosedText}>Closed</Text>
+    ) : (
+      <View style={styles.hoursTimes}>
+        <TextInput
+          value={row.opening_time}
+          onChangeText={text => onChange('opening_time', text)}
+          placeholder="09:00"
+          placeholderTextColor={colors.subtextInput}
+          style={styles.hoursInput}
+        />
+        <Text style={styles.hoursDash}>–</Text>
+        <TextInput
+          value={row.closing_time}
+          onChangeText={text => onChange('closing_time', text)}
+          placeholder="22:00"
+          placeholderTextColor={colors.subtextInput}
+          style={styles.hoursInput}
+        />
+      </View>
+    )}
+
+    <TouchableOpacity
+      style={[styles.closedPill, row.is_closed && styles.closedPillActive]}
+      onPress={() => onChange('is_closed', !row.is_closed)}
+    >
+      <Text
+        style={[
+          styles.closedPillText,
+          row.is_closed && styles.closedPillTextActive,
+        ]}
+      >
+        Closed
+      </Text>
+    </TouchableOpacity>
+  </View>
+);
+
 const RestaurantInformationScreen = ({ navigation }) => {
   const {
     form,
@@ -90,9 +134,25 @@ const RestaurantInformationScreen = ({ navigation }) => {
     setLogoImage,
     coverImage,
     setCoverImage,
+    operatingHours,
+    setHour,
+    categories,
+    addCategory,
+    removeCategory,
+    branches,
+    addBranch,
+    removeBranch,
+    setBranch,
     isLoading,
     handleSubmit,
   } = useRestaurantInfoForm(navigation);
+
+  const [categoryText, setCategoryText] = useState('');
+
+  const submitCategory = () => {
+    addCategory(categoryText);
+    setCategoryText('');
+  };
 
   return (
     <SafeAreaView style={styles.screen}>
@@ -174,6 +234,117 @@ const RestaurantInformationScreen = ({ navigation }) => {
                 value={form.longitude}
                 onChangeText={text => handleChange('longitude', text)}
               />
+
+              {/* -------- Operating hours -------- */}
+              <Text style={styles.sectionTitle}>Operating Hours</Text>
+              <Text style={styles.sectionHint}>
+                Use 24-hour time (e.g. 09:00). Leave a day blank or mark it
+                closed.
+              </Text>
+              {operatingHours.map(row => (
+                <HoursRow
+                  key={row.day_of_week}
+                  row={row}
+                  onChange={(key, value) =>
+                    setHour(row.day_of_week, key, value)
+                  }
+                />
+              ))}
+
+              {/* -------- Cuisine categories -------- */}
+              <Text style={styles.sectionTitle}>Cuisine Categories</Text>
+              <View style={styles.categoryInputRow}>
+                <TextInput
+                  value={categoryText}
+                  onChangeText={setCategoryText}
+                  onSubmitEditing={submitCategory}
+                  placeholder="e.g. Filipino, Cafe, Seafood"
+                  placeholderTextColor={colors.subtextInput}
+                  style={[styles.addDishInput, styles.categoryInput]}
+                />
+                <TouchableOpacity
+                  style={styles.categoryAddButton}
+                  onPress={submitCategory}
+                >
+                  <Plus size={18} color="#fff" />
+                </TouchableOpacity>
+              </View>
+              {categories.length > 0 && (
+                <View style={styles.chipWrap}>
+                  {categories.map(name => (
+                    <TouchableOpacity
+                      key={name}
+                      style={styles.chip}
+                      onPress={() => removeCategory(name)}
+                    >
+                      <Text style={styles.chipText}>{name}</Text>
+                      <X size={13} color={colors.button} />
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
+
+              {/* -------- Branches -------- */}
+              <Text style={styles.sectionTitle}>Branches</Text>
+              {branches.map((branch, index) => (
+                <View key={index} style={styles.branchCard}>
+                  <View style={styles.branchCardHeader}>
+                    <Text style={styles.branchCardTitle}>
+                      Branch {index + 1}
+                    </Text>
+                    <TouchableOpacity onPress={() => removeBranch(index)}>
+                      <X size={16} color={colors.subtext} />
+                    </TouchableOpacity>
+                  </View>
+                  <TextInput
+                    value={branch.branch_name}
+                    onChangeText={text => setBranch(index, 'branch_name', text)}
+                    placeholder="Branch name"
+                    placeholderTextColor={colors.subtextInput}
+                    style={styles.addDishInput}
+                  />
+                  <TextInput
+                    value={branch.address}
+                    onChangeText={text => setBranch(index, 'address', text)}
+                    placeholder="Address"
+                    placeholderTextColor={colors.subtextInput}
+                    style={styles.addDishInput}
+                  />
+                  <TextInput
+                    value={branch.contact_number}
+                    onChangeText={text =>
+                      setBranch(index, 'contact_number', text)
+                    }
+                    placeholder="Contact number"
+                    placeholderTextColor={colors.subtextInput}
+                    keyboardType="phone-pad"
+                    style={styles.addDishInput}
+                  />
+                  <View style={styles.branchCoordRow}>
+                    <TextInput
+                      value={branch.latitude}
+                      onChangeText={text => setBranch(index, 'latitude', text)}
+                      placeholder="Latitude"
+                      placeholderTextColor={colors.subtextInput}
+                      style={[styles.addDishInput, styles.branchCoordInput]}
+                    />
+                    <TextInput
+                      value={branch.longitude}
+                      onChangeText={text => setBranch(index, 'longitude', text)}
+                      placeholder="Longitude"
+                      placeholderTextColor={colors.subtextInput}
+                      style={[styles.addDishInput, styles.branchCoordInput]}
+                    />
+                  </View>
+                </View>
+              ))}
+              <TouchableOpacity
+                style={styles.addBranchButton}
+                onPress={addBranch}
+              >
+                <Plus size={16} color={colors.button} />
+                <Text style={styles.addBranchButtonText}>Add branch</Text>
+              </TouchableOpacity>
 
               <View style={styles.bottomContainer}>
                 <TouchableOpacity

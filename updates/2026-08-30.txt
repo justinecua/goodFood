@@ -1,155 +1,114 @@
-goodFood — Development Log
-Date: 2026-08-30
+2026-08-30 — Add Restaurant Information
 
-================================================================
-OVERVIEW
-================================================================
-Adds the "Add Restaurant Information" feature end to end: logo +
-cover images, restaurant details, and a location (city / province /
-region / country / latitude / longitude). The backend code lives in
-its own `restaurant` app, written in the same plain raw-SQL style as
-`account/queries.py`.
+The owner can now add their restaurant: logo + cover images, the restaurant
+details, and a location (city / province / region / country / lat / long).
+The backend for this lives in its own restaurant app, written in the same
+plain raw-SQL style as account/queries.py.
 
-Files changed
-  NEW  backend/goodFoodProj/restaurant/queries.py
-       backend/goodFoodProj/restaurant/urls.py
-       frontend/src/hooks/useRestaurantInfoForm.js
-       frontend/src/screens/Owner/RestaurantInformationScreen.js
-
-  MOD  backend/goodFoodProj/restaurant/views.py     (was an empty stub)
-       backend/goodFoodProj/goodFoodProj/urls.py    (include restaurant.urls)
-       backend/goodFoodProj/account/*               (kept clean - see note)
-       frontend/src/api/services/home.js
-       frontend/src/navigation/AppNavigator.js      (register the screen)
-       frontend/src/screens/Owner/RestaurantHomeScreen.js  (fix nav target)
-       frontend/src/styles/RestaurantProfileInformationScreenStyle.js
-       frontend/src/styles/RestaurantHomeScreenStyles.js    (spacing)
+Files
+  new   backend/goodFoodProj/restaurant/queries.py
+        backend/goodFoodProj/restaurant/urls.py
+        frontend/src/hooks/useRestaurantInfoForm.js
+        frontend/src/screens/Owner/RestaurantInformationScreen.js
+  edit  backend/goodFoodProj/restaurant/views.py     (was an empty stub)
+        backend/goodFoodProj/goodFoodProj/urls.py    (include restaurant.urls)
+        frontend/src/api/services/home.js
+        frontend/src/navigation/AppNavigator.js
+        frontend/src/screens/Owner/RestaurantHomeScreen.js  (nav target)
+        frontend/src/styles/RestaurantProfileInformationScreenStyle.js
+        frontend/src/styles/RestaurantHomeScreenStyles.js    (spacing)
 
 
-================================================================
-1. BACKEND - new `restaurant` app endpoints
-================================================================
-Routes (mounted at /api/ via goodFoodProj/urls.py -> restaurant.urls):
+Backend
+
+Two routes, mounted at /api/ through goodFoodProj/urls.py -> restaurant.urls:
 
   POST /api/get-restaurant-info/   { account_id }
-       -> { "restaurant": {...} | null, "location": {...} | null }
+       -> { restaurant: {...} | null, location: {...} | null }
 
   POST /api/add-restaurant-info/   (multipart/form-data)
-       fields: account_id, restaurant_name, restaurant_description,
-               address, contact_number, email,
-               city, province, region, country, latitude, longitude,
-               restaurant_logo_img (file), restaurant_cover_img (file)
-       -> { "message": "Restaurant information saved" } | { "error": ... }
+       account_id, restaurant_name, restaurant_description, address,
+       contact_number, email, city, province, region, country, latitude,
+       longitude, restaurant_logo_img (file), restaurant_cover_img (file)
+       -> { message } | { error }
 
-backend/goodFoodProj/restaurant/queries.py
-  - getRestaurantInfo(data)
-      SELECT * the newest restaurant_restaurant row for the account, then
-      SELECT * its location_location row. Returns both as plain dicts.
-  - addRestaurantInfo(data)
-      * validates account_id + the four NOT NULL columns
-        (restaurant_name, address, contact_number, email)
-      * saves restaurant_logo_img / restaurant_cover_img through Django
-        storage, keeps only the path (a raw file can't go into SQL)
-      * looks up the account's existing restaurant:
-          - if found: UPDATE its location (or INSERT one if it had none),
-            then UPDATE the restaurant. COALESCE(%s, col) keeps the current
-            image when no new file was sent.
-          - if not found: INSERT the location, then INSERT the restaurant
-            with created_at = NOW().
-      * so the screen works as both "create" and "edit".
-      * duplicate restaurant email -> IntegrityError ->
-        "That email is already used by another restaurant".
+getRestaurantInfo() reads the newest restaurant_restaurant row for the
+account, then its location_location row, and returns both as plain dicts.
 
-  Written to match account/queries.py exactly: one self-contained function
-  each, `connection = connections['default']` + `cursor`, inline SQL strings,
-  `columns = [col[0] for col in cursor.description]` / `dict(zip(...))`,
-  try / except IntegrityError / except Exception / finally that closes the
-  cursor and connection, explicit connection.commit(). No helper functions,
-  no module-level column constants (an earlier factored version was reverted
-  for being harder to read).
+addRestaurantInfo() is create-or-update:
+- validates account_id and the four NOT NULL columns (restaurant_name,
+  address, contact_number, email)
+- saves the logo/cover through Django storage and keeps only the path
+- if the account already has a restaurant: update its location (or create
+  one if it had none), then update the restaurant. COALESCE(%s, col) keeps
+  the current image when no new file was sent.
+- otherwise: insert the location, then the restaurant with created_at = NOW()
+- a duplicate restaurant email hits the IntegrityError branch ->
+  "That email is already used by another restaurant"
 
-backend/goodFoodProj/restaurant/views.py
-  - GetRestaurantInfo  (AllowAny)                -> getRestaurantInfo
-  - AddRestaurantInfo  (AllowAny, MultiPart/Form) -> addRestaurantInfo
+Style: it matches account/queries.py deliberately - one self-contained
+function each, connection + cursor, inline SQL, dict(zip(...)) over
+cursor.description, try / except IntegrityError / except / finally that
+closes the cursor and connection, explicit commit(). An earlier version
+with helper functions and column constants was reverted for being harder
+to read.
 
-Note on the `account` app: the two functions / views / routes briefly lived
-in account while the feature was built, then moved here. account/queries.py,
-account/views.py and account/urls.py end up unchanged apart from trivia.
-checkInfoIfComplete stays in account - it reports BOTH personal and
-restaurant onboarding status.
+views.py: GetRestaurantInfo and AddRestaurantInfo, both AllowAny.
+
+These functions, views and routes briefly lived in the account app while
+the feature was built, then moved here. account/queries.py, views.py and
+urls.py are back to unchanged. checkInfoIfComplete stays in account - it
+reports both personal and restaurant onboarding.
 
 
-================================================================
-2. FRONTEND - the screen
-================================================================
-frontend/src/screens/Owner/RestaurantInformationScreen.js  (rewritten)
-  Was a broken copy of the personal-info screen (every input bound to
-  form.lastname, leftover gender dropdown + date picker). Now:
-  - three small module-scope components: TextField (explicit label / value /
-    onChangeText props), LogoField (circular + camera badge), CoverField
-    (wide banner), plus a chooseImage(onPicked) helper.
-  - the body is a flat, scannable list - one <TextField> per field.
-  - ScrollView (the form is long), Cancel -> goBack(), Submit shows a spinner
-    while saving.
+Frontend
 
-frontend/src/hooks/useRestaurantInfoForm.js  (new)
-  - a single FIELDS array drives the empty form, the prefill, the submit
-    body and the required-field check.
-  - on mount, calls getRestaurantInfo(); if a restaurant exists it fills the
-    form + shows the saved logo / cover (edit mode).
-  - validates the four required fields + email format.
-  - builds multipart FormData with account_id + all text fields; only a
-    freshly picked LOCAL image is uploaded (an unchanged remote one is not
-    re-sent).
-  - on success: Alert -> navigate to RestaurantHome.
-  - small helpers (labelFor, readAccountId, appendImage) at the bottom.
+RestaurantInformationScreen.js was a broken copy of the personal-info screen
+(every input bound to form.lastname, a leftover gender dropdown and date
+picker). Rewritten as three small module-scope components - TextField
+(explicit label/value/onChangeText), LogoField (circular + camera badge),
+CoverField (wide banner) - plus a chooseImage() helper. The body is a flat
+list of <TextField>s in a ScrollView; Cancel goes back, Submit shows a
+spinner.
 
-frontend/src/api/services/home.js
-  - new getRestaurantInfo() and addRestaurantInfo(formData).
-  - extracted a shared postMultipart(path, formData) helper (explicit
-    multipart header, 20s timeout, "server error" vs "can't reach server"
-    messages); addAdditionalInfo() now uses it too.
-  - added a currentAccountId() helper for the JSON POST bodies.
+useRestaurantInfoForm.js: a single FIELDS array drives the empty form, the
+prefill, the submit body and the required-field check. On mount it calls
+getRestaurantInfo() and fills the form + shows the saved logo/cover if a
+restaurant exists (edit mode). Validates the four required fields and the
+email format. Builds multipart FormData with account_id and all text
+fields; only a freshly picked local image is uploaded. On success: alert,
+then navigate to RestaurantHome.
 
-frontend/src/navigation/AppNavigator.js
-  - register RestaurantInformationScreen.
-frontend/src/screens/Owner/RestaurantHomeScreen.js
-  - "Add Restaurant information" card now navigates to the real route name
-    'RestaurantInformationScreen' (was 'RestaurantInformation').
-frontend/src/styles/RestaurantProfileInformationScreenStyle.js
-  - added screen / formScroll / buttonDisabled / multilineInput /
-    coverImageButton / coverImage; removed a duplicate `padding` key.
+home.js: getRestaurantInfo() and addRestaurantInfo(). The multipart POST
+logic is now a shared postMultipart(path, formData) helper (explicit header,
+20s timeout, clear error messages) that addAdditionalInfo() also uses.
+
+AppNavigator registers the screen. The RestaurantHome "Add Restaurant
+information" card now navigates to 'RestaurantInformationScreen' (it had the
+wrong name before).
 
 
-================================================================
-TESTING (via curl against the running dev server)
-================================================================
-  - get-restaurant-info before any data      -> { restaurant: null, location: null }
-  - add-restaurant-info create                -> row + location created
-  - get-restaurant-info after create          -> full restaurant + location
-  - add-restaurant-info update (change city)  -> same ids, location updated
-  - logo + cover upload                       -> files written to
-      media/restaurant_logo_photos/ and media/restaurant_cover_photos/
-  - update with no images                     -> COALESCE keeps the old paths
-  - missing required field                    -> validation error
-  - check-info-complete                       -> restaurant_info_complete flips
-                                                to true once a row exists
-  All test rows / media deleted afterward.  `manage.py check` clean.
-  ESLint + Prettier clean on the changed frontend files.
+Testing (curl against the dev server)
+- get-restaurant-info before any data   -> { restaurant: null, location: null }
+- create                                -> restaurant + location rows created
+- get after create                      -> full restaurant + location
+- update (change city)                  -> same ids, location updated
+- logo + cover upload                   -> files under media/restaurant_*_photos/
+- update with no images                 -> COALESCE keeps the old paths
+- missing required field                -> validation error
+- check-info-complete                   -> restaurant_info_complete flips to true
+Test rows and media deleted afterward. manage.py check clean; ESLint +
+Prettier clean on the changed frontend files.
 
 
-================================================================
-NOT DONE / NOTES
-================================================================
-  - No get-me / GET-restaurant endpoint returns the saved row from
-    add-restaurant-info (it returns only { message }); the screen re-reads via
-    get-restaurant-info on its next mount, and the home screen re-checks via
-    check-info-complete.
-  - restaurant / location still have no migration FILES in the repo, but the
-    tables already exist in the DB (goodfood schema) with django_migrations
-    records, so the raw SQL works. Real PK of restaurant_restaurant is `id`
-    (not restaurant_id as the model says).
-  - frontend/.env BACKEND_API_URL still points at an old LAN IP
-    (10.14.20.225); the dev machine's address changes between sessions - set
-    it to the current IP and rebuild the app (react-native-config bakes .env
-    at build time).
+Notes
+- add-restaurant-info returns only { message }; the screen re-reads via
+  get-restaurant-info on its next mount and the home screen re-checks via
+  check-info-complete
+- restaurant / location still have no migration files but the tables exist
+  in the DB with django_migrations records, so the raw SQL works. The real
+  PK of restaurant_restaurant is `id`, not restaurant_id as the model says
+  (see the 2026-08-30 backend-schema log).
+- frontend/.env BACKEND_API_URL points at an old LAN IP; the dev machine's
+  address changes between sessions. Set it and rebuild -
+  react-native-config bakes .env at build time.

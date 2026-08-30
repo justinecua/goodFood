@@ -1,84 +1,55 @@
-goodFood — Development Log
-Date: 2026-08-30  (second change of the day)
+2026-08-30 — My Restaurant screen (2nd change of the day)
 
-================================================================
-OVERVIEW
-================================================================
-Adds a "My Restaurant" screen for the owner that shows every detail
-of their restaurant, or an empty state when nothing has been added
-yet. The owner reaches it from the "Menu" tab of the bottom navbar,
-which used to open the (unfinished) Add Dish screen.
+A "My Restaurant" screen for the owner that shows every detail of their
+restaurant, or an empty state when nothing's been added yet. It's reached
+from the Menu tab of the bottom navbar, which used to open the unfinished
+Add Dish screen.
 
-Files changed
-  NEW  frontend/src/screens/Owner/MyRestaurantScreen.js
-       frontend/src/styles/MyRestaurantScreenStyle.js
-
-  MOD  frontend/src/navigation/AppNavigator.js
-       frontend/src/components/shared/RestaurantBottomNavbar.js
+Files
+  new   frontend/src/screens/Owner/MyRestaurantScreen.js
+        frontend/src/styles/MyRestaurantScreenStyle.js
+  edit  frontend/src/navigation/AppNavigator.js
+        frontend/src/components/shared/RestaurantBottomNavbar.js
 
 
-================================================================
-1. NEW SCREEN - MyRestaurantScreen
-================================================================
-frontend/src/screens/Owner/MyRestaurantScreen.js
+The screen
 
-  Data: calls getRestaurantInfo() (api/services/home.js -> POST
-  /api/get-restaurant-info/), which returns { restaurant, location }.
-  Reloaded on every screen focus via useFocusEffect, so edits made on
-  RestaurantInformationScreen show up straight away.
+Data comes from getRestaurantInfo() (POST /api/get-restaurant-info/),
+reloaded on every focus with useFocusEffect so edits made on
+RestaurantInformationScreen show immediately.
 
-  Three states:
-    - loading            -> spinner
-    - no restaurant yet   -> empty state: store icon, "No information
-                             yet", a short line, and an
-                             "Add Restaurant Information" button that
-                             opens RestaurantInformationScreen
-    - restaurant present  -> the full details:
-        * cover photo (or "No cover photo" placeholder)
-        * logo overlapping the cover (or a placeholder icon)
-        * restaurant name + description
-        * Contact card:  Address, Contact Number, Email
-        * Location card: City, Province, Region, Country,
-                         Latitude, Longitude
-        * "Edit Information" button -> RestaurantInformationScreen
-        * "Added on <date>" footnote (from created_at)
+Three states:
+- loading            -> spinner
+- no restaurant yet  -> store icon, "No information yet", and an
+                        "Add Restaurant Information" button
+- restaurant present -> cover photo (or a placeholder), the logo
+                        overlapping it, name + description, a Contact card
+                        (address, contact number, email), a Location card
+                        (city, province, region, country, lat, long), an
+                        "Edit Information" button, and an "Added on <date>"
+                        footnote from created_at
 
-  Every field that is blank renders a muted "Not provided" so nothing
-  is silently hidden. Small DetailRow component renders each
-  label / value pair; formatDate() turns created_at into a readable
-  date.
-
-frontend/src/styles/MyRestaurantScreenStyle.js
-  New stylesheet - header, centered loading/empty block, cover + logo,
-  detail cards and rows, edit button. Uses the existing colour tokens
-  and the Ezra font family like the rest of the app.
+Blank fields render a muted "Not provided" so nothing is silently hidden.
+A small DetailRow component renders each label/value pair; formatDate()
+turns created_at into a readable date. The stylesheet reuses the existing
+colour tokens and the Ezra font.
 
 
-================================================================
-2. NAVIGATION
-================================================================
-frontend/src/navigation/AppNavigator.js
-  - removed the AddDish import + <Stack.Screen name="AddDish"> (the
-    RestaurantAddDishScreen was an unfinished placeholder)
-  - added: import MyRestaurantScreen + <Stack.Screen name="MyRestaurant"
-    component={MyRestaurantScreen} />
+Navigation
 
-frontend/src/components/shared/RestaurantBottomNavbar.js
-  - the "Menu" tab now navigate('MyRestaurant') and highlights on
-    current === 'MyRestaurant' (was 'AddDish')
+AppNavigator: removed the AddDish import and its <Stack.Screen> (the
+RestaurantAddDishScreen was an unfinished placeholder), added
+MyRestaurantScreen as route "MyRestaurant".
+
+RestaurantBottomNavbar: the Menu tab now navigates to "MyRestaurant" and
+highlights on that route.
 
 
-================================================================
-NOTES
-================================================================
-  - frontend/src/screens/Owner/RestaurantAddDishScreen.js is now
-    unreferenced. Left in place in case an add-dish flow is built
-    later; it can be deleted safely.
-  - ESLint + Prettier clean on all four changed files.
-  - Pre-existing duplicate-key lint errors in
-    frontend/src/styles/RestaurantHomeScreenStyles.js (navBotton,
-    userProfile) are unrelated and were not touched.
-  - frontend/.env still points BACKEND_API_URL at an old LAN IP; on a
-    real device the fetch fails and the screen shows the empty state.
-    Update the IP and rebuild (react-native-config bakes .env at build
-    time).
+Notes
+- RestaurantAddDishScreen.js is now unreferenced. Left in place for now;
+  safe to delete. (An add-dish flow was built on 2026-08-30 - see the
+  restaurant-details-and-dishes log - but on new screens.)
+- pre-existing duplicate-key lint warnings in RestaurantHomeScreenStyles.js
+  are unrelated and untouched
+- if frontend/.env points at a stale IP the fetch fails and the screen
+  shows the empty state
