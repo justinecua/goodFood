@@ -12,6 +12,7 @@ import SubscriptionScreen from '../screens/SubscriptionScreen';
 import ProfileScreen from '../screens/Owner/RestaurantProfileScreen';
 import RestaurantInboxScreen from '../screens/Owner/RestaurantInboxScreen';
 import RestaurantProfileInformationScreen from '../screens/Owner/RestaurantProfileInformationScreen';
+import RestaurantInformationScreen from '../screens/Owner/RestaurantInformationScreen';
 
 import DinerMapScreen from '../screens/Diner/DinerMapScreen';
 import DinerHomeScreen from '../screens/Diner/DinerHomeScreen';
@@ -49,6 +50,10 @@ const AppNavigator = () => {
           <Stack.Screen
             name="RestaurantProfileInformationScreen"
             component={RestaurantProfileInformationScreen}
+          />
+          <Stack.Screen
+            name="RestaurantInformationScreen"
+            component={RestaurantInformationScreen}
           />
 
           {/* -------- Diner ----------- */}

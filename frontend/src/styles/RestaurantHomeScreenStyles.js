@@ -113,6 +113,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     paddingHorizontal: 20,
     height: 55,
+    marginTop: 20,
   },
   searchBarText: {
     fontFamily: 'Ezra-SemiBold',
@@ -209,7 +210,6 @@ const styles = StyleSheet.create({
   firstSteps: {
     marginTop: 15,
     gap: 10,
-    marginBottom: 20,
   },
 
   firstStepsLoading: {

@@ -9,7 +9,7 @@ from .queries import (
     login,
     logout,
     checkInfoIfComplete,
-    addAdditionalInfo
+    addAdditionalInfo,
 )
 
 def print_test(request):
