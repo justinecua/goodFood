@@ -60,19 +60,19 @@ const RestaurantBottomNavbar = ({ navigation }) => {
 
       <TouchableOpacity
         style={styles.navItem}
-        onPress={() => navigation.navigate('AddDish')}
+        onPress={() => navigation.navigate('MyRestaurant')}
       >
         <Image
           style={styles.dishIcon}
-          source={current === 'AddDish' ? dishnavbar1 : dishnavbar}
+          source={current === 'MyRestaurant' ? dishnavbar1 : dishnavbar}
         />
         <Text
           style={[
             styles.navIconText,
-            current === 'AddDish' && { color: colors.button },
+            current === 'MyRestaurant' && { color: colors.button },
           ]}
         >
-          Dish
+          Menu
         </Text>
       </TouchableOpacity>
 
