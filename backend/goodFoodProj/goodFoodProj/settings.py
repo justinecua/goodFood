@@ -52,8 +52,15 @@ INSTALLED_APPS = [
      "rest_framework_simplejwt",
     'rest_framework_simplejwt.token_blacklist',
     'account',
-    'restaurant',
     'location',
+    'restaurant',
+    'dish',
+    'review',
+    'ranking',
+    'subscription',
+    'messaging',
+    'favorite',
+    'notification',
 ]
 
 MIDDLEWARE = [
