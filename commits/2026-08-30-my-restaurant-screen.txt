@@ -1,0 +1,13 @@
+add the My Restaurant screen on the owner Menu tab
+
+- MyRestaurantScreen.js: shows the full restaurant + location details from
+  getRestaurantInfo(), reloading on focus so edits show up right away.
+  Empty state ("No information yet" + an Add Restaurant Information button)
+  when the account has no restaurant. Blank fields render "Not provided".
+- MyRestaurantScreenStyle.js
+- AppNavigator: drop the unfinished AddDish / RestaurantAddDishScreen,
+  register MyRestaurantScreen as route "MyRestaurant"
+- RestaurantBottomNavbar: the Menu tab now opens "MyRestaurant" and
+  highlights on that route
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>

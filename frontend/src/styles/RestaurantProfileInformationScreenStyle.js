@@ -265,6 +265,168 @@ const styles = StyleSheet.create({
     fontFamily: 'Ezra-SemiBold',
     color: colors.subtextInput,
   },
+
+  // -------- Section headings (operating hours / categories / branches) --------
+  sectionTitle: {
+    fontFamily: 'Ezra-SemiBold',
+    fontWeight: '600',
+    fontSize: 15,
+    color: colors.maintext,
+    marginTop: 18,
+    marginLeft: 4,
+  },
+  sectionHint: {
+    fontFamily: 'Ezra-Regular',
+    fontSize: 11,
+    color: colors.subtextInput,
+    marginLeft: 4,
+    marginBottom: 4,
+  },
+
+  // -------- Operating hours --------
+  hoursRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+    paddingVertical: 6,
+  },
+  hoursDay: {
+    fontFamily: 'Ezra-SemiBold',
+    fontSize: 12,
+    color: colors.maintext,
+    width: 78,
+  },
+  hoursTimes: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  hoursInput: {
+    flex: 1,
+    height: 42,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    backgroundColor: colors.container_bg,
+    color: colors.subtext,
+    fontFamily: 'Ezra-SemiBold',
+    fontSize: 12,
+    textAlign: 'center',
+  },
+  hoursDash: {
+    color: colors.subtextInput,
+    fontFamily: 'Ezra-SemiBold',
+  },
+  hoursClosedText: {
+    flex: 1,
+    fontFamily: 'Ezra-SemiBold',
+    fontSize: 12,
+    color: colors.subtextInput,
+  },
+  closedPill: {
+    paddingHorizontal: 12,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: colors.subtextInput,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  closedPillActive: {
+    backgroundColor: colors.button,
+    borderColor: colors.button,
+  },
+  closedPillText: {
+    fontFamily: 'Ezra-SemiBold',
+    fontSize: 11,
+    color: colors.subtextInput,
+  },
+  closedPillTextActive: {
+    color: '#fff',
+  },
+
+  // -------- Cuisine categories --------
+  categoryInputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  categoryInput: {
+    flex: 1,
+  },
+  categoryAddButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 16,
+    backgroundColor: colors.button,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  chipWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 8,
+  },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: colors.button_green_light,
+  },
+  chipText: {
+    fontFamily: 'Ezra-SemiBold',
+    fontSize: 12,
+    color: colors.button,
+  },
+
+  // -------- Branches --------
+  branchCard: {
+    backgroundColor: colors.container_bg,
+    borderRadius: 16,
+    padding: 12,
+    gap: 6,
+    marginTop: 8,
+  },
+  branchCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  branchCardTitle: {
+    fontFamily: 'Ezra-SemiBold',
+    fontWeight: '600',
+    fontSize: 13,
+    color: colors.maintext,
+  },
+  branchCoordRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  branchCoordInput: {
+    flex: 1,
+  },
+  addBranchButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    height: 46,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: colors.button,
+    marginTop: 10,
+  },
+  addBranchButtonText: {
+    color: colors.button,
+    fontFamily: 'Ezra-SemiBold',
+    fontSize: 13,
+    fontWeight: '600',
+  },
 });
 
 export default styles;

@@ -1,178 +1,116 @@
-goodFood — Development Log
-Date: 2026-08-29
+2026-08-29 — auth + owner profile flow
 
-================================================================
-OVERVIEW
-================================================================
-Four related fixes to the authentication and restaurant-owner
-profile flow, plus one new shared config/helper module. Touches
-the React Native frontend and the Django backend's `account` app.
+Four connected fixes around login and the restaurant-owner profile, plus one
+new shared config module. Touches the RN frontend and the Django account app.
+All frontend changes are JS-only; the dev server picks them up on reload.
 
-Files changed
-  NEW  frontend/src/constants/config.js
-       backend/goodFoodProj/account/queries.py
-       frontend/src/api/services/auth.js
-       frontend/src/api/services/home.js
-       frontend/src/hooks/useAddInformationForm.js
-       frontend/src/hooks/useLoginForm.js
-       frontend/src/screens/SplashScreen.js
-       frontend/src/screens/Owner/RestaurantProfileInformationScreen.js
-       frontend/src/screens/Owner/RestaurantProfileScreen.js
-       frontend/src/screens/Diner/DinerProfileScreen.js
-       frontend/src/styles/ProfileScreenStyle.js   (minor)
-       frontend/package-lock.json                  (incidental)
+Files
+  new   frontend/src/constants/config.js
+  edit  backend/goodFoodProj/account/queries.py
+        frontend/src/api/services/auth.js
+        frontend/src/api/services/home.js
+        frontend/src/hooks/useAddInformationForm.js
+        frontend/src/hooks/useLoginForm.js
+        frontend/src/screens/SplashScreen.js
+        frontend/src/screens/Owner/RestaurantProfileInformationScreen.js
+        frontend/src/screens/Owner/RestaurantProfileScreen.js
+        frontend/src/screens/Diner/DinerProfileScreen.js
+        frontend/src/styles/ProfileScreenStyle.js   (removed one stray key)
 
 
-================================================================
-NEW FILE: frontend/src/constants/config.js
-================================================================
-Central place for backend URL config. Exports:
-  - BACKEND_API_URL  : from react-native-config (.env)
-  - BACKEND_ORIGIN   : API URL with a trailing "/api" stripped (used for media)
-  - mediaUrl(path)   : turns a stored media path like "account_photos/19.jpg"
-                       into a full URL
-                       (http://<host>:8006/media/account_photos/19.jpg).
-                       Values that are already absolute (http/https, file://,
-                       content://, data:) are returned unchanged.
+config.js
+
+One place for the backend URL. Exports BACKEND_API_URL (from
+react-native-config / .env), BACKEND_ORIGIN (the same URL without the
+trailing /api, for media), and mediaUrl(path), which turns a stored path
+like "account_photos/19.jpg" into a full http://host/media/... URL. Paths
+that are already absolute (http, file:, content:, data:) are passed through.
 
 
-================================================================
-1. FIX — "Add Information" (owner personal info) never reached the database
-================================================================
-Files: useAddInformationForm.js, RestaurantProfileInformationScreen.js,
-       backend account/queries.py
+1. "Add Information" never reached the database
 
-Problems found
-  - The request never included `account_id`, so the backend ran
-    "UPDATE ... WHERE account_id = NULL", matched 0 rows, and still
-    returned a success message.
-  - Gender was captured from the dropdown as an updater FUNCTION, not a
-    string (react-native-dropdown-picker calls setValue with a callback).
-  - Selecting a photo crashed the backend: the raw uploaded file object was
-    passed straight into a SQL parameter, and the file was never saved to
-    MEDIA_ROOT.
-  - birthdate was sent as a locale string ("8/29/2026") instead of
-    YYYY-MM-DD.
-  - On success it navigated to "RestaurantHomeScreen", which is not a
-    registered route (the route is "RestaurantHome").
+Several things were wrong at once:
+- account_id was never sent, so the backend ran UPDATE ... WHERE
+  account_id = NULL, matched nothing, and still returned success
+- gender came from react-native-dropdown-picker as an updater function, not
+  a string (it calls setValue with a callback)
+- picking a photo crashed the backend - the raw file object went straight
+  into a SQL parameter and was never written to MEDIA_ROOT
+- birthdate was sent as "8/29/2026" instead of YYYY-MM-DD
+- on success it navigated to "RestaurantHomeScreen", which isn't a real
+  route (it's "RestaurantHome")
 
-Changes
-  Frontend
-  - Read `account_id` from the cached user in AsyncStorage and append it to
-    the form data.
-  - Pass `setGender` straight to GenderDropdown; submit now reads the gender
-    state (merged into a `payload` object for validation + send).
-  - Format birthdate as YYYY-MM-DD from the selected Date (toISODate helper).
-  - Alert and stop if there is no signed-in user.
-  - Navigate to the real "RestaurantHome" route on success.
-  Backend  addAdditionalInfo()
-  - Require `account_id`; return {"error": "account_id is required"} if missing.
-  - Save an uploaded photo through Django's default_storage and store only the
-    path in the DB.
-  - account_profile_photo = COALESCE(%s, account_profile_photo) so an existing
-    photo is kept when none is uploaded.
-  - Return {"error": "Account not found"} when 0 rows match, instead of a
-    false success.
+Frontend: read account_id from the cached user and send it; pass setGender
+straight to the dropdown and read the gender state on submit; format
+birthdate as YYYY-MM-DD; bail with an alert if nobody is signed in; navigate
+to "RestaurantHome".
+
+Backend, addAdditionalInfo(): require account_id; save the photo through
+default_storage and store only the path; account_profile_photo =
+COALESCE(%s, account_profile_photo) so an existing photo survives; return
+"Account not found" on 0 rows instead of a fake success.
 
 
-================================================================
-2. HARDENING — "Network Error" when pressing Submit
-================================================================
-Files: api/services/home.js, useAddInformationForm.js,
-       RestaurantProfileInformationScreen.js
+2. "Network Error" on Submit
 
-  - addAdditionalInfo() now sends an explicit `multipart/form-data` header and
-    a 20s timeout, logs transport failures (url, error code, message), and
-    throws a readable message that distinguishes "server returned an error"
-    from "could not reach the server".
-  - The image picker keeps the whole asset object ({ uri, fileName, type })
-    instead of only the uri, so uploads use the real filename and mime type,
-    and didCancel / errorCode results are handled.
+Mostly hardening so the real cause is visible next time:
+- addAdditionalInfo() sends an explicit multipart/form-data header and a
+  20s timeout, logs transport failures (url, code, message), and throws a
+  message that separates "server returned an error" from "couldn't reach
+  the server"
+- the image picker keeps the whole asset ({ uri, fileName, type }) instead
+  of just the uri, and handles didCancel / errorCode
 
-Investigation notes (for reference)
-  - Backend verified reachable; all endpoints return 200 from curl, including
-    multipart add-additional-info.
-  - The .env value http://10.14.20.225:8006/api is correctly baked into the
-    debug APK's BuildConfig.
-  - JSON POSTs from the app work. The failure is specific to the multipart
-    request — most likely the attached photo's uri not being readable by the
-    native uploader, which aborts the request.
+What we know: the backend is reachable and every endpoint returns 200 from
+curl, including multipart. JSON POSTs from the app work. The failure is
+specific to the multipart request with a photo attached - most likely the
+asset uri not being readable by the native uploader. The .env IP is baked
+into the APK correctly.
 
 
-================================================================
-3. FEATURE — stay logged in after a refresh/restart, expire after 1 day
-================================================================
-Files: api/services/auth.js, SplashScreen.js, useLoginForm.js,
-       RestaurantProfileScreen.js, DinerProfileScreen.js
+3. Stay logged in across a restart, expire after a day
 
-  auth.js
-  - login() now also stores a "loginAt" timestamp alongside the tokens/user.
-  - NEW getActiveSession(): returns the stored session only if it is younger
-    than SESSION_TTL_MS (24h); otherwise clears storage and returns null.
-  - NEW clearSession(): removes accessToken, refreshToken, user, loginAt.
-  SplashScreen
-  - On boot, calls getActiveSession() and navigates straight to RestaurantHome
-    / DinerHome (by account_type) when a valid session exists; only falls back
-    to Login when there is none or it has expired. Splash still shows ~1.5s.
-  useLoginForm
-  - On success, resets the navigation stack to the home route so Splash / Login
-    are not left underneath it.
-  Both profile screens
-  - Logout now goes through clearSession() (also clears loginAt).
+auth.js: login() also stores a loginAt timestamp. New getActiveSession()
+returns the stored session only if it's younger than SESSION_TTL_MS (24h),
+otherwise it clears storage and returns null. New clearSession() wipes
+accessToken, refreshToken, user, loginAt.
 
-Behaviour
-  refresh / restart within 24h of login   -> stays logged in, jumps to home
-  refresh / restart 24h+ after login      -> session cleared, back to Login
-  tap Logout                               -> session cleared immediately
+SplashScreen calls getActiveSession() on boot and jumps straight to
+RestaurantHome / DinerHome (by account_type) when the session is valid;
+it only falls back to Login when there's none or it expired. Splash still
+shows for ~1.5s. useLoginForm resets the nav stack to home on success so
+Splash/Login aren't left underneath. Both profile screens log out through
+clearSession().
 
-To change the window: edit SESSION_TTL_MS in api/services/auth.js.
-Note: this is a client-side timer; all API endpoints are still AllowAny.
+  restart within 24h   -> stays logged in, goes to home
+  restart after 24h    -> session cleared, back to Login
+  Logout               -> session cleared now
+
+This is a client-side timer only; every API endpoint is still AllowAny.
+Change the window with SESSION_TTL_MS in api/services/auth.js.
 
 
-================================================================
-4. FIX — uploaded profile photo not visible on the Profile screen
-================================================================
-Files: RestaurantProfileScreen.js, DinerProfileScreen.js,
-       useAddInformationForm.js, backend account/queries.py
+4. Saved profile photo not visible
 
-Cause
-  The photo IS saved on the server correctly, but the DB stores only a
-  RELATIVE path ("account_photos/19.jpg"). The profile screens passed that
-  straight into <Image source={{ uri: ... }}>, which React Native cannot
-  resolve, so the avatar rendered at 0x0 (which also collapsed the layout and
-  made the name/email look centered).
+The photo is stored fine, but the DB keeps only a relative path
+("account_photos/19.jpg") and the profile screens passed that straight into
+<Image source={{ uri }}>, which RN can't resolve - so the avatar rendered
+at 0x0 and collapsed the layout around it.
 
-Changes
-  - Profile screens build the avatar URL with mediaUrl(), falling back to the
-    bundled `pfp` image.
-  - Cached user is re-read on screen focus (useFocusEffect) instead of once on
-    mount, so a newly saved photo shows when returning to the Profile tab.
-  - Backend addAdditionalInfo() UPDATE gained a RETURNING clause; the endpoint
-    now returns the updated user row.
-  - The hook merges that returned user into AsyncStorage after a successful
-    save, so the new photo/details appear without logging in again.
-  - The Information screen now prefills first/last name, gender, birthdate and
-    the current photo from the cached user (works as an "edit" screen). On
-    submit, only a freshly picked LOCAL file is uploaded; the existing remote
-    photo is not re-sent (isLocalFileUri guard).
+- profile screens build the URL with mediaUrl() and fall back to the
+  bundled image
+- the cached user is re-read on focus (useFocusEffect), so a new photo
+  shows when you come back to the tab
+- addAdditionalInfo()'s UPDATE got a RETURNING clause; the endpoint returns
+  the updated row and the hook merges it into AsyncStorage, so changes
+  appear without logging in again
+- the Information screen prefills name / gender / birthdate / photo from the
+  cached user and works as an edit screen; on submit only a freshly picked
+  local file is uploaded, the existing remote photo isn't re-sent
 
 
-================================================================
-INCIDENTAL
-================================================================
-  - frontend/src/styles/ProfileScreenStyle.js: removed `objectFit` from the
-    profileImage style.
-  - frontend/package-lock.json: `typescript` marked devOptional (npm metadata,
-    from an install).
-
-
-================================================================
-NOT DONE / KNOWN GAPS
-================================================================
-  - The `restaurant` and `location` Django apps still have no migrations; the
-    check-info-complete query references the restaurant_restaurant table.
-  - The pre-existing Jest test (frontend/__tests__/App.test.tsx) was already
-    failing before today (a @react-navigation ESM transform issue) and was
-    left unchanged.
-  - All frontend changes are JS-only (Fast Refresh picks them up); the Django
-    dev server auto-reloads.
+Known gaps
+- restaurant and location still have no migration files; the
+  check-info-complete query already reads restaurant_restaurant
+- frontend/__tests__/App.test.tsx was already failing before today
+  (a @react-navigation ESM transform issue) and was left alone
