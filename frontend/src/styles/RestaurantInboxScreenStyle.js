@@ -24,7 +24,7 @@ const styles = StyleSheet.create({
     marginTop: 30,
     flex: 1,
     gap: 10,
-    justifyContent: 'top',
+    justifyContent: 'flex-start',
   },
   searchInput: {
     height: 48,
@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.container_bg,
     color: colors.subtext,
     fontFamily: 'Ezra-SemiBold',
-    flexDirection: 'row',       
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Ezra-SemiBold',
     fontSize: 13,
   },
-  searchIcon: {  
+  searchIcon: {
     width: 16,
     height: 16,
     marginRight: 19,

@@ -285,49 +285,73 @@ const styles = StyleSheet.create({
 
   // -------- Operating hours --------
   hoursRow: {
+    backgroundColor: colors.container_bg,
+    borderRadius: 14,
+    padding: 12,
+    gap: 8,
+    marginTop: 8,
+  },
+  hoursHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: 8,
-    paddingVertical: 6,
   },
   hoursDay: {
     fontFamily: 'Ezra-SemiBold',
-    fontSize: 12,
+    fontSize: 13,
     color: colors.maintext,
-    width: 78,
   },
-  hoursTimes: {
-    flex: 1,
+  hoursTimeRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
+  },
+  hoursTimeLabel: {
+    fontFamily: 'Ezra-Regular',
+    fontSize: 12,
+    color: colors.subtext,
+    width: 48,
   },
   hoursInput: {
     flex: 1,
-    height: 42,
+    height: 40,
     paddingHorizontal: 12,
-    borderRadius: 12,
-    backgroundColor: colors.container_bg,
+    borderRadius: 10,
+    backgroundColor: colors.container_bg2,
     color: colors.subtext,
     fontFamily: 'Ezra-SemiBold',
-    fontSize: 12,
+    fontSize: 13,
     textAlign: 'center',
   },
-  hoursDash: {
-    color: colors.subtextInput,
-    fontFamily: 'Ezra-SemiBold',
+  periodToggle: {
+    flexDirection: 'row',
+    borderRadius: 10,
+    overflow: 'hidden',
+    borderWidth: 1.5,
+    borderColor: colors.button,
   },
-  hoursClosedText: {
-    flex: 1,
+  periodOption: {
+    width: 38,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.container_bg2,
+  },
+  periodOptionActive: {
+    backgroundColor: colors.button,
+  },
+  periodOptionText: {
     fontFamily: 'Ezra-SemiBold',
-    fontSize: 12,
-    color: colors.subtextInput,
+    fontSize: 11,
+    color: colors.button,
+  },
+  periodOptionTextActive: {
+    color: '#fff',
   },
   closedPill: {
     paddingHorizontal: 12,
-    height: 32,
-    borderRadius: 16,
+    height: 30,
+    borderRadius: 15,
     borderWidth: 1.5,
     borderColor: colors.subtextInput,
     alignItems: 'center',

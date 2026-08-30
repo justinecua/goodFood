@@ -5,7 +5,7 @@ import styles from '../../styles/RestaurantAddDishScreenStyle';
 import colors from '../../constants/colors';
 import RestaurantBottomNavbar from '../../components/shared/RestaurantBottomNavbar';
 
-const RestaurantDishesScreen = () => {
+const RestaurantDishesScreen = ({ navigation }) => {
   return (
     <View style={styles.background}>
       <View style={styles.headerContainer}>
@@ -22,7 +22,7 @@ const RestaurantDishesScreen = () => {
         </TouchableOpacity>
       </View>
       {/* Bottom NavBar */}
-      <BottomNavbar />
+      <RestaurantBottomNavbar navigation={navigation} />
     </View>
   );
 };

@@ -83,46 +83,85 @@ const CoverField = ({ image, onPress }) => (
   </View>
 );
 
-// One day's opening / closing time, or a "Closed" toggle.
+// Two-segment AM / PM switch.
+const PeriodToggle = ({ value, onChange }) => (
+  <View style={styles.periodToggle}>
+    {['AM', 'PM'].map(option => (
+      <TouchableOpacity
+        key={option}
+        style={[
+          styles.periodOption,
+          value === option && styles.periodOptionActive,
+        ]}
+        onPress={() => onChange(option)}
+      >
+        <Text
+          style={[
+            styles.periodOptionText,
+            value === option && styles.periodOptionTextActive,
+          ]}
+        >
+          {option}
+        </Text>
+      </TouchableOpacity>
+    ))}
+  </View>
+);
+
+// One time field: a "9:00" input plus its AM/PM toggle.
+const TimeField = ({ label, time, period, onTime, onPeriod }) => (
+  <View style={styles.hoursTimeRow}>
+    <Text style={styles.hoursTimeLabel}>{label}</Text>
+    <TextInput
+      value={time}
+      onChangeText={onTime}
+      placeholder="9:00"
+      placeholderTextColor={colors.subtextInput}
+      keyboardType="numbers-and-punctuation"
+      style={styles.hoursInput}
+    />
+    <PeriodToggle value={period} onChange={onPeriod} />
+  </View>
+);
+
+// One day: opening + closing time (with AM/PM), or a "Closed" toggle.
 const HoursRow = ({ row, onChange }) => (
   <View style={styles.hoursRow}>
-    <Text style={styles.hoursDay}>{row.day_of_week}</Text>
-
-    {row.is_closed ? (
-      <Text style={styles.hoursClosedText}>Closed</Text>
-    ) : (
-      <View style={styles.hoursTimes}>
-        <TextInput
-          value={row.opening_time}
-          onChangeText={text => onChange('opening_time', text)}
-          placeholder="09:00"
-          placeholderTextColor={colors.subtextInput}
-          style={styles.hoursInput}
-        />
-        <Text style={styles.hoursDash}>–</Text>
-        <TextInput
-          value={row.closing_time}
-          onChangeText={text => onChange('closing_time', text)}
-          placeholder="22:00"
-          placeholderTextColor={colors.subtextInput}
-          style={styles.hoursInput}
-        />
-      </View>
-    )}
-
-    <TouchableOpacity
-      style={[styles.closedPill, row.is_closed && styles.closedPillActive]}
-      onPress={() => onChange('is_closed', !row.is_closed)}
-    >
-      <Text
-        style={[
-          styles.closedPillText,
-          row.is_closed && styles.closedPillTextActive,
-        ]}
+    <View style={styles.hoursHeader}>
+      <Text style={styles.hoursDay}>{row.day_of_week}</Text>
+      <TouchableOpacity
+        style={[styles.closedPill, row.is_closed && styles.closedPillActive]}
+        onPress={() => onChange('is_closed', !row.is_closed)}
       >
-        Closed
-      </Text>
-    </TouchableOpacity>
+        <Text
+          style={[
+            styles.closedPillText,
+            row.is_closed && styles.closedPillTextActive,
+          ]}
+        >
+          Closed
+        </Text>
+      </TouchableOpacity>
+    </View>
+
+    {!row.is_closed && (
+      <>
+        <TimeField
+          label="Opens"
+          time={row.opening_time}
+          period={row.opening_period}
+          onTime={text => onChange('opening_time', text)}
+          onPeriod={value => onChange('opening_period', value)}
+        />
+        <TimeField
+          label="Closes"
+          time={row.closing_time}
+          period={row.closing_period}
+          onTime={text => onChange('closing_time', text)}
+          onPeriod={value => onChange('closing_period', value)}
+        />
+      </>
+    )}
   </View>
 );
 
@@ -139,10 +178,6 @@ const RestaurantInformationScreen = ({ navigation }) => {
     categories,
     addCategory,
     removeCategory,
-    branches,
-    addBranch,
-    removeBranch,
-    setBranch,
     isLoading,
     handleSubmit,
   } = useRestaurantInfoForm(navigation);
@@ -238,8 +273,8 @@ const RestaurantInformationScreen = ({ navigation }) => {
               {/* -------- Operating hours -------- */}
               <Text style={styles.sectionTitle}>Operating Hours</Text>
               <Text style={styles.sectionHint}>
-                Use 24-hour time (e.g. 09:00). Leave a day blank or mark it
-                closed.
+                Enter a time like 9:00 and pick AM or PM. Leave a day blank or
+                mark it closed.
               </Text>
               {operatingHours.map(row => (
                 <HoursRow
@@ -283,68 +318,6 @@ const RestaurantInformationScreen = ({ navigation }) => {
                   ))}
                 </View>
               )}
-
-              {/* -------- Branches -------- */}
-              <Text style={styles.sectionTitle}>Branches</Text>
-              {branches.map((branch, index) => (
-                <View key={index} style={styles.branchCard}>
-                  <View style={styles.branchCardHeader}>
-                    <Text style={styles.branchCardTitle}>
-                      Branch {index + 1}
-                    </Text>
-                    <TouchableOpacity onPress={() => removeBranch(index)}>
-                      <X size={16} color={colors.subtext} />
-                    </TouchableOpacity>
-                  </View>
-                  <TextInput
-                    value={branch.branch_name}
-                    onChangeText={text => setBranch(index, 'branch_name', text)}
-                    placeholder="Branch name"
-                    placeholderTextColor={colors.subtextInput}
-                    style={styles.addDishInput}
-                  />
-                  <TextInput
-                    value={branch.address}
-                    onChangeText={text => setBranch(index, 'address', text)}
-                    placeholder="Address"
-                    placeholderTextColor={colors.subtextInput}
-                    style={styles.addDishInput}
-                  />
-                  <TextInput
-                    value={branch.contact_number}
-                    onChangeText={text =>
-                      setBranch(index, 'contact_number', text)
-                    }
-                    placeholder="Contact number"
-                    placeholderTextColor={colors.subtextInput}
-                    keyboardType="phone-pad"
-                    style={styles.addDishInput}
-                  />
-                  <View style={styles.branchCoordRow}>
-                    <TextInput
-                      value={branch.latitude}
-                      onChangeText={text => setBranch(index, 'latitude', text)}
-                      placeholder="Latitude"
-                      placeholderTextColor={colors.subtextInput}
-                      style={[styles.addDishInput, styles.branchCoordInput]}
-                    />
-                    <TextInput
-                      value={branch.longitude}
-                      onChangeText={text => setBranch(index, 'longitude', text)}
-                      placeholder="Longitude"
-                      placeholderTextColor={colors.subtextInput}
-                      style={[styles.addDishInput, styles.branchCoordInput]}
-                    />
-                  </View>
-                </View>
-              ))}
-              <TouchableOpacity
-                style={styles.addBranchButton}
-                onPress={addBranch}
-              >
-                <Plus size={16} color={colors.button} />
-                <Text style={styles.addBranchButtonText}>Add branch</Text>
-              </TouchableOpacity>
 
               <View style={styles.bottomContainer}>
                 <TouchableOpacity

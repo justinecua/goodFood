@@ -1,0 +1,96 @@
+split owner manage area into its own screens; edit/delete + profile menu
+
+Follows on from the previous change, which put dishes, categories and
+branches inside MyRestaurantScreen and the restaurant info form. This
+breaks them out into their own screens and fills in the edit/delete paths
+and the rest of the owner profile menu.
+
+Manage area
+- MyRestaurantScreen now just shows the info cards + a Manage card linking
+  to three new screens: MenuScreen (dishes), DishCategoriesScreen,
+  BranchesScreen. Add buttons live on those screens, not on MyRestaurant.
+- new components/shared/ScreenHeader.js (back chevron + title) used across
+  the manage section; RestaurantBottomNavbar keeps the Menu tab lit on all
+  of them via a MENU_ROUTES list.
+- OwnerListScreenStyle.js shared by the three list screens.
+
+Empty states
+- new components/shared/EmptyState.js, used on the three list screens and
+  on RestaurantHome / RestaurantNotification / RestaurantInbox. Removed the
+  hardcoded mock cards from RestaurantHome (fake top dishes/rankings) and a
+  stray Add Dish button from the inbox screen.
+
+Operating hours
+- 12-hour hour:minute input + AM/PM toggle instead of raw 24h HH:MM.
+  useRestaurantInfoForm converts at the API edge (to24h/from24h); backend
+  storage is unchanged.
+
+Dishes - detail, edit, delete
+- getDish (POST /api/get-dish/) returns the dish + its images.
+- RestaurantDishDetailsScreen is now opened by tapping a dish in
+  MenuScreen, reloads on focus, and has Edit + Delete.
+- AddDishScreen / useAddDishForm are add-or-edit (a `dish` route param
+  switches to edit mode: prefill, append dish_id, call updateDish).
+- updateDish / deleteDish in dish/queries.py; a new photo on update becomes
+  the primary image. Routes: /api/update-dish/, /api/delete-dish/.
+
+Categories - edit, delete
+- DishCategoriesScreen rows open AddDishCategoryScreen in edit mode with a
+  Delete link.
+- updateDishCategory / deleteDishCategory (rowcount-checked). Deleting a
+  category leaves its dishes uncategorised (FK is ON DELETE SET NULL).
+  Routes: /api/update-dish-category/, /api/delete-dish-category/.
+
+Branches - moved off the restaurant info form
+- addRestaurantInfo no longer touches branches (it used to delete + rebuild
+  them from the form, which would wipe branches added elsewhere). Removed
+  the branch section from RestaurantInformationScreen / useRestaurantInfoForm.
+- new addBranch / updateBranch / deleteBranch in restaurant/queries.py.
+  addBranch resolves the restaurant from account_id. Routes:
+  /api/add-branch/, /api/update-branch/, /api/delete-branch/.
+- new BranchFormScreen (add / edit / delete), reached from BranchesScreen.
+- getRestaurantInfo still returns `branches` for the list.
+
+Profile menu
+- RestaurantProfileScreen rows had no handlers; wired them to
+  ChangeProfilePicture, RestaurantProfileInformationScreen, ChangePassword
+  (new), MyRestaurant, Subscription, RestaurantSettings (new), PrivacyPolicy,
+  About. New screens: ChangeProfilePicture, ChangePassword, PrivacyPolicy,
+  About, RestaurantSettings.
+
+Profile info screen
+- adds Email + Mobile Number fields, prefilled. addAdditionalInfo writes
+  them with COALESCE(NULLIF(%s,''), col) so the onboarding flow (which
+  omits them) is unaffected; added an IntegrityError branch for the unique
+  constraints. validatorAdditionalInfo only checks them when present.
+- Cancel button had no onPress - now goBack(); successful save goBack()s
+  too instead of jumping to RestaurantHome.
+
+Account endpoints
+- POST /api/update-profile-photo/ - photo-only update (addAdditionalInfo
+  would null the name/gender/birthdate columns if only a photo was sent).
+- POST /api/change-password/ - verifies the current password with
+  check_password, min 6 chars.
+
+Settings / theme (scaffolding only)
+- RestaurantSettingsScreen: Light/Dark toggle, persisted to AsyncStorage
+  via new contexts/ThemeContext.js.
+- constants/colors.js exports lightColors/darkColors; the default export
+  stays lightColors so no existing screen changes behaviour. Only
+  RestaurantSettingsScreen reads the themed colors so far - converting the
+  rest is a separate task.
+
+Seed data
+- python manage.py seed_dishes - ~6 sample dishes on the newest restaurant,
+  idempotent by name (--account / --restaurant / --fresh).
+
+Depends on reconcile_db + migrate (not yet run on the shared DB): the
+dish_* tables and the nullable operating-hours columns come from there, so
+until then the dish/branch endpoints and saving hours will error.
+
+Checked: new raw-SQL paths on a throwaway DB (update/delete for
+dishes/categories/branches incl. not-found, change password, profile
+email/mobile), manage.py check, makemigrations --check, ESLint + Prettier
+on all changed frontend files.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>

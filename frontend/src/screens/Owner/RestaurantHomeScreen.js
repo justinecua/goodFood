@@ -14,8 +14,15 @@ import RestaurantBottomNavbar from '../../components/shared/RestaurantBottomNavb
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SquarePlus, ChevronRight, CircleUser } from 'lucide-react-native';
+import {
+  SquarePlus,
+  ChevronRight,
+  CircleUser,
+  UtensilsCrossed,
+  Store,
+} from 'lucide-react-native';
 import colors from '../../constants/colors';
+import EmptyState from '../../components/shared/EmptyState';
 import { checkInfoComplete } from '../../api/services/home';
 
 const RestaurantHomeScreen = ({ navigation }) => {
@@ -152,104 +159,26 @@ const RestaurantHomeScreen = ({ navigation }) => {
 
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionHeaderText}>Top Dishes</Text>
-              <TouchableOpacity>
-                <Text style={styles.sectionHeaderText1}>See all</Text>
-              </TouchableOpacity>
             </View>
-
-            <View style={styles.dishContainer}>
-              <View style={styles.dishSubContainer}>
-                <View style={styles.dishCard}>
-                  <Image
-                    style={styles.dishImage}
-                    source={ImageSource.fishTacos}
-                  />
-                  <View style={styles.dishUnderline}></View>
-                  <Text style={styles.dishText}>Fish Tacos</Text>
-                </View>
-                <View style={styles.dishCard}>
-                  <Image
-                    style={styles.dishImage}
-                    source={ImageSource.fishTacos}
-                  />
-                  <View style={styles.dishUnderline}></View>
-                  <Text style={styles.dishText}>Fish Tacos</Text>
-                </View>
-              </View>
-              <View style={styles.dishSubContainer}>
-                <View style={styles.dishCard}>
-                  <Image
-                    style={styles.dishImage}
-                    source={ImageSource.fishTacos}
-                  />
-                  <View style={styles.dishUnderline}></View>
-                  <Text style={styles.dishText}>Fish Tacos</Text>
-                </View>
-                <View style={styles.dishCard}>
-                  <Image
-                    style={styles.dishImage}
-                    source={ImageSource.fishTacos}
-                  />
-                  <View style={styles.dishUnderline}></View>
-                  <Text style={styles.dishText}>Fish Tacos</Text>
-                </View>
-              </View>
+            <View style={styles.emptySection}>
+              <EmptyState
+                compact
+                icon={UtensilsCrossed}
+                title="No top dishes yet"
+                message="Once diners start rating dishes, the highest-rated ones show up here."
+              />
             </View>
 
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionHeaderText}>Top Restaurants</Text>
-              <TouchableOpacity>
-                <Text style={styles.sectionHeaderText1}>See all</Text>
-              </TouchableOpacity>
             </View>
-
-            <View style={styles.restaurantContainer}>
-              <View style={styles.restaurantSubContainer}>
-                <View style={styles.restaurantCard}>
-                  <Image
-                    style={styles.restaurantCardImage}
-                    source={ImageSource.userProfile}
-                  />
-                  <Text style={styles.restaurantText}>Rank 1st</Text>
-                </View>
-                <View style={styles.restaurantCard}>
-                  <Image
-                    style={styles.restaurantCardImage}
-                    source={ImageSource.userProfile}
-                  />
-                  <Text style={styles.restaurantText}>Rank 2nd</Text>
-                </View>
-                <View style={styles.restaurantCard}>
-                  <Image
-                    style={styles.restaurantCardImage}
-                    source={ImageSource.userProfile}
-                  />
-                  <Text style={styles.restaurantText}>Rank 3rd</Text>
-                </View>
-              </View>
-              <View style={styles.restaurantSubContainer}>
-                <View style={styles.restaurantCard}>
-                  <Image
-                    style={styles.restaurantCardImage}
-                    source={ImageSource.userProfile}
-                  />
-                  <Text style={styles.restaurantText}>Rank 4th</Text>
-                </View>
-                <View style={styles.restaurantCard}>
-                  <Image
-                    style={styles.restaurantCardImage}
-                    source={ImageSource.userProfile}
-                  />
-                  <Text style={styles.restaurantText}>Rank 5th</Text>
-                </View>
-                <View style={styles.restaurantCard}>
-                  <Image
-                    style={styles.restaurantCardImage}
-                    source={ImageSource.userProfile}
-                  />
-                  <Text style={styles.restaurantText}>Rank 6th</Text>
-                </View>
-              </View>
+            <View style={[styles.emptySection, styles.emptySectionLast]}>
+              <EmptyState
+                compact
+                icon={Store}
+                title="No top restaurants yet"
+                message="Restaurant rankings appear here as reviews come in."
+              />
             </View>
           </View>
         </ScrollView>
