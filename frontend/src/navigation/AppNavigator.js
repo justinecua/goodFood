@@ -5,7 +5,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import RestaurantHomeScreen from '../screens/Owner/RestaurantHomeScreen';
-import AddDish from '../screens/Owner/RestaurantAddDishScreen';
+import MyRestaurantScreen from '../screens/Owner/MyRestaurantScreen';
 import DishDetails from '../screens/Owner/RestaurantDishDetailsScreen';
 import Notifications from '../screens/Owner/RestaurantNotificationScreen';
 import SubscriptionScreen from '../screens/SubscriptionScreen';
@@ -39,7 +39,7 @@ const AppNavigator = () => {
             name="RestaurantHome"
             component={RestaurantHomeScreen}
           />
-          <Stack.Screen name="AddDish" component={AddDish} />
+          <Stack.Screen name="MyRestaurant" component={MyRestaurantScreen} />
           <Stack.Screen
             name="MessageScreen"
             component={RestaurantInboxScreen}
