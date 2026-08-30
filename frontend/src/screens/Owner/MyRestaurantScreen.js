@@ -17,14 +17,13 @@ import {
   Clock,
   Tag,
   GitBranch,
-  Plus,
+  ChevronRight,
   UtensilsCrossed,
 } from 'lucide-react-native';
 import RestaurantBottomNavbar from '../../components/shared/RestaurantBottomNavbar';
 import styles from '../../styles/MyRestaurantScreenStyle';
 import colors from '../../constants/colors';
 import { getRestaurantInfo } from '../../api/services/home';
-import { getDishes } from '../../api/services/dish';
 import { mediaUrl } from '../../constants/config';
 
 // One "label / value" line. Falls back to a placeholder when the value is empty.
@@ -35,6 +34,18 @@ const DetailRow = ({ label, value }) => (
       {value ? String(value) : 'Not provided'}
     </Text>
   </View>
+);
+
+// A tappable row that opens another screen.
+const NavRow = ({ icon: Icon, label, count, onPress }) => (
+  <TouchableOpacity style={styles.navRow} onPress={onPress}>
+    <View style={styles.navRowIcon}>
+      <Icon size={16} color={colors.button} />
+    </View>
+    <Text style={styles.navRowLabel}>{label}</Text>
+    {count != null ? <Text style={styles.navRowCount}>{count}</Text> : null}
+    <ChevronRight size={18} color={colors.subtextInput} />
+  </TouchableOpacity>
 );
 
 const formatDate = value => {
@@ -49,8 +60,16 @@ const formatDate = value => {
       });
 };
 
-// "09:00:00" -> "09:00".
-const shortTime = value => (value ? String(value).slice(0, 5) : '');
+// "13:30:00" -> "1:30 PM".
+const formatTime12 = value => {
+  if (!value) return '';
+  const [h, m = '00'] = String(value).split(':');
+  let hour = parseInt(h, 10);
+  if (Number.isNaN(hour)) return '';
+  const period = hour >= 12 ? 'PM' : 'AM';
+  hour = hour % 12 || 12;
+  return `${hour}:${m.slice(0, 2)} ${period}`;
+};
 
 const MyRestaurantScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
@@ -59,32 +78,28 @@ const MyRestaurantScreen = ({ navigation }) => {
   const [operatingHours, setOperatingHours] = useState([]);
   const [categories, setCategories] = useState([]);
   const [branches, setBranches] = useState([]);
-  const [dishes, setDishes] = useState([]);
 
-  // Reload every time the screen comes into focus (e.g. after editing / adding).
+  // Reload every time the screen comes into focus (e.g. after editing).
   useFocusEffect(
     useCallback(() => {
       let active = true;
       setLoading(true);
 
-      Promise.all([
-        getRestaurantInfo().catch(err => {
-          console.log('getRestaurantInfo failed:', err.message);
-          return null;
-        }),
-        getDishes().catch(err => {
-          console.log('getDishes failed:', err.message);
-          return null;
-        }),
-      ])
-        .then(([info, dishData]) => {
+      getRestaurantInfo()
+        .then(info => {
           if (!active) return;
           setRestaurant(info?.restaurant ?? null);
           setLocation(info?.location ?? null);
           setOperatingHours(info?.operating_hours ?? []);
           setCategories(info?.categories ?? []);
           setBranches(info?.branches ?? []);
-          setDishes(dishData?.dishes ?? []);
+        })
+        .catch(err => {
+          console.log('getRestaurantInfo failed:', err.message);
+          if (active) {
+            setRestaurant(null);
+            setLocation(null);
+          }
         })
         .finally(() => {
           if (active) setLoading(false);
@@ -198,7 +213,7 @@ const MyRestaurantScreen = ({ navigation }) => {
                     <Text style={styles.detailValue}>
                       {row.is_closed
                         ? 'Closed'
-                        : `${shortTime(row.opening_time)} – ${shortTime(
+                        : `${formatTime12(row.opening_time)} – ${formatTime12(
                             row.closing_time,
                           )}`}
                     </Text>
@@ -229,80 +244,25 @@ const MyRestaurantScreen = ({ navigation }) => {
 
             <View style={styles.card}>
               <View style={styles.cardTitleRow}>
-                <GitBranch size={16} color={colors.button} />
-                <Text style={styles.cardTitle}>Branches</Text>
-              </View>
-              {branches.length === 0 ? (
-                <Text style={styles.cardEmptyText}>No branches added.</Text>
-              ) : (
-                branches.map(branch => (
-                  <View key={branch.branch_id} style={styles.branchBlock}>
-                    <Text style={styles.branchName}>{branch.branch_name}</Text>
-                    <Text style={styles.branchLine}>{branch.address}</Text>
-                    <Text style={styles.branchLine}>
-                      {branch.contact_number}
-                    </Text>
-                  </View>
-                ))
-              )}
-            </View>
-
-            <View style={styles.card}>
-              <View style={styles.cardTitleRow}>
                 <UtensilsCrossed size={16} color={colors.button} />
-                <Text style={styles.cardTitle}>Menu</Text>
+                <Text style={styles.cardTitle}>Manage</Text>
               </View>
-
-              <View style={styles.menuButtonRow}>
-                <TouchableOpacity
-                  style={styles.menuButton}
-                  onPress={() => navigation.navigate('AddDish')}
-                >
-                  <Plus size={15} color="#fff" />
-                  <Text style={styles.menuButtonText}>Add Dish</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.menuButton, styles.menuButtonOutline]}
-                  onPress={() => navigation.navigate('AddDishCategory')}
-                >
-                  <Plus size={15} color={colors.button} />
-                  <Text
-                    style={[
-                      styles.menuButtonText,
-                      styles.menuButtonTextOutline,
-                    ]}
-                  >
-                    Dish Category
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
-              {dishes.length === 0 ? (
-                <Text style={styles.cardEmptyText}>No dishes yet.</Text>
-              ) : (
-                dishes.map(dish => (
-                  <View key={dish.dish_id} style={styles.dishRow}>
-                    {dish.dish_image_path ? (
-                      <Image
-                        source={{ uri: mediaUrl(dish.dish_image_path) }}
-                        style={styles.dishThumb}
-                      />
-                    ) : (
-                      <View style={[styles.dishThumb, styles.dishThumbEmpty]}>
-                        <UtensilsCrossed size={16} color={colors.subtext} />
-                      </View>
-                    )}
-                    <View style={styles.dishTextWrap}>
-                      <Text style={styles.dishName}>{dish.dish_name}</Text>
-                      <Text style={styles.dishMeta}>
-                        {dish.dish_category_name || 'Uncategorised'}
-                        {dish.is_available ? '' : ' · Unavailable'}
-                      </Text>
-                    </View>
-                    <Text style={styles.dishPrice}>{dish.dish_price}</Text>
-                  </View>
-                ))
-              )}
+              <NavRow
+                icon={UtensilsCrossed}
+                label="Menu"
+                onPress={() => navigation.navigate('Menu')}
+              />
+              <NavRow
+                icon={Tag}
+                label="Dish Categories"
+                onPress={() => navigation.navigate('DishCategories')}
+              />
+              <NavRow
+                icon={GitBranch}
+                label="Branches"
+                count={branches.length || null}
+                onPress={() => navigation.navigate('Branches')}
+              />
             </View>
 
             <TouchableOpacity style={styles.editButton} onPress={goToEdit}>

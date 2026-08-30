@@ -14,25 +14,8 @@ const styles = StyleSheet.create({
     paddingBottom: 120,
   },
   form: {
-    gap: 6,
+    gap: 4,
     padding: 15,
-  },
-
-  headerContainer: {
-    alignItems: 'center',
-    marginTop: 15,
-  },
-  heading: {
-    fontFamily: 'Ezra-SemiBold',
-    fontWeight: '600',
-    fontSize: 19,
-    color: colors.maintext,
-  },
-  subheading: {
-    fontFamily: 'Ezra-SemiBold',
-    fontSize: 13,
-    color: colors.subtextInput,
-    marginTop: 4,
   },
 
   inputLabel: {
@@ -40,7 +23,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.subtextInput,
     marginLeft: 4,
-    marginTop: 6,
+    marginTop: 8,
     marginBottom: 5,
   },
   input: {
@@ -50,12 +33,14 @@ const styles = StyleSheet.create({
     backgroundColor: colors.container_bg,
     color: colors.subtext,
     fontFamily: 'Ezra-SemiBold',
-    justifyContent: 'center',
   },
-  multilineInput: {
-    height: 96,
-    paddingTop: 14,
-    paddingBottom: 14,
+
+  coordRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  coordCol: {
+    flex: 1,
   },
 
   bottomContainer: {
@@ -105,18 +90,6 @@ const styles = StyleSheet.create({
     color: '#c0392b',
     fontFamily: 'Ezra-SemiBold',
     fontSize: 13,
-  },
-
-  bottomNavigationBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    paddingVertical: 15,
-    width: '90%',
-    alignSelf: 'center',
-    borderRadius: 35,
-    backgroundColor: colors.container_bg2,
-    position: 'absolute',
-    bottom: 0,
   },
 });
 

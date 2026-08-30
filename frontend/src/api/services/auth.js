@@ -78,6 +78,18 @@ export async function logoutAccount(refresh) {
   return response.data;
 }
 
+export async function changePassword(currentPassword, newPassword) {
+  const user = JSON.parse((await AsyncStorage.getItem('user')) || '{}');
+
+  const response = await axios.post(`${BACKEND_API_URL}/change-password/`, {
+    account_id: user.account_id ?? null,
+    current_password: currentPassword,
+    new_password: newPassword,
+  });
+
+  return response.data;
+}
+
 export async function getAccountTypes() {
   const response = await axios.get(`${BACKEND_API_URL}/account-types/`);
   return response.data;

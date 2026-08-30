@@ -216,92 +216,33 @@ const styles = StyleSheet.create({
     color: colors.button,
   },
 
-  // Branch blocks
-  branchBlock: {
-    paddingVertical: 8,
-    borderTopWidth: 1,
-    borderTopColor: colors.background,
-    gap: 2,
-  },
-  branchName: {
-    fontFamily: 'Ezra-SemiBold',
-    fontSize: 13,
-    color: colors.maintext,
-  },
-  branchLine: {
-    fontFamily: 'Ezra-Regular',
-    fontSize: 12,
-    color: colors.subtext,
-  },
-
-  // Menu action buttons
-  menuButtonRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginBottom: 12,
-  },
-  menuButton: {
-    flex: 1,
+  // Navigation rows (Menu / Dish Categories / Branches)
+  navRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    height: 44,
-    borderRadius: 16,
-    backgroundColor: colors.button,
-  },
-  menuButtonOutline: {
-    backgroundColor: 'transparent',
-    borderWidth: 1.5,
-    borderColor: colors.button,
-  },
-  menuButtonText: {
-    color: '#fff',
-    fontFamily: 'Ezra-SemiBold',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  menuButtonTextOutline: {
-    color: colors.button,
-  },
-
-  // Dish rows
-  dishRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    paddingVertical: 8,
+    gap: 12,
+    paddingVertical: 12,
     borderTopWidth: 1,
     borderTopColor: colors.background,
   },
-  dishThumb: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: colors.container_bg,
-  },
-  dishThumbEmpty: {
+  navRowIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 9,
+    backgroundColor: colors.button_green_light,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  dishTextWrap: {
+  navRowLabel: {
     flex: 1,
-    gap: 2,
-  },
-  dishName: {
     fontFamily: 'Ezra-SemiBold',
-    fontSize: 13,
+    fontSize: 14,
     color: colors.maintext,
   },
-  dishMeta: {
-    fontFamily: 'Ezra-Regular',
-    fontSize: 11,
-    color: colors.subtext,
-  },
-  dishPrice: {
+  navRowCount: {
     fontFamily: 'Ezra-SemiBold',
     fontSize: 13,
-    color: colors.button,
+    color: colors.subtext,
   },
 });
 

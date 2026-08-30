@@ -12,6 +12,7 @@ import { launchImageLibrary } from 'react-native-image-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Camera } from 'lucide-react-native';
 import RestaurantBottomNavbar from '../../components/shared/RestaurantBottomNavbar';
+import ScreenHeader from '../../components/shared/ScreenHeader';
 import styles from '../../styles/AddDishScreenStyle';
 import colors from '../../constants/colors';
 import { useAddDishForm } from '../../hooks/useAddDishForm';
@@ -53,8 +54,9 @@ const ToggleRow = ({ label, value, onPress }) => (
   </TouchableOpacity>
 );
 
-const AddDishScreen = ({ navigation }) => {
+const AddDishScreen = ({ navigation, route }) => {
   const {
+    isEdit,
     form,
     handleChange,
     toggle,
@@ -63,15 +65,16 @@ const AddDishScreen = ({ navigation }) => {
     categories,
     isLoading,
     handleSubmit,
-  } = useAddDishForm(navigation);
+  } = useAddDishForm(navigation, route.params?.dish);
 
   return (
     <SafeAreaView style={styles.screen}>
       <View style={styles.container}>
-        <View style={styles.headerContainer}>
-          <Text style={styles.heading}>Add Dish</Text>
-          <Text style={styles.subheading}>Add a dish to your menu</Text>
-        </View>
+        <ScreenHeader
+          title={isEdit ? 'Edit Dish' : 'Add Dish'}
+          subtitle={isEdit ? 'Update this dish' : 'Add a dish to your menu'}
+          onBack={() => navigation.goBack()}
+        />
 
         <ScrollView contentContainerStyle={styles.formScroll}>
           <View style={styles.form}>
@@ -177,7 +180,9 @@ const AddDishScreen = ({ navigation }) => {
                 {isLoading ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
-                  <Text style={styles.submitButtonText}>Add Dish</Text>
+                  <Text style={styles.submitButtonText}>
+                    {isEdit ? 'Save Changes' : 'Add Dish'}
+                  </Text>
                 )}
               </TouchableOpacity>
             </View>

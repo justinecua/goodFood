@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
   midContainer: {
     flex: 1,
     gap: 10,
-    justifyContent: 'topS',
+    justifyContent: 'flex-start',
   },
   cardText: {
     fontSize: 12,

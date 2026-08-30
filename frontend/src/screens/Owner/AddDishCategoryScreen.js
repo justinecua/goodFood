@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   View,
   Text,
@@ -9,25 +9,27 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Tag } from 'lucide-react-native';
+import { Trash2 } from 'lucide-react-native';
 import RestaurantBottomNavbar from '../../components/shared/RestaurantBottomNavbar';
+import ScreenHeader from '../../components/shared/ScreenHeader';
 import styles from '../../styles/AddDishCategoryScreenStyle';
 import colors from '../../constants/colors';
-import { addDishCategory, getDishCategories } from '../../api/services/dish';
+import {
+  addDishCategory,
+  updateDishCategory,
+  deleteDishCategory,
+} from '../../api/services/dish';
 
-const AddDishCategoryScreen = ({ navigation }) => {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [categories, setCategories] = useState([]);
+const AddDishCategoryScreen = ({ navigation, route }) => {
+  const editing = route.params?.category;
+  const isEdit = !!editing?.dish_category_id;
+
+  const [name, setName] = useState(editing?.dish_category_name ?? '');
+  const [description, setDescription] = useState(
+    editing?.dish_category_description ?? '',
+  );
   const [isLoading, setIsLoading] = useState(false);
-
-  const loadCategories = () => {
-    getDishCategories()
-      .then(data => setCategories(data?.categories ?? []))
-      .catch(err => console.log('getDishCategories failed:', err.message));
-  };
-
-  useEffect(loadCategories, []);
+  const [deleting, setDeleting] = useState(false);
 
   const handleSubmit = async () => {
     if (!name.trim()) {
@@ -36,20 +38,24 @@ const AddDishCategoryScreen = ({ navigation }) => {
     }
 
     const body = new FormData();
+    if (isEdit) {
+      body.append('dish_category_id', String(editing.dish_category_id));
+    }
     body.append('dish_category_name', name.trim());
     body.append('dish_category_description', description.trim());
 
     try {
       setIsLoading(true);
-      const res = await addDishCategory(body);
+      const res = await (isEdit
+        ? updateDishCategory(body)
+        : addDishCategory(body));
       if (res.error) {
         Alert.alert('Category Not Saved', res.error);
         return;
       }
-      setName('');
-      setDescription('');
-      loadCategories();
-      Alert.alert('Success', 'Dish category added.');
+      Alert.alert('Success', isEdit ? 'Category updated.' : 'Category added.', [
+        { text: 'OK', onPress: () => navigation.goBack() },
+      ]);
     } catch (err) {
       Alert.alert('Failed', err.message);
     } finally {
@@ -57,15 +63,43 @@ const AddDishCategoryScreen = ({ navigation }) => {
     }
   };
 
+  const confirmDelete = () => {
+    Alert.alert(
+      'Delete Category',
+      `Delete "${editing.dish_category_name}"? Dishes in it become uncategorised.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setDeleting(true);
+              const res = await deleteDishCategory(editing.dish_category_id);
+              if (res.error) {
+                Alert.alert('Not Deleted', res.error);
+                return;
+              }
+              navigation.goBack();
+            } catch (err) {
+              Alert.alert('Failed', err.message);
+            } finally {
+              setDeleting(false);
+            }
+          },
+        },
+      ],
+    );
+  };
+
   return (
     <SafeAreaView style={styles.screen}>
       <View style={styles.container}>
-        <View style={styles.headerContainer}>
-          <Text style={styles.heading}>Add Dish Category</Text>
-          <Text style={styles.subheading}>
-            Categories help organise your menu
-          </Text>
-        </View>
+        <ScreenHeader
+          title={isEdit ? 'Edit Category' : 'Add Dish Category'}
+          subtitle="Categories help organise your menu"
+          onBack={() => navigation.goBack()}
+        />
 
         <ScrollView contentContainerStyle={styles.formScroll}>
           <View style={styles.form}>
@@ -88,40 +122,46 @@ const AddDishCategoryScreen = ({ navigation }) => {
               style={[styles.input, styles.multilineInput]}
             />
 
-            <TouchableOpacity
-              style={[styles.submitButton, isLoading && styles.buttonDisabled]}
-              onPress={handleSubmit}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.submitButtonText}>Add Category</Text>
-              )}
-            </TouchableOpacity>
+            <View style={styles.bottomContainer}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => navigation.goBack()}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.submitButton,
+                  isLoading && styles.buttonDisabled,
+                ]}
+                onPress={handleSubmit}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.submitButtonText}>
+                    {isEdit ? 'Save Changes' : 'Add Category'}
+                  </Text>
+                )}
+              </TouchableOpacity>
+            </View>
 
-            {categories.length > 0 && (
-              <View style={styles.existingWrap}>
-                <Text style={styles.existingTitle}>Existing categories</Text>
-                {categories.map(category => (
-                  <View
-                    key={category.dish_category_id}
-                    style={styles.existingRow}
-                  >
-                    <Tag size={14} color={colors.button} />
-                    <View style={styles.existingTextWrap}>
-                      <Text style={styles.existingName}>
-                        {category.dish_category_name}
-                      </Text>
-                      {category.dish_category_description ? (
-                        <Text style={styles.existingDesc}>
-                          {category.dish_category_description}
-                        </Text>
-                      ) : null}
-                    </View>
-                  </View>
-                ))}
-              </View>
+            {isEdit && (
+              <TouchableOpacity
+                style={styles.deleteLink}
+                onPress={confirmDelete}
+                disabled={deleting}
+              >
+                {deleting ? (
+                  <ActivityIndicator color="#c0392b" />
+                ) : (
+                  <>
+                    <Trash2 size={15} color="#c0392b" />
+                    <Text style={styles.deleteLinkText}>Delete category</Text>
+                  </>
+                )}
+              </TouchableOpacity>
             )}
           </View>
         </ScrollView>
