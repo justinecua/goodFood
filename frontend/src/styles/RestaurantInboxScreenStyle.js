@@ -2,6 +2,9 @@ import { StyleSheet } from 'react-native';
 import colors from '../constants/colors';
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
   background: {
     flex: 1,
     paddingHorizontal: 25,
@@ -12,7 +15,6 @@ const styles = StyleSheet.create({
   },
   headerContainer: {
     alignItems: 'center',
-    marginTop: 30,
   },
   heading: {
     fontFamily: 'Ezra-SemiBold',

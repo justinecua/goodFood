@@ -107,6 +107,14 @@ android {
     }
 }
 
+configurations.configureEach {
+    // Gradle resolves to the highest version any module asks for, so pinning
+    // the ext property above is not enough on its own.
+    resolutionStrategy {
+        force "com.google.android.gms:play-services-location:${rootProject.ext.googlePlayServicesLocationVersion}"
+    }
+}
+
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")

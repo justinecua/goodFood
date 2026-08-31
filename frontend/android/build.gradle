@@ -6,6 +6,14 @@ buildscript {
         targetSdkVersion = 36
         ndkVersion = "27.1.12297006"
         kotlinVersion = "2.1.20"
+
+        // react-native-geolocation-service (5.3.1) was built against
+        // play-services-location 18.x, where FusedLocationProviderClient is a
+        // class. From 21.1.0 it became an interface, so the newer version that
+        // react-native-maps pulls in makes getCurrentPosition() crash with
+        // IncompatibleClassChangeError. Pin the last compatible release.
+        googlePlayServicesLocationVersion = "21.0.1"
+        googlePlayServicesVersion = "21.0.1"
     }
     repositories {
         google()

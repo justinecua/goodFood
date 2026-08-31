@@ -31,8 +31,12 @@ import DinerHomeScreen from '../screens/Diner/DinerHomeScreen';
 import DinerNotificationScreen from '../screens/Diner/DinerNotificationScreen';
 import DinerProfileScreen from '../screens/Diner/DinerProfileScreen';
 import DinerInboxScreen from '../screens/Diner/DinerInboxScreen';
+import DinerFavoritesScreen from '../screens/Diner/DinerFavoritesScreen';
+import DinerPlanBillingScreen from '../screens/Diner/DinerPlanBillingScreen';
 
 import SplashScreen from '../screens/SplashScreen';
+import OnboardingScreen from '../screens/OnboardingScreen';
+import LocationPermissionScreen from '../screens/LocationPermissionScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -43,7 +47,12 @@ const AppNavigator = () => {
         <NavigationContainer>
           <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen name="Splash" component={SplashScreen} />
+            <Stack.Screen name="Onboarding" component={OnboardingScreen} />
             <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen
+              name="LocationPermission"
+              component={LocationPermissionScreen}
+            />
             <Stack.Screen name="Register" component={RegisterScreen} />
             <Stack.Screen name="Subscription" component={SubscriptionScreen} />
 
@@ -62,6 +71,12 @@ const AppNavigator = () => {
             <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
             <Stack.Screen
               name="RestaurantProfileInformationScreen"
+              component={RestaurantProfileInformationScreen}
+            />
+            {/* Same screen, role-neutral name — the diner profile links here
+                and the tab bar adapts to the signed-in account type. */}
+            <Stack.Screen
+              name="ProfileInformation"
               component={RestaurantProfileInformationScreen}
             />
             <Stack.Screen
@@ -112,6 +127,14 @@ const AppNavigator = () => {
             <Stack.Screen
               name="DinerInboxScreen"
               component={DinerInboxScreen}
+            />
+            <Stack.Screen
+              name="DinerFavorites"
+              component={DinerFavoritesScreen}
+            />
+            <Stack.Screen
+              name="DinerPlanBilling"
+              component={DinerPlanBillingScreen}
             />
           </Stack.Navigator>
         </NavigationContainer>
