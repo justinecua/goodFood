@@ -1,0 +1,90 @@
+add onboarding + location consent; swap maps to MapLibre; diner empty states
+
+Four pieces of work over the diner side of the app, plus a native crash fix
+that had to land with them.
+
+Onboarding
+- new OnboardingScreen: three paged slides with dots, Skip, and Next ->
+  Get Started. Shown once on a fresh install.
+- new utils/onboarding.js holds the `hasSeenOnboarding` flag in
+  AsyncStorage; SplashScreen resolves it in the same Promise.all as the
+  session restore and replaces to Onboarding when unseen.
+
+Location consent
+- new LocationPermissionScreen, shown after every login: what the app will
+  store, what it will use it for, Allow / Cancel.
+- useLoginForm now resets to it with params.next set to the account's home;
+  the screen resets to `next` on either button. A cancel, a denied OS
+  permission and a failed fix all continue into the app - location is not a
+  gate.
+- new hooks/useLocationPermission.js (PermissionsAndroid on Android,
+  requestAuthorization on iOS, one getCurrentPosition, then save). It also
+  exports requestLocationPermission() on its own, which DinerMapScreen
+  reuses instead of its own near-identical copy.
+- new api/services/location.js stores {latitude, longitude, capturedAt}
+  under `userLocation`. Device-only for now - Account has no location FK
+  and the `location` app has no endpoints. clearSession() clears it too.
+- AndroidManifest was missing ACCESS_FINE_LOCATION / ACCESS_COARSE_LOCATION
+  entirely, so the existing map permission request could never have been
+  granted.
+
+Fix native crash on getCurrentPosition
+- IncompatibleClassChangeError: FusedLocationProviderClient became an
+  interface in play-services-location 21.1.0, but
+  react-native-geolocation-service 5.3.1 was compiled against 18.x where it
+  was a class. react-native-maps pulled 21.3.0 and Gradle resolves to the
+  highest version, so Allow and the map tab both killed the process.
+- pinned googlePlayServicesLocationVersion / googlePlayServicesVersion to
+  21.0.1 in the root ext, plus a resolutionStrategy.force in app/build.gradle
+  - the ext alone doesn't stop Gradle upgrading.
+
+react-native-maps -> MapLibre (no API key)
+- added @maplibre/maplibre-react-native, removed react-native-maps, dropped
+  the dead com.google.android.geo.API_KEY meta-data.
+- DinerMapScreen rewritten on the v11 API: Map + mapStyle, Camera
+  initialViewState, cameraRef.flyTo, Marker lngLat with a custom dot,
+  NativeUserLocation. Note MapLibre uses [lng, lat] order - the screen
+  converts at the boundary.
+- new constants/map.js holds the style URL (OpenFreeMap Liberty, free and
+  keyless) and the default camera; new DinerMapScreenStyle.js replaces the
+  borrowed ProfileScreenStyle and inline flex objects.
+- iOS needs `pod install` before its next build.
+
+Diner empty states
+- DinerHomeScreen: removed the hardcoded placeholder cards (four Fish
+  Tacos, Rank 1st-6th). Both sections render from state with compact empty
+  states, and the card markup is kept behind the conditional, chunked into
+  the original 2-up / 3-up rows.
+- DinerNotificationScreen: Bell empty state instead of the fake reservation
+  card; removed dead imports.
+- DinerInboxScreen: MessageSquare empty state, header renamed to
+  "Messages", removed a stray Add Dish button left over from the owner
+  screen.
+
+Diner profile tabs
+- none of the six rows had an onPress. Wired to ChangeProfilePicture,
+  ProfileInformation, DinerFavorites (new), DinerPlanBilling (new),
+  PrivacyPolicy and About.
+- personal information is shared, not duplicated: new
+  components/shared/AccountBottomNavbar.js picks the tab bar from the
+  cached account_type, and RestaurantProfileInformationScreen uses it. It's
+  registered a second time as `ProfileInformation` for the diner; the
+  owner's route name still works.
+- new DinerFavoritesScreen and DinerPlanBillingScreen, both
+  placeholder-backed (the favorite and subscription apps have models but no
+  views/urls), sharing DinerListScreenStyle.js.
+
+Subscription screen
+- the two rows didn't line up: one was content-sized, the other 100%, and
+  space-evenly pushed the price past the card edge. Both are full width
+  with space-between now, label left and price right at matching insets.
+
+Also carries some edits already in the working tree: My Restaurants /
+Settings rows commented out on RestaurantProfileScreen, a ScrollView around
+the profile information form, and a marginTop dropped from the inbox
+header.
+
+Checked: ESLint + Prettier on all changed files, `react-native bundle`
+builds clean, `gradlew :app:installDebug` succeeds and libmaplibre.so loads
+without crashing, play-services-location resolves to 21.0.1 throughout. The
+diner screens themselves weren't exercised on device (needs a login).

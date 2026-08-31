@@ -44,7 +44,12 @@ export const useLoginForm = navigation => {
         return;
       }
 
-      navigation.reset({ index: 0, routes: [{ name: home }] });
+      // Ask for location on every login; the screen resets to `home` whether
+      // the user allows or cancels.
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'LocationPermission', params: { next: home } }],
+      });
     } catch (error) {
       Alert.alert('Login Failed', error.response?.data?.error || error.message);
     } finally {

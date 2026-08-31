@@ -86,7 +86,10 @@ const DinerProfileScreen = ({ navigation }) => {
           <Text style={styles.bottomSectionTitle}>General</Text>
           <ScrollView contentContainerStyle={{ paddingBottom: 90 }}>
             <View style={styles.bottomSection}>
-              <TouchableOpacity style={styles.button}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => navigation.navigate('ChangeProfilePicture')}
+              >
                 <View style={styles.buttonContent}>
                   <View style={styles.iconButton}>
                     <Camera size={20} color={colors.food_bg} />
@@ -96,7 +99,10 @@ const DinerProfileScreen = ({ navigation }) => {
                 <ChevronRight size={20} color="#999" />
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.button}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => navigation.navigate('ProfileInformation')}
+              >
                 <View style={styles.buttonContent}>
                   <View style={styles.iconButton}>
                     <User size={20} color={colors.food_bg} />
@@ -108,7 +114,10 @@ const DinerProfileScreen = ({ navigation }) => {
                 <ChevronRight size={20} color="#999" />
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.button}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => navigation.navigate('DinerFavorites')}
+              >
                 <View style={styles.buttonContent}>
                   <View style={styles.iconButton}>
                     <Heart size={20} color={colors.food_bg} />
@@ -118,7 +127,10 @@ const DinerProfileScreen = ({ navigation }) => {
                 <ChevronRight size={20} color="#999" />
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.button}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => navigation.navigate('DinerPlanBilling')}
+              >
                 <View style={styles.buttonContent}>
                   <View style={styles.iconButton}>
                     <CircleDollarSign size={20} color={colors.food_bg} />
@@ -128,7 +140,10 @@ const DinerProfileScreen = ({ navigation }) => {
                 <ChevronRight size={20} color="#999" />
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.button}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => navigation.navigate('PrivacyPolicy')}
+              >
                 <View style={styles.buttonContent}>
                   <View style={styles.iconButton}>
                     <GlobeLock size={20} color={colors.food_bg} />
@@ -138,7 +153,10 @@ const DinerProfileScreen = ({ navigation }) => {
                 <ChevronRight size={20} color="#999" />
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.button}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => navigation.navigate('About')}
+              >
                 <View style={styles.buttonContent}>
                   <View style={styles.iconButton}>
                     <Info size={20} color={colors.food_bg} />

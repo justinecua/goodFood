@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
+import { UtensilsCrossed, Store } from 'lucide-react-native';
+import EmptyState from '../../components/shared/EmptyState';
 import styles from '../../styles/RestaurantHomeScreenStyles';
 import colors from '../../constants/colors';
 import ImageSource from '../../constants/imageSource';
@@ -15,22 +17,33 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+// Rankings aren't wired to the backend yet, so both sections start empty and
+// show their empty state. The cards below render as soon as the API fills
+// these in.
+const chunk = (items, size) => {
+  const rows = [];
+  for (let i = 0; i < items.length; i += size) {
+    rows.push(items.slice(i, i + size));
+  }
+  return rows;
+};
+
 const DinerHomeScreen = ({ navigation }) => {
   const [user, setUser] = useState({});
+  const [topDishes] = useState([]);
+  const [topRestaurants] = useState([]);
 
   useEffect(() => {
     AsyncStorage.getItem('user').then(res => {
       if (res) {
-        const user = JSON.parse(res);
-        console.log(user);
-        setUser(user);
+        setUser(JSON.parse(res));
       }
     });
   }, []);
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <View style={{ flex: 1 }}>
+    <SafeAreaView style={styles.screen}>
+      <View style={styles.screen}>
         <ScrollView>
           <View style={styles.background}>
             <View style={styles.upperContainer}>
@@ -95,44 +108,36 @@ const DinerHomeScreen = ({ navigation }) => {
               </TouchableOpacity>
             </View>
 
-            <View style={styles.dishContainer}>
-              <View style={styles.dishSubContainer}>
-                <View style={styles.dishCard}>
-                  <Image
-                    style={styles.dishImage}
-                    source={ImageSource.fishTacos}
-                  />
-                  <View style={styles.dishUnderline}></View>
-                  <Text style={styles.dishText}>Fish Tacos</Text>
-                </View>
-                <View style={styles.dishCard}>
-                  <Image
-                    style={styles.dishImage}
-                    source={ImageSource.fishTacos}
-                  />
-                  <View style={styles.dishUnderline}></View>
-                  <Text style={styles.dishText}>Fish Tacos</Text>
-                </View>
+            {topDishes.length === 0 ? (
+              <View style={styles.emptySection}>
+                <EmptyState
+                  compact
+                  icon={UtensilsCrossed}
+                  title="No top dishes yet"
+                  message="Once diners start rating dishes, the highest-rated ones show up here."
+                />
               </View>
-              <View style={styles.dishSubContainer}>
-                <View style={styles.dishCard}>
-                  <Image
-                    style={styles.dishImage}
-                    source={ImageSource.fishTacos}
-                  />
-                  <View style={styles.dishUnderline}></View>
-                  <Text style={styles.dishText}>Fish Tacos</Text>
-                </View>
-                <View style={styles.dishCard}>
-                  <Image
-                    style={styles.dishImage}
-                    source={ImageSource.fishTacos}
-                  />
-                  <View style={styles.dishUnderline}></View>
-                  <Text style={styles.dishText}>Fish Tacos</Text>
-                </View>
+            ) : (
+              <View style={styles.dishContainer}>
+                {chunk(topDishes, 2).map((row, rowIndex) => (
+                  <View
+                    key={`dish-row-${rowIndex}`}
+                    style={styles.dishSubContainer}
+                  >
+                    {row.map(dish => (
+                      <View key={dish.id} style={styles.dishCard}>
+                        <Image
+                          style={styles.dishImage}
+                          source={{ uri: dish.image }}
+                        />
+                        <View style={styles.dishUnderline} />
+                        <Text style={styles.dishText}>{dish.name}</Text>
+                      </View>
+                    ))}
+                  </View>
+                ))}
               </View>
-            </View>
+            )}
 
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionHeaderText}>Top Restaurants</Text>
@@ -141,54 +146,37 @@ const DinerHomeScreen = ({ navigation }) => {
               </TouchableOpacity>
             </View>
 
-            <View style={styles.restaurantContainer}>
-              <View style={styles.restaurantSubContainer}>
-                <View style={styles.restaurantCard}>
-                  <Image
-                    style={styles.restaurantCardImage}
-                    source={ImageSource.userProfile}
-                  />
-                  <Text style={styles.restaurantText}>Rank 1st</Text>
-                </View>
-                <View style={styles.restaurantCard}>
-                  <Image
-                    style={styles.restaurantCardImage}
-                    source={ImageSource.userProfile}
-                  />
-                  <Text style={styles.restaurantText}>Rank 2nd</Text>
-                </View>
-                <View style={styles.restaurantCard}>
-                  <Image
-                    style={styles.restaurantCardImage}
-                    source={ImageSource.userProfile}
-                  />
-                  <Text style={styles.restaurantText}>Rank 3rd</Text>
-                </View>
+            {topRestaurants.length === 0 ? (
+              <View style={[styles.emptySection, styles.emptySectionLast]}>
+                <EmptyState
+                  compact
+                  icon={Store}
+                  title="No top restaurants yet"
+                  message="Restaurant rankings appear here as reviews come in."
+                />
               </View>
-              <View style={styles.restaurantSubContainer}>
-                <View style={styles.restaurantCard}>
-                  <Image
-                    style={styles.restaurantCardImage}
-                    source={ImageSource.userProfile}
-                  />
-                  <Text style={styles.restaurantText}>Rank 4th</Text>
-                </View>
-                <View style={styles.restaurantCard}>
-                  <Image
-                    style={styles.restaurantCardImage}
-                    source={ImageSource.userProfile}
-                  />
-                  <Text style={styles.restaurantText}>Rank 5th</Text>
-                </View>
-                <View style={styles.restaurantCard}>
-                  <Image
-                    style={styles.restaurantCardImage}
-                    source={ImageSource.userProfile}
-                  />
-                  <Text style={styles.restaurantText}>Rank 6th</Text>
-                </View>
+            ) : (
+              <View style={styles.restaurantContainer}>
+                {chunk(topRestaurants, 3).map((row, rowIndex) => (
+                  <View
+                    key={`restaurant-row-${rowIndex}`}
+                    style={styles.restaurantSubContainer}
+                  >
+                    {row.map(restaurant => (
+                      <View key={restaurant.id} style={styles.restaurantCard}>
+                        <Image
+                          style={styles.restaurantCardImage}
+                          source={{ uri: restaurant.photo }}
+                        />
+                        <Text style={styles.restaurantText}>
+                          {restaurant.name}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
+                ))}
               </View>
-            </View>
+            )}
           </View>
         </ScrollView>
 

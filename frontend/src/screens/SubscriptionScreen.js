@@ -25,14 +25,14 @@ const SubscriptionScreen = () => {
         <View style={styles.subButtonContainer}>
           <TouchableOpacity style={styles.subscriptionButton}>
             <Text style={styles.registerButtonText}>Diner Subscription</Text>
-            <Text style={styles.registerButtonText}>₱59 / month</Text>
+            <Text style={styles.registerButtonPrice}>₱59 / month</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.subscriptionButton2}>
             <Text style={styles.registerButtonText}>
               Restaurant Subscription
             </Text>
-            <Text style={styles.registerButtonText}>₱99 / month</Text>
+            <Text style={styles.registerButtonPrice}>₱99 / month</Text>
           </TouchableOpacity>
         </View>
 
