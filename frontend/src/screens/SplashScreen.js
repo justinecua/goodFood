@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { View, Image } from 'react-native';
 import styles from '../styles/SplashScreenStyles';
 import { getActiveSession } from '../api/services/auth';
+import { hasSeenOnboarding } from '../utils/onboarding';
 
 const HOME_BY_ACCOUNT_TYPE = {
   'Restaurant Owner': 'RestaurantHome',
@@ -15,14 +16,22 @@ const SplashScreen = ({ navigation }) => {
     const boot = async () => {
       // Restore an existing session (valid for up to a day) so a refresh or
       // app restart doesn't force the user back to the login screen.
-      const [session] = await Promise.all([
+      const [session, seenOnboarding] = await Promise.all([
         getActiveSession().catch(() => null),
+        hasSeenOnboarding(),
         new Promise(resolve => setTimeout(resolve, 1500)),
       ]);
 
       if (cancelled) return;
 
-      const target = session && HOME_BY_ACCOUNT_TYPE[session.user?.account_type];
+      // First launch on this device: the slides come before anything else.
+      if (!seenOnboarding) {
+        navigation.replace('Onboarding');
+        return;
+      }
+
+      const target =
+        session && HOME_BY_ACCOUNT_TYPE[session.user?.account_type];
       navigation.replace(target || 'Login');
     };
 

@@ -32,35 +32,43 @@ const styles = StyleSheet.create({
   },
 
   subscriptionButton: {
-    display: 'flex',
+    width: '100%',
     flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingVertical: 23,
+    paddingHorizontal: 22,
     borderWidth: 1,
     borderColor: colors.button,
-    justifyContent: 'space-evenly',
     borderRadius: 20,
   },
 
   subscriptionButton2: {
     marginTop: 10,
-    display: 'flex',
-    flexDirection: 'row',
-    paddingVertical: 23,
-    justifyContent: 'space-evenly',
-    borderRadius: 20,
     width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 23,
+    paddingHorizontal: 22,
+    borderRadius: 20,
     backgroundColor: colors.container_bg,
   },
   subButtonContainer: {
     marginTop: 17,
+    width: '100%',
   },
   registerButtonText: {
     fontFamily: 'Ezra-SemiBold',
     color: colors.subtext,
     fontSize: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    textAlign: 'center',
+    textAlign: 'left',
+  },
+  registerButtonPrice: {
+    fontFamily: 'Ezra-SemiBold',
+    color: colors.subtext,
+    fontSize: 12,
+    textAlign: 'right',
   },
 
   bottomSub: {

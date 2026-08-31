@@ -136,7 +136,7 @@ const DinerProfileScreen = ({ navigation }) => {
                 <ChevronRight size={20} color="#999" />
               </TouchableOpacity>
 
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 style={styles.button}
                 onPress={() => navigation.navigate('MyRestaurant')}
               >
@@ -147,7 +147,7 @@ const DinerProfileScreen = ({ navigation }) => {
                   <Text style={styles.buttonText}>My Restaurants</Text>
                 </View>
                 <ChevronRight size={20} color="#999" />
-              </TouchableOpacity>
+              </TouchableOpacity> */}
 
               <TouchableOpacity
                 style={styles.button}
@@ -175,7 +175,7 @@ const DinerProfileScreen = ({ navigation }) => {
                 <ChevronRight size={20} color="#999" />
               </TouchableOpacity>
 
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 style={styles.button}
                 onPress={() => navigation.navigate('RestaurantSettings')}
               >
@@ -186,7 +186,7 @@ const DinerProfileScreen = ({ navigation }) => {
                   <Text style={styles.buttonText}>Settings</Text>
                 </View>
                 <ChevronRight size={20} color="#999" />
-              </TouchableOpacity>
+              </TouchableOpacity> */}
 
               <TouchableOpacity
                 style={styles.button}

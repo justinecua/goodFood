@@ -6,10 +6,11 @@ import {
   TouchableOpacity,
   Platform,
   Modal,
+  ScrollView
 } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import RestaurantBottomNavbar from '../../components/shared/RestaurantBottomNavbar';
+import AccountBottomNavbar from '../../components/shared/AccountBottomNavbar';
 import ScreenHeader from '../../components/shared/ScreenHeader';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import styles from '../../styles/RestaurantProfileInformationScreenStyle';
@@ -139,6 +140,7 @@ const RestaurantProfileInformationScreen = ({ navigation }) => {
                 <Camera size={16} color="#fff" />
               </View>
             </View>
+            <ScrollView contentContainerStyle={{ paddingBottom: 130 }}>
             <View style={styles.midSubContainer}>
               <Text style={styles.inputLabel}>First Name</Text>
               <TextInput
@@ -233,10 +235,11 @@ const RestaurantProfileInformationScreen = ({ navigation }) => {
                 </TouchableOpacity>
               </View>
             </View>
+            </ScrollView>
           </View>
         </View>
 
-        <RestaurantBottomNavbar navigation={navigation} />
+        <AccountBottomNavbar navigation={navigation} />
       </View>
     </SafeAreaView>
   );

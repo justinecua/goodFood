@@ -1,0 +1,336 @@
+2026-08-31 — onboarding, location consent, MapLibre swap, diner screens
+
+Four separate pieces of work, committed together because they all landed
+in the same pass over the diner side of the app:
+
+  1. first-run onboarding carousel + a post-login location consent screen
+  2. fixed a native crash in react-native-geolocation-service
+  3. replaced react-native-maps with MapLibre (no API key)
+  4. empty states + working profile tabs on the diner screens
+
+Also carries a few small edits that were already sitting in the working
+tree before this session (see "Carried along" at the end).
+
+
+Files
+  new   frontend/src/screens/OnboardingScreen.js
+        frontend/src/screens/LocationPermissionScreen.js
+        frontend/src/screens/Diner/DinerFavoritesScreen.js
+        frontend/src/screens/Diner/DinerPlanBillingScreen.js
+        frontend/src/components/shared/AccountBottomNavbar.js
+        frontend/src/hooks/useLocationPermission.js
+        frontend/src/api/services/location.js
+        frontend/src/utils/onboarding.js
+        frontend/src/constants/map.js
+        frontend/src/styles/OnboardingScreenStyle.js
+        frontend/src/styles/LocationPermissionScreenStyle.js
+        frontend/src/styles/DinerMapScreenStyle.js
+        frontend/src/styles/DinerListScreenStyle.js
+  edit  frontend/android/build.gradle, app/build.gradle
+        frontend/android/app/src/main/AndroidManifest.xml
+        frontend/package.json (+ lock)
+        frontend/src/navigation/AppNavigator.js
+        frontend/src/screens/SplashScreen.js
+        frontend/src/hooks/useLoginForm.js
+        frontend/src/api/services/auth.js
+        frontend/src/screens/Diner/DinerHomeScreen.js
+        frontend/src/screens/Diner/DinerMapScreen.js
+        frontend/src/screens/Diner/DinerInboxScreen.js
+        frontend/src/screens/Diner/DinerNotificationScreen.js
+        frontend/src/screens/Diner/DinerProfileScreen.js
+        frontend/src/screens/Owner/RestaurantProfileInformationScreen.js
+        frontend/src/screens/SubscriptionScreen.js
+        + the matching style files
+
+
+Onboarding (first launch only)
+
+New OnboardingScreen.js - three paged slides (discover restaurants / rate
+what you eat / find what's near you) on a horizontal FlatList with
+pagingEnabled, dots, a Skip link and Next -> "Get Started". The visible
+slide is tracked from the scroll offset in onMomentumScrollEnd rather than
+onViewableItemsChanged; for three full-width pages that's simpler and has
+no viewability config to get wrong.
+
+utils/onboarding.js holds the flag (`hasSeenOnboarding` in AsyncStorage)
+with hasSeenOnboarding() / markOnboardingSeen() / resetOnboarding(). Every
+read and write is wrapped - a storage failure just means the slides show
+again, which is the harmless direction to fail in. resetOnboarding() is
+there for testing the first-run path without wiping app data.
+
+SplashScreen now resolves the flag in the same Promise.all as the session
+restore, so it costs no extra time, and replaces to Onboarding when unseen.
+Finishing or skipping sets the flag and replaces to Login.
+
+
+Location consent (every login)
+
+New LocationPermissionScreen.js, matching the sketch: title "goodFood wants
+to track your location", "Do you want to share your location?", two info
+cards (stores your location / suggests restaurants near you), Allow and
+Cancel.
+
+useLoginForm resets to LocationPermission with `params.next` set to the
+account's home route instead of resetting straight to the home screen; the
+consent screen then resets to `next` on either button. Location is never a
+gate - Cancel, a denied OS permission and a failed fix all continue to the
+app, the last two after an alert explaining what won't work.
+
+hooks/useLocationPermission.js does the actual work: PermissionsAndroid on
+Android, Geolocation.requestAuthorization('whenInUse') on iOS, then one
+getCurrentPosition wrapped in a promise, then saveUserLocation. It also
+exports requestLocationPermission() on its own, which DinerMapScreen reuses
+(it had its own near-identical copy).
+
+api/services/location.js stores the coordinates under `userLocation` in
+AsyncStorage as {latitude, longitude, capturedAt}. Device-only for now -
+Account has no location FK and the `location` app has no views/urls, so
+there is nothing to POST to yet. clearSession() clears it alongside the
+session keys, since the coordinates belong to whoever was signed in.
+
+The hardware back button is swallowed on this screen (BackHandler returning
+true) - the user is already logged in by the time they see it, so back must
+not drop them onto Login.
+
+Android needed ACCESS_FINE_LOCATION / ACCESS_COARSE_LOCATION in the
+manifest; only INTERNET was declared, which means the permission request in
+the old DinerMapScreen could never have been granted. iOS already had
+NSLocationWhenInUseUsageDescription.
+
+
+Native crash: play-services-location
+
+Pressing Allow (and opening the map) killed the app outright. It's a native
+error, so the try/catch in the hook never sees it - the process just dies:
+
+  FATAL EXCEPTION: mqt_v_native
+  java.lang.IncompatibleClassChangeError: Found interface
+    com.google.android.gms.location.FusedLocationProviderClient,
+    but class was expected
+      at com.agontuk.RNFusedLocation.FusedLocationProvider.getCurrentLocation
+      at com.agontuk.RNFusedLocation.RNFusedLocationModule.getCurrentPosition
+
+react-native-geolocation-service 5.3.1 (last released 2022) was compiled
+against play-services-location 18.x, where FusedLocationProviderClient is
+an abstract class. In 21.1.0 Google turned it into an interface.
+react-native-maps asked for 21.3.0, Gradle resolves to the highest version
+in the graph, and the old module then ran against a signature it wasn't
+built for.
+
+Fix: pin the last compatible release.
+  - android/build.gradle ext: googlePlayServicesLocationVersion = "21.0.1"
+    and googlePlayServicesVersion = "21.0.1" (the two names both libraries
+    read via their safeExtGet helpers)
+  - android/app/build.gradle: a resolutionStrategy.force on the same
+    coordinate. The ext property alone is NOT enough - anything else
+    requesting a higher version still wins without the force.
+
+Verified with `./gradlew :app:dependencies --configuration
+debugRuntimeClasspath | grep play-services-location` - 21.0.1 everywhere,
+no upgrade arrows. The pin stays relevant after the maps swap below:
+MapLibre reads the same googlePlayServicesLocationVersion ext, so both
+agree.
+
+
+react-native-maps -> MapLibre
+
+The Google Maps key stopped working, so the map moved off Google entirely.
+MapLibre needs no API key - it renders whatever vector style you point it
+at. Added @maplibre/maplibre-react-native ^11.3.7, removed
+react-native-maps, and dropped the now-dead com.google.android.geo.API_KEY
+meta-data from the manifest. GOOGLE_MAPS_API_KEY is still in .env, unused.
+
+Worth recording why the obvious alternatives don't work on Android:
+  - OSM tiles via <UrlTile> inside react-native-maps still needs the key -
+    the underlying view is the Google Maps SDK and it must authorize before
+    it renders anything, even with mapType="none".
+  - PROVIDER_DEFAULT / Apple Maps is key-free on iOS only; on Android the
+    default provider IS Google.
+  - Leaflet in a WebView is genuinely key-free but has worse gestures and
+    perf, and OSM's public tile server usage policy rules it out for
+    production traffic.
+
+DinerMapScreen rewritten on the v11 API:
+  MapView          -> Map, with mapStyle
+  initialRegion    -> Camera initialViewState {center, zoom}
+  animateToRegion  -> cameraRef.flyTo({center, zoom, duration})
+  Marker coordinate-> Marker lngLat, with children (it's a view annotation,
+                      so it renders our own dot + label)
+  showsUserLocation-> <NativeUserLocation />
+
+MapLibre works in [longitude, latitude] order, the opposite of the
+{latitude, longitude} objects the rest of the app passes around.
+getUserLocation() still returns the object form and the screen converts at
+the boundary - worth remembering when restaurant pins get added.
+
+constants/map.js holds the style URL and the default camera. Style is
+OpenFreeMap's Liberty (https://tiles.openfreemap.org/styles/liberty):
+OSM-based, free, no signup, no usage cap. Swap for MapTiler/Protomaps if an
+SLA is ever needed. Default centre is Iligan at zoom 12 until the first fix
+lands, then zoom 15.
+
+The screen also keeps the previous behaviour of seeding from the stored
+location before the live fix, and saving the fresh fix back. Added a
+`cancelled` guard so a late fix can't setState after unmount. It got its
+own DinerMapScreenStyle.js instead of borrowing ProfileScreenStyle plus
+three inline {flex:1} objects.
+
+iOS still needs `cd ios && pod install` - only Android was built here.
+
+
+Emulator gotcha: this is not an API key problem
+
+Most of the "the map is broken" time went here, so writing it down.
+
+The Google symptom was:
+  E Google Maps Android API: Error requesting API token. StatusCode=UNAVAILABLE
+  W libbinder.Binder: ...maps.auth.IApiTokenService ... took 24041ms
+
+UNAVAILABLE plus a 24-second binder timeout means Play Services never
+reached Google to validate the key. A genuinely rejected key looks nothing
+like this - it says "Authorization failure" and "Ensure that the Maps SDK
+for Android is enabled" and dumps the key and SHA-1.
+
+After the MapLibre swap the same underlying fault showed up as:
+  MapLibre Native [ERROR] [Mbgl] [Setup]: loading style failed:
+    Unable to resolve host "tiles.openfreemap.org"
+
+The emulator could open raw TCP fine (nc -z to the tile server's IP:443 and
+to 8.8.8.8:53 both succeeded) but could not resolve any hostname. Private
+DNS was off. Launching with `-dns-server 8.8.8.8,8.8.4.4` did NOT help -
+the emulator maps those to its internal forwarders 10.0.2.3/10.0.2.4, and
+on the AndroidWifi interface in this system image that forwarding path is
+broken (virtio-wifi bug).
+
+What actually fixed it - drop the guest onto mobile data:
+    adb shell svc wifi disable
+    adb shell svc data enable
+or launch the AVD with Wi-Fi off entirely:
+    emulator -avd Pixel_9a -feature -Wifi
+
+This is runtime state, not config, so it has to be redone after a wipe. If
+maps look broken on a fresh emulator, check DNS before touching any keys.
+
+
+Diner screens: empty states
+
+Same treatment the owner screens got in the previous change.
+
+- DinerHomeScreen: the hardcoded placeholder cards are gone (four "Fish
+  Tacos", "Rank 1st" through "Rank 6th"). Both sections now render from
+  topDishes / topRestaurants state, empty for now since rankings have no
+  endpoints, showing compact EmptyStates. The card markup is kept behind
+  the conditional and chunked back into the original row layout (2-up for
+  dishes, 3-up for restaurants), so it renders as soon as data arrives.
+  Also dropped a stray console.log(user).
+- DinerNotificationScreen: the fake "New Reservation Request" card replaced
+  with a Bell empty state. Removed dead imports copied over from the owner
+  screen (Dropdown, TextInput, TouchableOpacity, Image, colors, useState).
+- DinerInboxScreen: MessageSquare empty state, header renamed "Diner Inbox"
+  -> "Messages" to match the tab, and removed a stray "Add Dish" button -
+  the same copy-paste leftover that was cleaned off the owner inbox.
+
+Both style files gained a `screen: { flex: 1 }` key so the wrappers stop
+using inline styles.
+
+
+Diner profile tabs
+
+None of the six rows had an onPress at all. Now:
+
+  Change Profile Picture            -> ChangeProfilePicture (existing)
+  Complete your personal information-> ProfileInformation
+  My Favorites                      -> DinerFavorites       (new)
+  Plan and Billing                  -> DinerPlanBilling     (new)
+  Privacy Policy                    -> PrivacyPolicy        (existing)
+  About                             -> About                (existing)
+
+ChangeProfilePicture / PrivacyPolicy / About were already role-neutral -
+they use ScreenHeader + goBack and no owner navbar - so the diner links
+straight at them.
+
+Personal information is shared rather than duplicated. The owner's
+RestaurantProfileInformationScreen is already the right form (name, gender,
+birthdate, email, mobile, photo) hitting the generic add-additional-info
+endpoint; the only owner-specific thing in it was the tab bar. New
+components/shared/AccountBottomNavbar.js reads account_type from the cached
+user and renders DinerBottomNavbar or RestaurantBottomNavbar, and that
+screen now uses it. It's registered a second time under the role-neutral
+route name `ProfileInformation` for the diner to link to; the owner's
+existing route name still points at the same component, so the owner flow
+is untouched. Copying 250 lines for the diner would have been the
+alternative.
+
+AccountBottomNavbar renders null until AsyncStorage resolves - the tab bar
+appears a frame late rather than flashing the wrong role's tabs.
+
+New screens, both placeholder-backed because the `favorite` and
+`subscription` Django apps have models but no views or urls:
+- DinerFavoritesScreen - heart empty state with a "Find restaurants" action
+  back to DinerHome.
+- DinerPlanBillingScreen - a plan card reading "No active plan", a button
+  through to the existing Subscription screen, and an empty payment
+  history. `plan` and `payments` are the seams the API fills.
+Both share the new DinerListScreenStyle.js.
+
+
+Subscription screen alignment
+
+The two subscription rows didn't line up: the first was content-sized and
+the second width:100%, and space-evenly pushed "P99 / month" past the card
+edge. Both are width:100% now with space-between and paddingHorizontal 22,
+so label pins left and price pins right at the same insets on both rows.
+Added a registerButtonPrice style (right-aligned) for the price texts; the
+label style is left-aligned instead of centred.
+
+
+Checked
+- frontend: ESLint (0 errors) + Prettier on every changed/new file
+- `npx react-native bundle --platform android` builds clean, so every
+  import in the new screens resolves
+- `./gradlew :app:installDebug` succeeds; libmaplibre.so loads and its view
+  managers register on the emulator with no crash on startup
+- play-services-location resolves to 21.0.1 across debugRuntimeClasspath
+- device reaches tiles.openfreemap.org by hostname on :443 after the Wi-Fi
+  workaround
+- the "Could not find generated setter for MLRN*Manager" warnings in
+  logcat are benign New-Arch interop fallbacks, not errors
+
+
+Notes / follow-ups
+- The diner screens have not been exercised on the device - reaching them
+  needs a login. Verified through the bundle build and lint only.
+- Whether MapLibre tiles actually paint is likewise unconfirmed; what was
+  verified is that the two things that were failing (DNS, reaching the tile
+  host) now work from inside the emulator.
+- react-native-geolocation-service is unmaintained (2022, no New
+  Architecture support) and only works here through the interop layer. The
+  version pin unblocks it; migrating to
+  @react-native-community/geolocation is the durable fix and is close to a
+  drop-in - it would touch useLocationPermission.js and DinerMapScreen.js.
+- The location is stored on the device only. Persisting it would need a
+  location FK on Account (or a join table) plus an endpoint in the
+  `location` app, which currently has a model and nothing else.
+- DinerHomeScreen still shows a hardcoded address line ("Brgy. Poblacion,
+  Quezon Avenue, Iligan ...") which is now visibly wrong given a real
+  location is captured at login. Showing a street name needs reverse
+  geocoding.
+- The "See all" links on the home sections still have no handler; there are
+  no list screens to point them at yet.
+- Consent is asked on every login, not once - deliberate for now, but it
+  should probably remember a previous "Allow" and skip straight through.
+- The emulator ran on software GL ("Available Memory: 2830 MB, Required:
+  5120 MB"), so MapLibre's vector rendering may feel sluggish there; that's
+  a host-RAM issue, not the app.
+
+
+Carried along
+
+These were already uncommitted in the working tree before this session and
+are included in the same commit:
+- RestaurantProfileScreen.js - "My Restaurants" and "Settings" rows
+  commented out.
+- RestaurantProfileInformationScreen.js - the form body wrapped in a
+  ScrollView (separate from the navbar swap above).
+- RestaurantInboxScreenStyle.js - marginTop: 30 dropped from
+  headerContainer.
