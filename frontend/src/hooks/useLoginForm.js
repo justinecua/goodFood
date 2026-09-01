@@ -36,7 +36,7 @@ export const useLoginForm = navigation => {
         user.account_type === 'Restaurant Owner'
           ? 'RestaurantHome'
           : user.account_type === 'Diner'
-          ? 'DinerHome'
+          ? 'DinerHomeMode'
           : null;
 
       if (!home) {

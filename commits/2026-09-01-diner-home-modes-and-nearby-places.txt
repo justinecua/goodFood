@@ -1,0 +1,85 @@
+add assisted diner home with nearby food search; Apple Maps on iOS
+
+Gives the diner a choice of home screen and builds the second one: a
+"where do you want to eat" search over the food places around them, with a
+live map. Owner side untouched.
+
+Home mode chooser
+- new DinerHomeModeScreen: pick between the existing "Default home" and the
+  new "Assisted home". The choice is remembered (`dinerHomeMode` in
+  AsyncStorage) and the screen auto-forwards to it on later visits, so it
+  only interrupts once.
+- diners land here after login and session restore (useLoginForm,
+  SplashScreen); it replaces onward immediately so the back stack stays a
+  single entry.
+- both home screens get a header button that reopens the chooser with
+  `{ change: true }` to skip the auto-forward.
+- DinerBottomNavbar's Home tab follows the stored mode and stays lit on
+  either home route, otherwise the assisted screen becomes unreachable from
+  the tab bar.
+
+Assisted home
+- new DinerAssistedHomeScreen: search input, category chips, a live map and
+  a distance-sorted list, with its own loading / location-denied /
+  request-failed / no-match / nothing-nearby states.
+- the query filters the fetched set on name, cuisine, category and address
+  and requires every word to match, so "korean bbq" narrows. Filtering
+  client-side also avoids a request per keystroke.
+- new useNearbyPlaces: uses the login-time stored location immediately,
+  replaces it with a fresh fix, re-runs on origin or radius change, ranks
+  nearest-first. "Search wider" goes 3km -> 10km.
+- new utils/geo.js (haversine + distance formatting).
+
+Nearby data via Overpass / OpenStreetMap
+- new api/services/places.js. We have no "near me" endpoint, so this is
+  OSM: no key, same on both platforms. Queries food amenities and food
+  shops in the radius, drops unnamed pins, de-dupes node/way duplicates of
+  the same venue.
+- uses `nwr` and `out center` - half the statements of spelling out
+  node/way, and measurably quicker (6.8s vs 8.3s for the same area).
+- public instances are unreliable and fail independently: in one sitting
+  the main one went from fine to timing out, two mirrors returned a bare
+  500 for every query, and overpass.osm.jp failed TLS (dropped). Trying
+  them in sequence meant waiting out the sum of the dead ones. Now the last
+  mirror that worked gets a solo attempt first, and otherwise the rest are
+  raced with the losers aborted.
+
+St. Michael's College as the map's home base
+- constants/map.js centres on the Quezon Avenue campus (8.228441,
+  124.2395125), chosen over the Tambo one because it matches the address
+  already on the diner home header.
+- the file now exports both coordinate orders and both zoom conventions,
+  since MapLibre wants [lng, lat] and react-native-maps wants
+  {latitude, longitude}.
+
+Apple Maps on iOS, MapLibre on Android
+- react-native-maps is back, used on iOS only, where PROVIDER_DEFAULT is
+  Apple Maps: free, no key. Android stays on MapLibre.
+- new NearbyMap.ios.js / NearbyMap.android.js, picked by Metro per
+  platform, same props, each handling its own coordinate order, re-centre
+  animation and user dot. Used by both the assisted home and
+  DinerMapScreen, which loses its inline map code.
+- the play-services-location 21.0.1 pin still applies - re-adding
+  react-native-maps is what pulled the bad version in originally.
+
+Fixes found while verifying on the simulator
+- Info.plist had an EMPTY NSLocationWhenInUseUsageDescription. iOS silently
+  refuses location with a blank purpose string and App Store review rejects
+  it; this also affected the login-time consent screen, not just this
+  feature.
+- formatDistance(999) rendered "1000 m" right above a neighbour shown as
+  "1.0 km"; it now rounds before choosing the unit.
+- the map card rode up over the filter chips once results populated (chip
+  row had flexGrow: 0 but no flexShrink: 0).
+- the location-denied "Try again" button called reload(), which no-ops
+  without an origin; it retries the location step instead.
+
+Checked: built and ran on the iPhone 17 Pro simulator with the simulator
+location set to the campus - Apple Maps renders, 80 food places found, pins
+on the map, list sorted nearest-first. Overpass query verified against the
+campus coordinates (200, 80 named results); geo maths verified against that
+live payload (nothing outside the radius, order correct); both platform
+bundles build; ESLint + Prettier clean.
+
+Android is NOT verified for this change - the MapLibre half is written but
+has not been rebuilt or run since, as the work focused on iOS.

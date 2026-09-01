@@ -1,7 +1,9 @@
+import { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import styles from '../../styles/RestaurantAddDishScreenStyle';
 import { useRoute } from '@react-navigation/native';
 import colors from '../../constants/colors';
+import { getHomeMode, routeForMode } from '../../utils/homeMode';
 
 import chatnavbar from '../../assets/navBarIcons/chat_0.png';
 import eat from '../../assets/navBarIcons/eat_0.png';
@@ -15,26 +17,34 @@ import homenavbar1 from '../../assets/navBarIcons/home_1.png';
 import notifnavbar1 from '../../assets/navBarIcons/notif_1.png';
 import usercircle1 from '../../assets/navBarIcons/profile_1.png';
 
+// Both home screens live under the Home tab, so it stays lit on either one
+// and returns the diner to whichever they picked on DinerHomeMode.
+const HOME_ROUTES = ['DinerHome', 'DinerAssistedHome'];
+
 const DinerBottomNavbar = ({ navigation }) => {
   const route = useRoute();
   const current = route.name;
+  const [homeRoute, setHomeRoute] = useState('DinerHome');
+
+  useEffect(() => {
+    getHomeMode().then(mode => setHomeRoute(routeForMode(mode)));
+  }, []);
+
+  const onHome = HOME_ROUTES.includes(current);
 
   return (
     <View style={styles.bottomNavigationBar}>
       <TouchableOpacity
         style={styles.navItem}
-        onPress={() => navigation.navigate('DinerHome')}
+        onPress={() => navigation.navigate(homeRoute)}
       >
         <Image
           style={styles.homeIcon}
-          source={current === 'DinerHome' ? homenavbar1 : homenavbar}
+          source={onHome ? homenavbar1 : homenavbar}
         />
 
         <Text
-          style={[
-            styles.homenavIconText,
-            current === 'DinerHome' && { color: colors.button },
-          ]}
+          style={[styles.homenavIconText, onHome && { color: colors.button }]}
         >
           Home
         </Text>
