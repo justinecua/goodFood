@@ -6,7 +6,7 @@ import { hasSeenOnboarding } from '../utils/onboarding';
 
 const HOME_BY_ACCOUNT_TYPE = {
   'Restaurant Owner': 'RestaurantHome',
-  Diner: 'DinerHome',
+  Diner: 'DinerHomeMode',
 };
 
 const SplashScreen = ({ navigation }) => {

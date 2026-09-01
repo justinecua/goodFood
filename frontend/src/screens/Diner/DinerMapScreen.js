@@ -1,53 +1,27 @@
-import { View, Text } from 'react-native';
-import { useEffect, useState, useRef } from 'react';
-import {
-  Map,
-  Camera,
-  Marker,
-  NativeUserLocation,
-} from '@maplibre/maplibre-react-native';
+import { View } from 'react-native';
+import { useEffect, useState } from 'react';
 import Geolocation from 'react-native-geolocation-service';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import styles from '../../styles/DinerMapScreenStyle';
+import NearbyMap from '../../components/shared/NearbyMap';
 import DinerBottomNavbar from '../../components/shared/DinerBottomNavbar';
 import { requestLocationPermission } from '../../hooks/useLocationPermission';
 import { getUserLocation, saveUserLocation } from '../../api/services/location';
-import {
-  MAP_STYLE_URL,
-  DEFAULT_CENTER,
-  DEFAULT_ZOOM,
-  USER_ZOOM,
-} from '../../constants/map';
 
+// Apple Maps on iOS, MapLibre on Android - both behind NearbyMap, which
+// takes {latitude, longitude} and handles the coordinate order each one
+// wants. Until a fix arrives the map sits on St. Michael's College.
 const DinerMapScreen = ({ navigation }) => {
-  // MapLibre works in [longitude, latitude] order, unlike the {latitude,
-  // longitude} objects the rest of the app passes around.
   const [center, setCenter] = useState(null);
-  const cameraRef = useRef(null);
 
   useEffect(() => {
     let cancelled = false;
-
-    const showCoords = ({ latitude, longitude }, animate) => {
-      if (cancelled) return;
-
-      const lngLat = [longitude, latitude];
-      setCenter(lngLat);
-
-      if (animate) {
-        cameraRef.current?.flyTo({
-          center: lngLat,
-          zoom: USER_ZOOM,
-          duration: 1000,
-        });
-      }
-    };
 
     const requestLocation = async () => {
       // Whatever was captured at login gets the map on the right spot right
       // away; the live fix below refines it.
       const stored = await getUserLocation();
-      if (stored) showCoords(stored, false);
+      if (!cancelled && stored) setCenter(stored);
 
       const hasPermission = await requestLocationPermission();
 
@@ -58,9 +32,11 @@ const DinerMapScreen = ({ navigation }) => {
 
       Geolocation.getCurrentPosition(
         position => {
+          if (cancelled) return;
+
           const { latitude, longitude } = position.coords;
 
-          showCoords({ latitude, longitude }, true);
+          setCenter({ latitude, longitude });
           saveUserLocation({ latitude, longitude }).catch(() => {});
         },
         error => {
@@ -85,26 +61,7 @@ const DinerMapScreen = ({ navigation }) => {
     <SafeAreaView style={styles.screen}>
       <View style={styles.container}>
         <View style={styles.mapWrap}>
-          <Map style={styles.map} mapStyle={MAP_STYLE_URL}>
-            <Camera
-              ref={cameraRef}
-              initialViewState={{
-                center: center ?? DEFAULT_CENTER,
-                zoom: center ? USER_ZOOM : DEFAULT_ZOOM,
-              }}
-            />
-
-            <NativeUserLocation />
-
-            {center && (
-              <Marker id="you-are-here" lngLat={center}>
-                <View style={styles.marker}>
-                  <View style={styles.markerDot} />
-                  <Text style={styles.markerLabel}>You are here</Text>
-                </View>
-              </Marker>
-            )}
-          </Map>
+          <NearbyMap style={styles.map} center={center} />
         </View>
 
         <DinerBottomNavbar navigation={navigation} />

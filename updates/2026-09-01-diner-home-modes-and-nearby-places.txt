@@ -1,0 +1,240 @@
+2026-09-01 — diner home modes, nearby food search, Apple Maps on iOS
+
+Two pieces of work, in order:
+
+  1. a second diner home screen ("assisted") and a chooser between it and
+     the existing one, backed by a nearby-food search
+  2. the map moved to St. Michael's College, went live on both home and map
+     screens, and split per platform - Apple Maps on iOS, MapLibre on
+     Android
+
+Owner side untouched throughout.
+
+
+Files
+  new   frontend/src/screens/Diner/DinerHomeModeScreen.js
+        frontend/src/screens/Diner/DinerAssistedHomeScreen.js
+        frontend/src/components/shared/NearbyMap.ios.js
+        frontend/src/components/shared/NearbyMap.android.js
+        frontend/src/hooks/useNearbyPlaces.js
+        frontend/src/api/services/places.js
+        frontend/src/utils/geo.js
+        frontend/src/utils/homeMode.js
+        frontend/src/styles/DinerHomeModeScreenStyle.js
+        frontend/src/styles/DinerAssistedHomeScreenStyle.js
+  edit  frontend/package.json (+ lock) - react-native-maps back
+        frontend/ios/goodFood/Info.plist
+        frontend/ios/goodFood.xcodeproj/project.pbxproj
+        frontend/src/constants/map.js
+        frontend/src/navigation/AppNavigator.js
+        frontend/src/screens/SplashScreen.js
+        frontend/src/hooks/useLoginForm.js
+        frontend/src/components/shared/DinerBottomNavbar.js
+        frontend/src/screens/Diner/DinerHomeScreen.js
+        frontend/src/screens/Diner/DinerMapScreen.js
+        frontend/src/styles/RestaurantHomeScreenStyles.js
+        frontend/src/styles/DinerMapScreenStyle.js
+
+
+Home mode chooser
+
+New DinerHomeModeScreen: two cards, "Default home" (the existing top
+dishes / top restaurants screen) and "Assisted home". The pick is stored in
+AsyncStorage under `dinerHomeMode` (utils/homeMode.js) and the screen
+auto-forwards to the stored route on later visits, so it interrupts once
+rather than every login.
+
+Diners now land on DinerHomeMode after login and after a session restore
+(useLoginForm, SplashScreen); it replaces onward immediately, so the back
+stack stays a single entry.
+
+Switching later: both home screens have a header button that reopens the
+chooser with `{ change: true }`, which skips the auto-forward and shows the
+options again.
+
+DinerBottomNavbar's Home tab reads the stored mode and navigates there, and
+stays lit on either home route (HOME_ROUTES). Without that the assisted
+screen would be unreachable from the tab bar once you left it.
+
+
+Assisted home
+
+DinerAssistedHomeScreen: "Where do you want to eat?" as the heading, a
+search input, category chips (All / Restaurants / Cafés / Fast food /
+Sweets / Food stores), a live map, and a distance-sorted list of what's
+around the diner. Loading, location-denied, request-failed, no-match and
+nothing-nearby each get their own state.
+
+The typed query filters the already-fetched set on name, cuisine, category
+and address, and every word has to match - so "korean bbq" narrows instead
+of widening the way a plain OR would. Filtering client-side also means
+typing doesn't fire a request per keystroke, which matters given where the
+data comes from (below).
+
+useNearbyPlaces owns position + fetch: the login-time stored location is
+used immediately so the list can render, a fresh fix replaces it, and the
+search re-runs when either the origin or the radius changes. Nearest first
+is the whole ranking for now. "Search wider" goes 3 km -> 10 km.
+
+
+Where the recommendations come from
+
+There is no "near me" endpoint on our backend - restaurants have lat/lon
+columns but nothing queries them and there's no data - so the list is
+OpenStreetMap via the Overpass API. No key, no signup, same on both
+platforms, and consistent with the keyless direction the MapLibre swap set.
+
+api/services/places.js queries amenity (restaurant, cafe, fast_food,
+food_court, ice_cream, bar, pub) and shop (bakery, pastry, deli,
+convenience, supermarket, greengrocer, butcher, seafood) within the radius.
+Notes on the query:
+  - `nwr` matches nodes, ways and relations in one statement instead of
+    spelling out node/way separately. Half the statements and measurably
+    quicker: 6.8s vs 8.3s for the same area.
+  - `out center` gives ways a single coordinate, so venues mapped as
+    buildings arrive with a usable lat/lon like nodes do.
+  - unnamed pins are dropped, and results are de-duplicated on
+    name + position rounded to 4dp, because OSM often has both a node and
+    a way for the same venue.
+
+
+Overpass reliability - the part that took the time
+
+Public Overpass instances fail independently, slowly, and often. Observed
+in one sitting: overpass-api.de returned 200 fine, then half an hour later
+timed out for both curl and the app; overpass.kumi.systems and
+overpass.private.coffee returned a bare "Internal Server Error" for EVERY
+query including trivial ones; overpass.osm.jp failed TLS outright
+(NSURLErrorDomain -1200) so it's been dropped from the list.
+
+The first shape of this was a sequential loop, which meant the screen
+waited out the sum of every dead mirror before reaching a live one. On the
+simulator that blew past any sane timeout - iOS also tries QUIC first and
+falls back to TCP+TLS, so a mirror that curl finishes in 8.3s took the app
+past 20s.
+
+Current shape:
+  - the mirror that answered last time gets a solo attempt first, so a warm
+    screen makes exactly one request (`lastGoodEndpoint`)
+  - otherwise every remaining mirror is raced and the first one home wins,
+    with the losers aborted via AbortController
+  - firstToAnswer() is written out rather than using Promise.any, so the
+    abort happens the moment a winner lands
+  - 30s per attempt, which is generous but only ever paid once
+
+Racing does mean up to four requests against volunteer-run infrastructure
+on a cold start. It's the price of them being individually unreliable; the
+real fix is caching this behind our own backend (see follow-ups).
+
+
+St. Michael's College
+
+constants/map.js now centres on St. Michael's College, Iligan. Nominatim
+lists two campuses under that name:
+  8.228441, 124.2395125  Quezon Avenue, Poblacion   <- used
+  8.2394,   124.2498     Miguel Sheker Avenue, Tambo
+The Quezon Avenue one was chosen because it matches the address already
+hardcoded on the diner home header. One line to switch if that's wrong.
+
+The file now exports DEFAULT_PLACE ({label, latitude, longitude}) plus both
+coordinate orders, since the two map implementations disagree: MapLibre
+takes [longitude, latitude], react-native-maps takes {latitude, longitude}.
+Also exports zoom levels for MapLibre and the equivalent degree deltas for
+react-native-maps.
+
+
+Apple Maps on iOS, MapLibre on Android
+
+react-native-maps is back as a dependency, used on iOS only, where
+PROVIDER_DEFAULT is Apple Maps: free, no key, no entitlement beyond the
+location usage string. Android stays on MapLibre - Apple Maps has no
+Android equivalent and Google Maps would need a billed key.
+
+components/shared/NearbyMap.ios.js and NearbyMap.android.js are picked by
+Metro per platform and take the same props: { center, places, style,
+followUser }. Each handles its own coordinate order and its own
+re-centre-on-new-fix animation (animateToRegion vs camera.flyTo), and its
+own user dot (showsUserLocation vs NativeUserLocation).
+
+Both the assisted home (200pt card above the list, capped at 40 pins so a
+dense area doesn't put a hundred annotations on screen) and DinerMapScreen
+now render through it. DinerMapScreen lost its inline MapLibre code and its
+marker styles as a result.
+
+The play-services-location 21.0.1 pin from the previous change still
+matters and still holds - re-adding react-native-maps is exactly what
+pulled 21.3.0 in the first place.
+
+
+Three bugs found while verifying on the simulator
+
+1. NSLocationWhenInUseUsageDescription in Info.plist was an EMPTY STRING.
+   iOS silently refuses location authorisation with a blank purpose string
+   and App Store review rejects the build. Filled in. This would have
+   broken the login-time consent screen on iOS too, not just this feature.
+
+2. formatDistance(999) rendered "1000 m" directly above a neighbour shown
+   as "1.0 km". It rounded to 10m before deciding the unit; now it rounds
+   first, then picks.
+
+3. The map card rode up over the filter chips once results populated - the
+   chip row had flexGrow: 0 but no flexShrink: 0, so the filled list
+   squeezed it. Both the chip row and the map card are flexShrink: 0 now
+   and the results list carries flex: 1.
+
+Also fixed before it shipped: the "Try again" button on the location-denied
+empty state called reload(), which no-ops without an origin. It retries the
+location step (retryLocation) instead.
+
+
+Checked
+- built and ran on the iPhone 17 Pro simulator with the simulator location
+  set to the campus (xcrun simctl location ... set 8.228441,124.2395125).
+  Confirmed by screenshot: Apple Maps rendering, 80 food places found, pins
+  on the map, list sorted nearest-first (Kainan Eatery 70m, Victoria
+  Bakery 70m, Dunkin' 90m, Pop rock 90m)
+- the Overpass query against the campus coordinates: HTTP 200, 80 elements,
+  80 named - Jollibee, Chowking, Red Ribbon, Tatay's Seafood House and
+  local eateries
+- utils/geo.js run over that live payload: nearest 20m, farthest 2.9km,
+  zero results outside the 3km radius, sort order correct
+- formatDistance across the unit boundary (949 -> "950 m", 999 -> "1.0 km",
+  1049 -> "1.1 km", 15000 -> "15 km")
+- production bundles build for both android and ios
+- ESLint + Prettier on every changed file
+
+
+Notes / follow-ups
+- ANDROID IS UNVERIFIED for this change. The MapLibre half of NearbyMap is
+  written but has not been rebuilt or run since; the work focused on iOS on
+  request. Also remember that emulator needs `adb shell svc wifi disable`
+  for DNS before MapLibre can fetch its style.
+- Overpass should move behind our own backend, with results cached per
+  area. Depending on volunteer infrastructure on every app open is not a
+  production answer, and the racing above is a workaround for that, not a
+  solution.
+- Once goodFood restaurants have coordinates, they should be merged into
+  the assisted list ABOVE the OSM results and ranked by our own reviews,
+  rather than the list being purely OSM and purely distance-ranked.
+- Nothing on the assisted list is tappable yet - no place detail screen, no
+  route out to Maps, and the map pins aren't linked to the rows.
+- The diner home header still shows the hardcoded "Brgy. Poblacion, Quezon
+  Avenue, Iligan ..." address. Still wrong, still needs reverse geocoding
+  to fix properly.
+- The chooser has no "don't ask again" nuance beyond remembering the
+  choice; there's no way to clear it except switching modes.
+
+
+Carried along
+
+Already in the working tree, not written as part of this change:
+- frontend/Gemfile - `gem 'nkf'`, needed by CocoaPods on Ruby 4.
+- frontend/ios/Podfile - the `$MLRN.post_install(installer)` hook that
+  attaches the MapLibre SwiftPM package to the MapLibreReactNative target.
+- frontend/ios/goodFood.xcodeproj/project.pbxproj - the matching
+  XCRemoteSwiftPackageReference for maplibre-gl-native-distribution and a
+  build phase that strips MapLibre.xcframework-ios.signature. Regenerated
+  by `pod install`.
+Note that `pod install` must be run with a UTF-8 locale (LANG=en_US.UTF-8);
+without it CocoaPods on this Ruby crashes in unicode_normalize, which is
+what `react-native run-ios` hits when it runs pod install itself.
