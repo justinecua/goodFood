@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import { UtensilsCrossed, Store } from 'lucide-react-native';
+import { UtensilsCrossed, Store, Sparkles } from 'lucide-react-native';
 import EmptyState from '../../components/shared/EmptyState';
 import styles from '../../styles/RestaurantHomeScreenStyles';
 import colors from '../../constants/colors';
@@ -53,7 +53,17 @@ const DinerHomeScreen = ({ navigation }) => {
                   Brgy. Poblacion, Quezon Avenue, Iligan ...
                 </Text>
               </View>
-              <View>
+              <View style={styles.upperActions}>
+                <TouchableOpacity
+                  style={styles.switchButton}
+                  onPress={() =>
+                    navigation.replace('DinerHomeMode', { change: true })
+                  }
+                  hitSlop={styles.hitSlop}
+                >
+                  <Sparkles size={18} color={colors.button} />
+                </TouchableOpacity>
+
                 <Image
                   style={styles.userProfile}
                   source={ImageSource.userProfile}

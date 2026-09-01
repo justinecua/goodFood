@@ -5,6 +5,20 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
   },
+  upperActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  switchButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: colors.button_green_light,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  hitSlop: { top: 8, bottom: 8, left: 8, right: 8 },
   fontStyle: {
     fontFamily: 'Ezra-SemiBold',
   },

@@ -28,6 +28,8 @@ import RestaurantSettingsScreen from '../screens/Owner/RestaurantSettingsScreen'
 
 import DinerMapScreen from '../screens/Diner/DinerMapScreen';
 import DinerHomeScreen from '../screens/Diner/DinerHomeScreen';
+import DinerHomeModeScreen from '../screens/Diner/DinerHomeModeScreen';
+import DinerAssistedHomeScreen from '../screens/Diner/DinerAssistedHomeScreen';
 import DinerNotificationScreen from '../screens/Diner/DinerNotificationScreen';
 import DinerProfileScreen from '../screens/Diner/DinerProfileScreen';
 import DinerInboxScreen from '../screens/Diner/DinerInboxScreen';
@@ -114,7 +116,15 @@ const AppNavigator = () => {
             />
 
             {/* -------- Diner ----------- */}
+            <Stack.Screen
+              name="DinerHomeMode"
+              component={DinerHomeModeScreen}
+            />
             <Stack.Screen name="DinerHome" component={DinerHomeScreen} />
+            <Stack.Screen
+              name="DinerAssistedHome"
+              component={DinerAssistedHomeScreen}
+            />
             <Stack.Screen name="DinerMapScreen" component={DinerMapScreen} />
             <Stack.Screen
               name="DinerNotificationScreen"
