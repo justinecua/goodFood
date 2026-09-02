@@ -1,0 +1,241 @@
+2026-09-02 — sample data, reviews & ratings, notifications, home rankings
+
+Four pieces, in order:
+
+  1. sample data: 15 restaurants with dishes, categories, hours, branches,
+     plus owner and diner accounts to go with them
+  2. reviews and ratings for both restaurants and dishes, with the screens
+     to write and read them
+  3. a notification feed for owners AND diners, off one set of endpoints
+  4. both home screens rebuilt around Top Dishes / Top Restaurants /
+     Latest Reviews
+
+The review, ranking and notification apps existed as models only (added
+2026-08-30) - no queries, views or urls. They have all three now, in the
+same flat raw-SQL style as account/restaurant/dish.
+
+
+Files
+  new   backend/goodFoodProj/review/queries.py
+        backend/goodFoodProj/review/urls.py
+        backend/goodFoodProj/review/management/commands/seed_reviews.py
+        backend/goodFoodProj/ranking/queries.py
+        backend/goodFoodProj/ranking/urls.py
+        backend/goodFoodProj/notification/queries.py
+        backend/goodFoodProj/notification/urls.py
+        backend/goodFoodProj/restaurant/management/commands/_sample_data.py
+        backend/goodFoodProj/restaurant/management/commands/seed_sample_data.py
+        backend/goodFoodProj/restaurant/migrations/0002_operating_hours_nullable_times.py
+        frontend/src/api/services/review.js
+        frontend/src/api/services/ranking.js
+        frontend/src/api/services/notification.js
+        frontend/src/hooks/useTopPicks.js
+        frontend/src/components/shared/StarRating.js
+        frontend/src/components/shared/ReviewCard.js
+        frontend/src/components/shared/RatingSummary.js
+        frontend/src/components/shared/NotificationList.js
+        frontend/src/components/shared/TopPicks.js
+        frontend/src/screens/Diner/WriteReviewScreen.js
+        frontend/src/screens/Diner/DinerRestaurantScreen.js
+        frontend/src/screens/Diner/DinerDishScreen.js
+        frontend/src/screens/Diner/RestaurantReviewsScreen.js
+        frontend/src/screens/Owner/OwnerReviewsScreen.js
+        frontend/src/styles/WriteReviewScreenStyle.js
+        frontend/src/styles/DinerDetailScreenStyle.js
+  edit  backend/goodFoodProj/goodFoodProj/urls.py
+        backend/goodFoodProj/review/views.py
+        backend/goodFoodProj/ranking/views.py
+        backend/goodFoodProj/notification/views.py
+        backend/goodFoodProj/restaurant/queries.py - getRestaurantDetails
+        backend/goodFoodProj/restaurant/views.py, urls.py
+        backend/goodFoodProj/dish/queries.py - getDish returns restaurant_name
+        frontend/src/api/services/home.js - getRestaurantDetails
+        frontend/src/navigation/AppNavigator.js
+        frontend/src/screens/Diner/DinerHomeScreen.js
+        frontend/src/screens/Owner/RestaurantHomeScreen.js
+        frontend/src/screens/Diner/DinerNotificationScreen.js
+        frontend/src/screens/Owner/RestaurantNotificationScreen.js
+        frontend/src/screens/Owner/MyRestaurantScreen.js - Reviews row
+        frontend/src/styles/RestaurantHomeScreenStyles.js
+        frontend/src/styles/RestaurantNotificationScreenStyle.js
+
+
+Sample data
+
+_sample_data.py holds the dataset and is shared by the seed commands; the
+leading underscore keeps Django's command discovery from treating it as a
+command. 15 restaurants around Northern Mindanao with real coordinates
+(Iligan, Cagayan de Oro, Opol, Ozamiz, Malaybalay) - real ones so distance
+maths has something meaningful to sort by. Each gets an owner account, a
+location row, a 7-day opening template, cuisine categories, sometimes a
+branch, and 6 dishes. Plus 8 diner accounts to review them.
+
+  python manage.py seed_sample_data [--fresh]
+
+Idempotent on natural keys (restaurant email, account username, dish name),
+so re-running adds only what is missing. --fresh deletes the sample rows
+first and nothing else. Every sample login uses the password goodfood123 -
+see the note at the bottom about that.
+
+Result: 15 new restaurants (16 total with the pre-existing one), 90 new
+dishes, all 16 restaurants carrying at least 5 dishes.
+
+Blocked on a schema drift first: restaurant_operating_hours.opening_time
+and closing_time were still NOT NULL in the live database, so a restaurant
+closed on a Sunday could not be seeded. The model has said null=True since
+0001_initial and the deleted reconcile_existing_db.sql was supposed to have
+dropped it. Migration 0002 does it. It has to be RunSQL - an AlterField
+emits nothing, because Django compares model state and the state already
+matched. Worth remembering: makemigrations will not catch drift of this
+shape.
+
+
+Reviews and ratings
+
+review/queries.py, same flat style as the rest:
+
+  getRestaurantReviews / getDishReviews
+      -> {reviews, summary, my_review}. summary carries the averages plus a
+      stars_5..stars_1 histogram via COUNT(*) FILTER, so the screen draws
+      its bars without a second round trip. my_review is the signed-in
+      diner's own, which is what lets the form open pre-filled.
+  addRestaurantReview   food / service / ambiance, each 1-5; overall is
+                        their mean unless one is passed explicitly
+  addDishReview         a single rating
+  deleteRestaurantReview / deleteDishReview
+  getMyReviews          a diner's own history
+  getOwnerReviews       restaurant + dish reviews on the owner's restaurant,
+                        UNION ALL'd and tagged review_kind
+
+Both add* functions UPSERT - one review per account per subject. A second
+submission edits the first rather than stacking, which is why the form is
+"Post" or "Update" depending on what came back. Deletes are scoped to the
+author, so a diner can only remove their own.
+
+Posting a review also INSERTs the owner's notification, on the same cursor
+and transaction as the review itself, rather than as a second call. Skipped
+when an owner reviews their own restaurant.
+
+Front end: WriteReviewScreen is one page for both kinds, switched on
+route.params.mode. A restaurant gets three criteria and a live overall
+average; a dish gets one rating. Both take an optional comment. Reached
+from DinerRestaurantScreen (restaurant profile, menu with per-dish ratings,
+hours, reviews) and DinerDishScreen. Owners read theirs at OwnerReviewsScreen,
+linked from MyRestaurant -> Manage -> Reviews.
+
+StarRating is read-only by default and becomes tappable when handed an
+onChange, so the same component does display and input.
+
+
+Sample reviews
+
+  python manage.py seed_reviews [--fresh]
+
+94 restaurant reviews, 341 dish reviews. Each restaurant has a house
+QUALITY between 3.4 and 4.8 and every rating is drawn around it, so the top
+lists come out with a real spread instead of everything sitting at 4.5.
+Signature and best-selling dishes get a small bonus. Roughly a third of
+reviews deliberately have no comment.
+
+The first version wrote a row at a time and timed out past two minutes -
+the database is remote and that was ~1800 round trips. It now builds
+everything in memory and writes with bulk_create + bulk_update. The
+bulk_update is what makes a backdated created_at survive auto_now_add:
+bulk_update reads the attribute straight off the instance instead of going
+through pre_save. Same trick is reused by seed_messages.
+
+
+Notifications
+
+notification/queries.py: getNotifications (+ unread_count), getUnreadCount,
+addNotification, markNotificationRead, markAllNotificationsRead,
+deleteNotification. Everything is scoped by account_id, which is the whole
+trick - the SAME endpoints serve owners and diners, and who you are decides
+what comes back.
+
+That carries into the UI: NotificationList holds the entire feed - load,
+pull-to-refresh, optimistic mark-read, mark-all - so DinerNotificationScreen
+and RestaurantNotificationScreen are ~20-line wrappers differing only in
+navbar, empty-state wording and where a tap leads.
+
+seed_reviews also seeds the diner side (owners get theirs from the reviews
+themselves), so both roles have a populated feed: 131 notifications across
+15 owners and 8 diners.
+
+
+Home screens
+
+ranking/queries.py: getTopRestaurants, getTopDishes, getNearbyRestaurants.
+Ranked by a Bayesian score - MIN_REVIEWS = 3 pulls a low-count entry toward
+the mean, so two 5-star reviews do not outrank forty 4.8s.
+
+Distance is computed in SQL (haversine, clamped before acos because floats
+can push the cosine past 1). Coordinates are stored as free text and are
+inconsistent - the pre-existing row holds "~8.229° N" while the seeded ones
+hold "8.2280" - so every read goes through
+NULLIF(regexp_replace(col,'[^0-9.-]','','g'),'')::double precision. A row
+that still will not parse drops out instead of failing the query.
+
+IMPORTANT, changed mid-day on request: these lists were originally clipped
+to a 40 km radius around the user. That was wrong for this app - every
+seeded restaurant is in Northern Mindanao, so a device anywhere else saw
+three empty sections, which is exactly what was reported. They now rank
+across ALL of goodFood. Distance is still returned and shown on each card,
+but it only narrows the list when radius_km is passed explicitly.
+getNearbyRestaurants is the deliberate exception and keeps the 40 km
+default, since "nearby" is its entire purpose.
+
+Verified from Manila coordinates: 0/0/0 before the change, 3/3/3 after, and
+identical to what Iligan coordinates return.
+
+Both home screens now render the shared TopPicks: Top Dishes (2-up, rank
+badge, average, review count, distance), Top Restaurants (3-up) and Latest
+Reviews (real review cards; a tap opens the dish or the restaurant's review
+list). Captions read "Highest rated on goodFood", not "around you".
+
+Two UI details worth keeping:
+- TopPicks renders each heading even while loading. The first version
+  returned only a spinner, so during the fetch there was literally no "Top
+  Dishes" heading on screen - which read as the section being missing.
+- the "Near {city}" header label was removed. It was derived from the
+  top-ranked result's city, which is meaningless once ranking is app-wide.
+  There is no reverse geocoding available, so that slot now holds only a
+  "Share your location to see distances" prompt when location is off.
+
+The literal strings "Top Dishes" / "Top Restaurants" live ONLY in
+TopPicks.js, not in either home screen file - that caused some confusion
+when grepping the home screens for them.
+
+DinerAssistedHomeScreen was deliberately left alone. It is a separate
+Google-Places-style browser, not a top-picks home.
+
+
+Checked
+
+Django check clean; makemigrations --check reports no drift. Every endpoint
+exercised through the Django test client against the live database - 16-18
+per pass, all 200, no regressions on the pre-existing account/restaurant/
+dish endpoints. Ranking verified from three origins (Iligan, Cagayan de
+Oro, Manila) and with no location at all. Auth guards verified: a diner
+cannot delete another's review. ESLint clean (0 errors; the remaining
+warnings are pre-existing).
+
+NOT verified: none of this has been run in the actual app. No simulator or
+device build this session - the frontend is checked by ESLint and by
+reading, nothing more. Screens, navigation and layout need a real run
+before they can be called done.
+
+
+Follow-ups
+
+- goodfood123 is committed in plaintext in seed_sample_data.py, and these
+  accounts live in the REMOTE Postgres rather than a local throwaway. Anyone
+  who can reach the API can log in as them. Fine for now; should become an
+  env var or refuse to run when DEBUG is false before this goes anywhere.
+- location_location.latitude/longitude should be normalised to numeric
+  columns rather than sanitised on every read.
+- ranking_restaurant_ranking / ranking_dish_ranking are still unused -
+  rankings are computed live. Fine at this size; revisit if it gets slow.
+- top lists are a pure global ranking. A location-weighted blend (great
+  nearby food above great far-away food) may read better, and was left out
+  only because "not around me" was the explicit ask.

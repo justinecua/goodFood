@@ -514,3 +514,149 @@ def deleteBranch(data):
             cursor.close()
         if connection:
             connection.close()
+
+
+def getRestaurantDetails(data):
+    """Everything a diner needs to see one restaurant's page.
+
+    Unlike getRestaurantInfo (which resolves the restaurant from the signed-in
+    owner) this is looked up by restaurant_id and includes the menu and the
+    rating summary.
+    """
+    try:
+        connection = connections['default']
+        cursor = connection.cursor()
+
+        restaurant_id = data.get("restaurant_id")
+
+        if not restaurant_id:
+            return {"error": "restaurant_id is required"}
+
+        cursor.execute(
+            """
+            SELECT r.*,
+                   l.city,
+                   l.province,
+                   l.region,
+                   l.country,
+                   l.latitude,
+                   l.longitude
+            FROM restaurant_restaurant r
+            LEFT JOIN location_location l
+                ON l.location_id = r.location_id
+            WHERE r.restaurant_id = %s;
+            """,
+            [restaurant_id],
+        )
+        row = cursor.fetchone()
+
+        if not row:
+            return {"error": "Restaurant not found"}
+
+        columns = [col[0] for col in cursor.description]
+        restaurant = dict(zip(columns, row))
+
+        cursor.execute(
+            """
+            SELECT d.*,
+                   c.dish_category_name,
+                   (
+                       SELECT di.dish_image_path
+                       FROM dish_dish_images di
+                       WHERE di.dish_id = d.dish_id
+                       ORDER BY di.is_primary DESC, di.dish_image_id
+                       LIMIT 1
+                   ) AS dish_image_path,
+                   (
+                       SELECT AVG(rating)
+                       FROM review_dish_review rev
+                       WHERE rev.dish_id = d.dish_id
+                   ) AS average_rating,
+                   (
+                       SELECT COUNT(*)
+                       FROM review_dish_review rev
+                       WHERE rev.dish_id = d.dish_id
+                   ) AS review_count
+            FROM dish_dish d
+            LEFT JOIN dish_dish_category c
+                ON c.dish_category_id = d.dish_category_id
+            WHERE d.restaurant_id = %s
+            ORDER BY d.is_signature DESC, d.is_best_seller DESC, d.dish_name;
+            """,
+            [restaurant_id],
+        )
+        dish_columns = [col[0] for col in cursor.description]
+        dishes = [dict(zip(dish_columns, r)) for r in cursor.fetchall()]
+
+        cursor.execute(
+            """
+            SELECT *
+            FROM restaurant_operating_hours
+            WHERE restaurant_id = %s
+            ORDER BY operating_hours_id;
+            """,
+            [restaurant_id],
+        )
+        hours_columns = [col[0] for col in cursor.description]
+        operating_hours = [dict(zip(hours_columns, r)) for r in cursor.fetchall()]
+
+        cursor.execute(
+            """
+            SELECT c.category_id, c.category_name
+            FROM restaurant_category c
+            JOIN restaurant_restaurant_category rc
+                ON rc.category_id = c.category_id
+            WHERE rc.restaurant_id = %s
+            ORDER BY c.category_name;
+            """,
+            [restaurant_id],
+        )
+        category_columns = [col[0] for col in cursor.description]
+        categories = [dict(zip(category_columns, r)) for r in cursor.fetchall()]
+
+        cursor.execute(
+            """
+            SELECT *
+            FROM restaurant_restaurant_branch
+            WHERE restaurant_id = %s
+            ORDER BY branch_id;
+            """,
+            [restaurant_id],
+        )
+        branch_columns = [col[0] for col in cursor.description]
+        branches = [dict(zip(branch_columns, r)) for r in cursor.fetchall()]
+
+        cursor.execute(
+            """
+            SELECT COUNT(*) AS review_count,
+                   AVG(food_rating) AS food_rating,
+                   AVG(service_rating) AS service_rating,
+                   AVG(ambiance_rating) AS ambiance_rating,
+                   AVG(overall_rating) AS overall_rating
+            FROM review_restaurant_review
+            WHERE restaurant_id = %s
+              AND is_flagged = FALSE;
+            """,
+            [restaurant_id],
+        )
+        summary_columns = [col[0] for col in cursor.description]
+        rating_summary = dict(zip(summary_columns, cursor.fetchone()))
+
+        return {
+            "restaurant": restaurant,
+            "dishes": dishes,
+            "operating_hours": operating_hours,
+            "categories": categories,
+            "branches": branches,
+            "rating_summary": rating_summary,
+        }
+
+    except Exception as error:
+        print(f"Error: {error}")
+        return {"error": str(error)}
+
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()

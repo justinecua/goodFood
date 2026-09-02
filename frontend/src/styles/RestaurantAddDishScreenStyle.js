@@ -173,6 +173,40 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '600',
   },
+
+  // Anchor for the unread badge. The icons are sized individually, so the
+  // wrapper stays a fixed square and the badge always lands in the same place
+  // relative to the tab rather than shifting with each icon's dimensions.
+  // Wider than the icons it holds so the badge stays inside the wrapper's
+  // bounds - Android clips children that spill past a parent.
+  iconWrap: {
+    width: 36,
+    height: 26,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  navBadge: {
+    position: 'absolute',
+    top: -5,
+    left: 18,
+    minWidth: 17,
+    height: 17,
+    paddingHorizontal: 4,
+    borderRadius: 9,
+    backgroundColor: colors.badge,
+    alignItems: 'center',
+    justifyContent: 'center',
+    // A ring in the bar's own colour keeps the bubble legible where it
+    // overlaps the icon underneath.
+    borderWidth: 2,
+    borderColor: colors.container_bg2,
+  },
+  navBadgeText: {
+    color: '#fff',
+    fontSize: 9,
+    lineHeight: 12,
+    fontWeight: '700',
+  },
 });
 
 export default styles;

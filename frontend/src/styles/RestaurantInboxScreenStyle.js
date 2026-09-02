@@ -66,6 +66,78 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
   },
+
+  // --- Conversation list -------------------------------------------------
+  searchField: {
+    flex: 1,
+    height: '100%',
+    padding: 0,
+    color: colors.maintext,
+    fontFamily: 'Ezra-SemiBold',
+    fontSize: 13,
+  },
+  centered: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  list: {
+    paddingVertical: 8,
+    paddingBottom: 110,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 12,
+  },
+  avatar: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: colors.container_bg,
+  },
+  avatarEmpty: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rowBody: {
+    flex: 1,
+    gap: 3,
+  },
+  rowTopLine: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  rowName: {
+    flex: 1,
+    fontFamily: 'Ezra-SemiBold',
+    fontSize: 15,
+    color: colors.maintext,
+  },
+  rowTime: {
+    fontFamily: 'Ezra-SemiBold',
+    fontSize: 12,
+    color: colors.maintext,
+  },
+  rowPreview: {
+    fontFamily: 'Ezra-Regular',
+    fontSize: 13,
+    color: colors.subtext,
+  },
+  // An unread thread darkens the name and preview and shows a dot.
+  rowPreviewUnread: {
+    color: colors.maintext,
+    fontFamily: 'Ezra-SemiBold',
+  },
+  unreadDot: {
+    width: 9,
+    height: 9,
+    borderRadius: 5,
+    backgroundColor: colors.button,
+  },
 });
 
 export default styles;
