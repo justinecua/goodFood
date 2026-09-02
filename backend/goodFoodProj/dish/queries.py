@@ -143,10 +143,13 @@ def getDish(data):
         cursor.execute(
             """
             SELECT d.*,
-                   c.dish_category_name
+                   c.dish_category_name,
+                   r.restaurant_name
             FROM dish_dish d
             LEFT JOIN dish_dish_category c
                 ON c.dish_category_id = d.dish_category_id
+            JOIN restaurant_restaurant r
+                ON r.restaurant_id = d.restaurant_id
             WHERE d.dish_id = %s;
             """,
             [dish_id],

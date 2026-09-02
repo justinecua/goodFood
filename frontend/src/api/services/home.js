@@ -65,6 +65,18 @@ export async function getRestaurantInfo() {
   return response.data;
 }
 
+// One restaurant's public page: profile, menu, hours, branches and its
+// rating summary. Looked up by id, unlike getRestaurantInfo which resolves the
+// restaurant from the signed-in owner.
+export async function getRestaurantDetails(restaurantId) {
+  const response = await axios.post(
+    `${BACKEND_API_URL}/get-restaurant-details/`,
+    { restaurant_id: restaurantId },
+  );
+
+  return response.data;
+}
+
 export async function addRestaurantInfo(formData) {
   return postMultipart('/add-restaurant-info/', formData);
 }

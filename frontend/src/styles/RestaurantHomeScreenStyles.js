@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    height: 165,
+    height: 190,
     width: 171,
     backgroundColor: colors.background2,
     marginTop: 15,
@@ -193,7 +193,6 @@ const styles = StyleSheet.create({
   },
   restaurantContainer: {
     flexDirection: 'column',
-    marginBottom: 70,
   },
   restaurantSubContainer: {
     flexDirection: 'row',
@@ -203,8 +202,9 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    height: 120,
+    height: 140,
     width: 109,
+    paddingHorizontal: 6,
     backgroundColor: colors.background2,
     marginTop: 15,
     borderRadius: 10,
@@ -260,6 +260,110 @@ const styles = StyleSheet.create({
     padding: 13,
     marginRight: 10,
     borderRadius: 25,
+  },
+
+  // --- Top dishes / top restaurants --------------------------------------
+  // Both lists are location-aware, so each card carries its rating and how
+  // far away it is.
+  sectionLoading: {
+    paddingVertical: 30,
+  },
+  locationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  locationLink: {
+    fontSize: 12,
+    fontFamily: 'Ezra-SemiBold',
+    color: colors.button,
+  },
+
+  dishImageEmpty: {
+    height: 100,
+    width: 150,
+    borderRadius: 8,
+    backgroundColor: colors.container_bg,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dishCardBody: {
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    gap: 2,
+  },
+  dishMeta: {
+    fontFamily: 'Ezra-Regular',
+    fontSize: 10,
+    color: colors.subtextInput,
+    marginBottom: 6,
+  },
+  // A half-width filler keeps the last row aligned when the count is odd.
+  dishCardSpacer: {
+    height: 190,
+    width: 171,
+    marginTop: 15,
+  },
+
+  restaurantCardImageEmpty: {
+    height: 60,
+    width: 60,
+    borderRadius: 30,
+    backgroundColor: colors.container_bg,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  restaurantMeta: {
+    fontFamily: 'Ezra-Regular',
+    fontSize: 10,
+    color: colors.subtextInput,
+    marginTop: 2,
+  },
+  restaurantCardSpacer: {
+    height: 140,
+    width: 109,
+    marginTop: 15,
+  },
+
+  rankBadge: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    minWidth: 20,
+    height: 20,
+    paddingHorizontal: 6,
+    borderRadius: 10,
+    backgroundColor: colors.button,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rankBadgeText: {
+    fontFamily: 'Ezra-SemiBold',
+    fontSize: 10,
+    color: colors.button_text,
+  },
+  ratingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+  },
+  ratingText: {
+    fontFamily: 'Ezra-SemiBold',
+    fontSize: 11,
+    color: colors.maintext,
+  },
+  ratingCount: {
+    fontFamily: 'Ezra-Regular',
+    fontSize: 10,
+    color: colors.subtextInput,
+  },
+
+  // The "Latest Reviews" feed closes the home screen, so it carries the
+  // clearance for the bottom navbar.
+  reviewFeed: {
+    gap: 10,
+    marginTop: 12,
+    marginBottom: 70,
   },
 });
 

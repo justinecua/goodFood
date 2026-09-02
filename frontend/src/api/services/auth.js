@@ -2,6 +2,7 @@ import axios from 'axios';
 import Config from 'react-native-config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { clearUserLocation } from './location';
+import { resetUnreadCounts } from '../../utils/unreadCounts';
 
 const BACKEND_API_URL = Config.BACKEND_API_URL;
 
@@ -11,7 +12,10 @@ export const SESSION_TTL_MS = 24 * 60 * 60 * 1000; // 1 day
 const SESSION_KEYS = ['accessToken', 'refreshToken', 'user', 'loginAt'];
 
 export async function clearSession() {
-  // The stored coordinates belong to whoever was signed in, so they go too.
+  // The stored coordinates belong to whoever was signed in, so they go too,
+  // and the navbar badges must not carry the old account's counts over.
+  resetUnreadCounts();
+
   await Promise.all([
     AsyncStorage.multiRemove(SESSION_KEYS),
     clearUserLocation(),

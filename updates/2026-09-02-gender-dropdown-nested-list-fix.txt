@@ -1,0 +1,59 @@
+2026-09-02 — fix VirtualizedList warning on the Gender dropdown
+
+Reported from the simulator: opening "Select Gender" on Profile Information
+raised
+
+  VirtualizedLists should never be nested inside plain ScrollViews with the
+  same orientation
+
+Unrelated to the rest of today's work; logged separately so it can be
+committed on its own.
+
+
+Files
+  edit  frontend/src/components/register/GenderDropdown.js
+        frontend/src/components/register/RoleDropdown.js
+
+
+Cause
+
+react-native-dropdown-picker (5.4.6) renders its options as a FlatList by
+default - listMode defaults to FLATLIST. RestaurantProfileInformationScreen
+wraps its whole form in a ScrollView (line 143), so opening the dropdown
+put a virtualized list inside a plain ScrollView of the same orientation.
+React Native warns because virtualization cannot do its job in an unbounded
+parent: the ScrollView gives the list infinite height, so every row renders
+and the windowing is dead weight.
+
+
+Fix
+
+listMode="SCROLLVIEW" on the picker. Confirmed in the library source that
+this maps to DropDownScrollViewComponent, which renders a plain ScrollView
+rather than the FlatList, so there is no virtualized list left to warn
+about. Nested ScrollViews of the same orientation do not raise this
+warning, and with two options the inner one never scrolls anyway.
+
+It is the correct container regardless - virtualization was buying nothing
+for Male/Female. Behaviour is unchanged: the list still expands inline and
+pushes the fields below it down, exactly as before.
+
+Applied to RoleDropdown too. It is identical in structure and used on
+Register, which has no ScrollView today so it was not warning yet - but it
+would the moment that screen gains one.
+
+Also moved the zIndex: 2 wrapper style out of an inline object into a local
+StyleSheet in each file, which clears the only two ESLint warnings those
+files carried (30 -> 28 across src).
+
+
+Checked
+
+Read the picker source to confirm the SCROLLVIEW branch. Audited the rest
+of the app for the same nesting: the only other FlatLists are in
+OnboardingScreen and DinerAssistedHomeScreen, both top-level rather than
+inside a ScrollView, so neither has the problem. None of today's new
+screens use FlatList at all. ESLint 0 errors.
+
+NOT verified: the warning has not been confirmed gone on a device - no
+simulator run this session. Worth a look next time that screen is opened.

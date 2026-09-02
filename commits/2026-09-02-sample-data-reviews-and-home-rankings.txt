@@ -1,0 +1,79 @@
+add reviews, ratings and notifications; rebuild both home screens
+
+Fills in three apps that existed as models only (review, ranking,
+notification) and gives the app enough sample data to see them working.
+Both home screens are rebuilt around what comes out.
+
+Sample data
+- new seed_sample_data command: 15 restaurants around Northern Mindanao
+  with real coordinates, each with an owner account, location, 7-day
+  opening hours, cuisine categories, sometimes a branch, and 6 dishes,
+  plus 8 diner accounts. Idempotent on natural keys; --fresh wipes only
+  the sample rows. 90 dishes, every restaurant carrying at least 5.
+- the dataset lives in _sample_data.py, shared with seed_reviews; the
+  leading underscore keeps it out of Django's command discovery.
+- restaurant migration 0002 drops NOT NULL from operating_hours
+  opening_time/closing_time. The model has said null=True since
+  0001_initial but the live database predated it, so a restaurant closed
+  on a Sunday could not be saved. Has to be RunSQL - an AlterField emits
+  nothing when the model state already matches.
+
+Reviews and ratings
+- review/queries.py: get/add/delete for restaurant and dish reviews, plus
+  getMyReviews for a diner and getOwnerReviews for an owner. A restaurant
+  is scored on food, service and ambiance with overall as their mean; a
+  dish gets one rating.
+- reviews upsert, one per account per subject, so a second submission
+  edits rather than stacks. Deletes are scoped to the author.
+- summaries carry a stars_5..stars_1 histogram via COUNT(*) FILTER, so a
+  screen draws its bars without a second request.
+- posting a review inserts the owner's notification on the same cursor and
+  transaction, skipped when an owner reviews their own restaurant.
+- WriteReviewScreen is one page for both kinds, switched on route params,
+  and pre-fills from the diner's existing review. New DinerRestaurant,
+  DinerDish and RestaurantReviews screens for diners, OwnerReviews for
+  owners.
+
+Notifications
+- notification/queries.py, all scoped by account_id, so the same endpoints
+  serve owners and diners and who you are decides what comes back.
+- NotificationList holds the whole feed - load, pull-to-refresh, optimistic
+  mark-read, mark-all - leaving each role's screen a thin wrapper.
+
+Home screens
+- ranking/queries.py: top restaurants, top dishes, nearby restaurants.
+  Bayesian score with a 3-review prior, so two 5-star reviews don't
+  outrank forty 4.8s.
+- the top lists rank across all of goodFood rather than the user's
+  surroundings. Clipping to a radius meant a device outside Northern
+  Mindanao saw three empty sections. Distance is still computed and shown
+  on each card, but only narrows the list when a radius is asked for;
+  getNearbyRestaurants keeps its 40km default since that is its purpose.
+- distance is haversine in SQL. Coordinates are free text and inconsistent
+  ("~8.229° N" alongside "8.2280"), so every read strips non-numerics
+  before casting and unparseable rows drop out rather than failing.
+- both homes render the shared TopPicks: Top Dishes, Top Restaurants and
+  Latest Reviews. Headings render while loading - the first version showed
+  only a spinner, which read as the sections being missing.
+- dropped the "Near {city}" header label; it came from the top-ranked
+  result's city, which means nothing once ranking is app-wide. That slot
+  now prompts for location only when it is off.
+
+Sample reviews
+- new seed_reviews command: 94 restaurant reviews, 341 dish reviews and
+  131 notifications across 15 owners and 8 diners. Each restaurant has a
+  house quality and ratings are drawn around it, so the top lists have a
+  real spread.
+- built in memory and written with bulk_create + bulk_update; a row-at-a-
+  time version timed out past two minutes against the remote database.
+  bulk_update is also what lets a backdated created_at survive
+  auto_now_add, since it skips pre_save.
+
+Checked: Django check clean, no migration drift, every endpoint exercised
+through the test client against the live database with no regressions.
+Ranking verified from Iligan, Cagayan de Oro, Manila and with no location.
+ESLint clean.
+
+NOT verified: none of this has been run in the app. No simulator or device
+build this session, so the screens and navigation need a real run before
+they can be called done.

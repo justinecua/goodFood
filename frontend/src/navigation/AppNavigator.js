@@ -25,6 +25,7 @@ import ChangePasswordScreen from '../screens/Owner/ChangePasswordScreen';
 import PrivacyPolicyScreen from '../screens/Owner/PrivacyPolicyScreen';
 import AboutScreen from '../screens/Owner/AboutScreen';
 import RestaurantSettingsScreen from '../screens/Owner/RestaurantSettingsScreen';
+import OwnerReviewsScreen from '../screens/Owner/OwnerReviewsScreen';
 
 import DinerMapScreen from '../screens/Diner/DinerMapScreen';
 import DinerHomeScreen from '../screens/Diner/DinerHomeScreen';
@@ -35,7 +36,12 @@ import DinerProfileScreen from '../screens/Diner/DinerProfileScreen';
 import DinerInboxScreen from '../screens/Diner/DinerInboxScreen';
 import DinerFavoritesScreen from '../screens/Diner/DinerFavoritesScreen';
 import DinerPlanBillingScreen from '../screens/Diner/DinerPlanBillingScreen';
+import DinerRestaurantScreen from '../screens/Diner/DinerRestaurantScreen';
+import DinerDishScreen from '../screens/Diner/DinerDishScreen';
+import RestaurantReviewsScreen from '../screens/Diner/RestaurantReviewsScreen';
+import WriteReviewScreen from '../screens/Diner/WriteReviewScreen';
 
+import MessageThreadScreen from '../screens/MessageThreadScreen';
 import SplashScreen from '../screens/SplashScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
 import LocationPermissionScreen from '../screens/LocationPermissionScreen';
@@ -109,6 +115,7 @@ const AppNavigator = () => {
               component={PrivacyPolicyScreen}
             />
             <Stack.Screen name="About" component={AboutScreen} />
+            <Stack.Screen name="OwnerReviews" component={OwnerReviewsScreen} />
             <Stack.Screen name="AddDish" component={AddDishScreen} />
             <Stack.Screen
               name="AddDishCategory"
@@ -145,6 +152,25 @@ const AppNavigator = () => {
             <Stack.Screen
               name="DinerPlanBilling"
               component={DinerPlanBillingScreen}
+            />
+            <Stack.Screen
+              name="DinerRestaurant"
+              component={DinerRestaurantScreen}
+            />
+            <Stack.Screen name="DinerDish" component={DinerDishScreen} />
+            <Stack.Screen
+              name="RestaurantReviews"
+              component={RestaurantReviewsScreen}
+            />
+
+            {/* The review form serves both roles - an owner reaches it the
+                same way when browsing another restaurant. */}
+            <Stack.Screen name="WriteReview" component={WriteReviewScreen} />
+
+            {/* One chat screen for both sides of a conversation. */}
+            <Stack.Screen
+              name="MessageThread"
+              component={MessageThreadScreen}
             />
           </Stack.Navigator>
         </NavigationContainer>

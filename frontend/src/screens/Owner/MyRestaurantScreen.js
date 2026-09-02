@@ -19,6 +19,7 @@ import {
   GitBranch,
   ChevronRight,
   UtensilsCrossed,
+  Star,
 } from 'lucide-react-native';
 import RestaurantBottomNavbar from '../../components/shared/RestaurantBottomNavbar';
 import styles from '../../styles/MyRestaurantScreenStyle';
@@ -262,6 +263,11 @@ const MyRestaurantScreen = ({ navigation }) => {
                 label="Branches"
                 count={branches.length || null}
                 onPress={() => navigation.navigate('Branches')}
+              />
+              <NavRow
+                icon={Star}
+                label="Reviews"
+                onPress={() => navigation.navigate('OwnerReviews')}
               />
             </View>
 
