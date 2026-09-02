@@ -1,0 +1,92 @@
+add messaging with notifications, message edit/delete, navbar unread badges
+
+Builds the inbox and chat thread from the mockups, wires messages into the
+notification feed added earlier today, and puts unread counts on both
+bottom navbars.
+
+Schema
+- Message had no sender, so a thread could not be split into mine and
+  theirs and a reply had nobody to notify. Migration 0003 adds
+  Message.sender (FK -> Account); the table was empty so it goes in NOT
+  NULL with no backfill. Migration 0004 adds a nullable edited_at.
+- both were written by hand: makemigrations hangs on a non-nullable field,
+  prompting for a one-off default with no tty. Confirmed afterwards with
+  makemigrations --check.
+
+Backend
+- new messaging/queries.py: getConversations, getMessages,
+  startConversation, sendMessage, editMessage, deleteMessage,
+  getUnreadMessageCount.
+- a conversation is (diner, restaurant), so every query resolves the
+  signed-in account against those two columns and returns my_role and the
+  other party's name and photo. The client never declares its role, which
+  is what lets one set of endpoints serve both sides and means the role
+  cannot be spoofed.
+- opening a thread is what marks its incoming messages read.
+- search matches the counterpart name or any message in the thread, via a
+  CTE plus EXISTS. Searching only the last-message preview meant a word you
+  remembered saying found nothing unless it was the most recent line.
+- edit and delete check sender_id - being in the conversation is not
+  enough, only the author can change their own words. Delete is a hard
+  DELETE.
+- fixes a "cursor already closed" crash: sendMessage called
+  startConversation, but every query function closes the shared connection
+  in its own finally, so calling one from another breaks the caller. The
+  get-or-create is inlined on the same cursor. This applies to every
+  queries.py in the project.
+
+Message notifications
+- sending writes a notification for the recipient, so messages land in the
+  same feed as reviews. An unread thread holds one notification, not one
+  per message.
+- editing rewrites its preview and deleting removes it, but only while it
+  is unread; a read notification is left alone as a record of what actually
+  arrived.
+- NotificationList now exports notificationKind(title), since the table has
+  no type column. It infers the kind in one place and drives both the icon
+  and the tap target: a diner's message notification opens that
+  restaurant's thread, an owner's opens the inbox.
+
+Screens
+- ConversationList holds the whole inbox, so both inbox screens are thin
+  wrappers over it.
+- new MessageThreadScreen, at screens/ root because it is role-neutral:
+  date separators, avatar on the first message of a run, mine right and
+  green, theirs left and white. Takes either a conversationId or a
+  restaurantId, creating the thread on first send.
+- long-pressing your own bubble offers Edit and Delete. Editing reuses the
+  composer with a banner and a tick button; edited messages show "· edited".
+- reachable from both inbox tabs, a Message button on the restaurant page,
+  and message notifications.
+- the header shows "last message 7:30 PM" rather than the mockup's "active
+  5 min ago" - the app tracks no presence and inventing one seemed worse.
+
+Navbar badges
+- count bubbles on Messages and Notification for both navbars, from a small
+  shared store in utils/unreadCounts.js. Focus-based refetching alone is
+  not enough: marking notifications read happens while that screen is
+  focused, so the badge would keep a stale number until the next
+  navigation. Anything that changes a count pushes to every mounted navbar.
+- clearSession resets them, so one account's counts cannot carry into the
+  next login.
+- NavBadge renders nothing at zero and caps at 99+. New colors.badge - the
+  green accent is the active-tab colour it would sit beside, so it would
+  read as decoration rather than an alert.
+- all five icons are wrapped, not just the two badged ones: the wrapper is
+  wider than the icons because Android clips overflow, and applying it
+  uniformly keeps every tab label on one baseline.
+
+Sample data
+- new seed_messages command: 39 threads, 146 messages and 19 message
+  notifications from short reservation and menu scripts.
+
+Checked: Django check clean, no migration drift, and the full flow verified
+through the test client against the live database - first message creates
+the thread, owner unread goes 0 -> 1, notification carries sender and
+preview, opening clears it, the reply notifies back. Edit and delete
+verified for sender, non-sender, empty text and double-delete. 16/16
+endpoint regression pass. ESLint 0 errors.
+
+NOT verified: nothing has been run in the app. No simulator or device build
+this session, so the thread layout, long-press menu, keyboard behaviour and
+badge positioning are unverified visually.

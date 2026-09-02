@@ -1,0 +1,227 @@
+2026-09-02 — messaging, message notifications, navbar unread badges
+
+Three pieces, in order:
+
+  1. messaging: an inbox and a chat thread for both sides, wired to the
+     notification feed built earlier today
+  2. edit and delete on your own messages
+  3. unread count bubbles on the Messages and Notification tabs of both
+     bottom navbars
+
+Built from two mockups: an Inbox (search + conversation rows) and a thread
+(chat bubbles, date separator, composer).
+
+The messaging app existed as models only. It needed a schema change before
+anything could be built - see below.
+
+
+Files
+  new   backend/goodFoodProj/messaging/queries.py
+        backend/goodFoodProj/messaging/urls.py
+        backend/goodFoodProj/messaging/migrations/0003_message_sender.py
+        backend/goodFoodProj/messaging/migrations/0004_message_edited_at.py
+        backend/goodFoodProj/messaging/management/commands/seed_messages.py
+        frontend/src/api/services/messaging.js
+        frontend/src/components/shared/ConversationList.js
+        frontend/src/components/shared/NavBadge.js
+        frontend/src/hooks/useUnreadCounts.js
+        frontend/src/utils/unreadCounts.js
+        frontend/src/screens/MessageThreadScreen.js
+        frontend/src/styles/MessageThreadScreenStyle.js
+  edit  backend/goodFoodProj/messaging/models.py
+        backend/goodFoodProj/messaging/views.py
+        backend/goodFoodProj/goodFoodProj/urls.py
+        frontend/src/screens/Owner/RestaurantInboxScreen.js
+        frontend/src/screens/Diner/DinerInboxScreen.js
+        frontend/src/screens/Owner/RestaurantNotificationScreen.js
+        frontend/src/screens/Diner/DinerNotificationScreen.js
+        frontend/src/screens/Diner/DinerRestaurantScreen.js - Message button
+        frontend/src/components/shared/NotificationList.js
+        frontend/src/components/shared/RestaurantBottomNavbar.js
+        frontend/src/components/shared/DinerBottomNavbar.js
+        frontend/src/api/services/auth.js - reset badges on logout
+        frontend/src/constants/colors.js - colors.badge
+        frontend/src/navigation/AppNavigator.js
+        frontend/src/styles/RestaurantInboxScreenStyle.js
+        frontend/src/styles/RestaurantAddDishScreenStyle.js - navbar badge
+        frontend/src/styles/DinerDetailScreenStyle.js
+
+
+Schema: Message had no sender
+
+Message was conversation + message + is_read + sent_at. No sender. That
+makes the mockup impossible - a thread cannot be split into mine and
+theirs, and there is nobody to notify on a reply. Migration 0003 adds
+Message.sender (FK -> Account). The table was empty, so it goes in NOT NULL
+with no backfill.
+
+makemigrations HANGS on this. It prompts interactively for a one-off
+default and there is no tty, so it sat until it was killed. Both migrations
+today were written by hand, then confirmed with
+`makemigrations --check --dry-run` reporting no changes. Worth knowing for
+the next non-nullable field.
+
+is_read means "read by the recipient", which works because a conversation
+only ever has two people in it.
+
+
+Roles are derived, never declared
+
+A conversation is (diner, restaurant): messaging_conversation.account_id is
+the diner, restaurant_restaurant.account_id is the owner. Every query
+resolves the signed-in account against those two columns and returns
+my_role / counterpart_name / counterpart_photo.
+
+The client never says which side it is. That is what lets one set of
+endpoints and one set of screens serve both - a diner sees restaurants in
+their inbox, an owner sees the diners who wrote in - and it means the role
+cannot be spoofed by the request.
+
+  getConversations      + optional search
+  getMessages           returns is_mine per row; opening marks read
+  startConversation     get-or-create; refuses your own restaurant
+  sendMessage           conversation_id, or restaurant_id to start one
+  editMessage           sender only
+  deleteMessage         sender only
+  getUnreadMessageCount
+
+Search matches the counterpart name OR any message in the thread, through a
+threads CTE plus EXISTS. The first version searched only the last-message
+preview, which meant typing a word you definitely remembered saying found
+nothing, because it was not the most recent line.
+
+
+Bug: query functions must not call each other
+
+sendMessage originally called startConversation() for its create-on-demand
+path and failed with "cursor already closed". Every query function in this
+codebase closes the shared connections['default'] in its own finally, so
+calling one from another pulls the connection out from under the caller.
+The get-or-create is now inlined on the same cursor.
+
+This applies to every queries.py in the project, not just messaging. Any
+future reuse across these functions will hit it.
+
+
+Notifications
+
+sendMessage also writes a notification_notification row for the recipient,
+so messages land in the same feed as reviews. An unread thread holds ONE
+notification, not one per message - a new one deletes the pending unread
+one first, matched on title LIKE 'New message from %'.
+
+editMessage and deleteMessage keep that in sync: an edit rewrites the
+notification body, a delete removes it. Both only touch UNREAD ones. An
+already-read notification is deliberately left alone - it is a record of
+what actually arrived, and silently rewriting someone's history reads worse
+than leaving it slightly stale.
+
+Routing a tap needed a type, and the notification table has no type column,
+so NotificationList now exports notificationKind(title), which infers it
+from the wording in one place and drives both the icon and the destination.
+A diner's message notification opens that restaurant's thread (a diner has
+exactly one per restaurant); an owner's opens the inbox, because an owner
+has many.
+
+
+Screens
+
+ConversationList is the whole inbox - search, pull-to-refresh, unread dot,
+reload on focus - so both inbox screens are ~30-line wrappers.
+
+MessageThreadScreen sits at screens/ root rather than under Owner/ or
+Diner/, because it is genuinely role-neutral. Date separators, avatar only
+on the first message of a run, mine right and green, theirs left and white,
+composer pinned to the bottom. It accepts either {conversationId} or
+{restaurantId} - with only a restaurantId the thread does not exist yet and
+the first send creates it.
+
+Entry points: both inbox tabs, a new Message button on DinerRestaurantScreen,
+and message notifications.
+
+Long-pressing your own bubble offers Edit and Delete. Other people's bubbles
+have no actions, and the backend checks sender_id independently, so this is
+only about not offering something that would be refused. Editing reuses the
+composer: an "Editing message" banner appears above it, the bubble being
+edited gets an outline, and the send button becomes a tick. Edited messages
+render "7:30 PM · edited" from Message.edited_at (migration 0004, nullable).
+Delete is a hard DELETE - no tombstone row, no "this message was deleted".
+
+Deviation from the mockup: the header says "last message 7:30 PM", not
+"active 5 min ago". The app does not track presence and inventing an online
+status seemed worse than showing something true. Real last-seen would need
+a column on Account plus a heartbeat.
+
+
+Sample conversations
+
+  python manage.py seed_messages [--fresh]
+
+39 threads, 146 messages, 19 message notifications, from short scripts -
+reservations, dietary questions, parking, card payments. Two or three
+diners per restaurant. Only the last message in a thread can still be
+unread, which is what a real inbox looks like. Same bulk_create +
+bulk_update backdating as seed_reviews.
+
+
+Navbar unread badges
+
+Count bubbles on the Messages and Notification tabs of both navbars.
+
+Refreshing on screen focus alone is not enough, and this is the whole
+reason for the shared store. Marking notifications read happens WHILE the
+notification screen is focused: the list clears its dots and the badge
+underneath keeps its number until you navigate away. So the counts live in
+utils/unreadCounts.js - a tiny module-level store with subscribers - and
+anything that changes them calls refreshUnreadCounts(), which pushes to
+every mounted navbar at once. Wired into mark-one, mark-all, and opening a
+thread. clearSession() resets them so one account's counts cannot survive
+into the next login.
+
+useUnreadCounts subscribes to that store and also refetches on focus, which
+catches changes made anywhere else.
+
+NavBadge renders nothing at zero, so an icon with no news looks exactly as
+it did before, and caps at "99+" so the bubble cannot grow wide enough to
+collide with the neighbouring tab.
+
+colors.badge was added (#E5484D light / #FF6369 dark). The green accent is
+unusable here - it is the same colour as the active tab the badge sits
+beside, so it would read as decoration rather than an alert.
+
+All FIVE icons in each navbar are wrapped in styles.iconWrap, not just the
+two badged ones. The wrapper is wider than the icons because Android clips
+children that spill outside a parent, and applying it uniformly keeps every
+tab label on one baseline - the icons are 22, 24 and 26px, so wrapping only
+two would have pushed those labels ~2px lower than the rest.
+
+
+Checked
+
+Django check clean, no migration drift. Full flow through the Django test
+client against the live database: a first message creates the thread, takes
+the owner's unread count 0 -> 1, notifies them with the sender's name and a
+preview, clears on open, and the reply notifies the diner back. Repeat
+unread messages collapse to one notification. Edit and delete verified for
+sender, non-sender, empty text and double-delete, including the
+notification-preview follow-up. Search verified on both name and message
+body. 16/16 endpoint regression pass. ESLint 0 errors.
+
+NOT verified: nothing has been run in the app. No simulator or device build
+this session. The thread layout, long-press menu, keyboard behaviour and
+badge positioning are all unverified visually and should be the first thing
+checked on a real run.
+
+
+Follow-ups
+
+- messages are fetched, never pushed. The thread does not update while it
+  is open unless it is left and reopened; the badges only move on focus or
+  a local action. Polling or a socket is the obvious next step.
+- there is no pagination on getMessages or getConversations. Fine at 146
+  messages, not at 10,000.
+- delete is destructive with no undo. A soft delete showing "this message
+  was deleted" is the conventional behaviour and may be worth it.
+- an owner's message notification opens the inbox rather than the thread,
+  because Notification has no conversation reference. A conversation_id
+  column would fix that.

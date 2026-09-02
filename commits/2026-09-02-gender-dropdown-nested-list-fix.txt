@@ -1,0 +1,27 @@
+fix VirtualizedList warning when opening the Gender dropdown
+
+Opening "Select Gender" on Profile Information warned "VirtualizedLists
+should never be nested inside plain ScrollViews with the same orientation".
+
+react-native-dropdown-picker renders its options as a FlatList by default,
+and RestaurantProfileInformationScreen wraps its form in a ScrollView, so
+opening the dropdown nested a virtualized list inside it. Virtualization
+cannot work in an unbounded parent, hence the warning.
+
+- GenderDropdown and RoleDropdown now pass listMode="SCROLLVIEW", which
+  makes the picker render a plain ScrollView instead. It is the right
+  container anyway: there are two options, so virtualization was buying
+  nothing. The list still expands inline exactly as before.
+- applied to RoleDropdown as well. It is the same component shape and is
+  used on Register, which has no ScrollView today but would hit this the
+  moment it gains one.
+- moved the zIndex wrapper style into a local StyleSheet in both files,
+  clearing the two ESLint warnings they carried.
+
+Checked: confirmed in the library source that SCROLLVIEW mode renders a
+ScrollView rather than the FlatList. The app's other FlatLists
+(OnboardingScreen, DinerAssistedHomeScreen) are top-level, not nested, so
+they are unaffected. ESLint 0 errors.
+
+NOT verified on a device - no simulator run, so the warning should be
+confirmed gone next time that screen is opened.

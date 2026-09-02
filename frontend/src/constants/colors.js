@@ -17,6 +17,7 @@ export const lightColors = {
   background1: '#218355',
   background2: '#FFFFFF',
   underlineColor: '#3cb57c',
+  badge: '#E5484D',
 };
 
 export const darkColors = {
@@ -35,6 +36,7 @@ export const darkColors = {
   background1: '#218355',
   background2: '#1E262E',
   underlineColor: '#3cb57c',
+  badge: '#FF6369',
 };
 
 const colors = lightColors;

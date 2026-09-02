@@ -14,21 +14,26 @@ import RestaurantBottomNavbar from '../../components/shared/RestaurantBottomNavb
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {
-  SquarePlus,
-  ChevronRight,
-  CircleUser,
-  UtensilsCrossed,
-  Store,
-} from 'lucide-react-native';
+import { SquarePlus, ChevronRight, CircleUser, MapPin } from 'lucide-react-native';
 import colors from '../../constants/colors';
-import EmptyState from '../../components/shared/EmptyState';
+import TopPicks from '../../components/shared/TopPicks';
+import { useTopPicks } from '../../hooks/useTopPicks';
 import { checkInfoComplete } from '../../api/services/home';
 
 const RestaurantHomeScreen = ({ navigation }) => {
   const [user, setUser] = useState({});
   const [infoStatus, setInfoStatus] = useState(null);
   const [loadingInfo, setLoadingInfo] = useState(true);
+
+  // The owner sees the same ranked lists a diner would, so they can tell how
+  // their restaurant places against the others around them.
+  const {
+    loading: loadingPicks,
+    dishes,
+    restaurants,
+    reviews,
+    located,
+  } = useTopPicks();
 
   useEffect(() => {
     AsyncStorage.getItem('user').then(res => {
@@ -53,9 +58,24 @@ const RestaurantHomeScreen = ({ navigation }) => {
             <View style={styles.upperContainer}>
               <View>
                 <Text style={styles.textStyle}>Hello, {user?.username}</Text>
-                <Text style={styles.textStyle1}>
-                  Brgy. Poblacion, Quezon Avenue, Iligan ...
-                </Text>
+
+                {/* Rankings are app-wide either way - location only adds
+                    the "how far away" line to each card. */}
+                {located ? null : (
+                  <TouchableOpacity
+                    style={styles.locationRow}
+                    onPress={() =>
+                      navigation.navigate('LocationPermission', {
+                        next: 'RestaurantHome',
+                      })
+                    }
+                  >
+                    <MapPin size={12} color={colors.button} />
+                    <Text style={styles.locationLink}>
+                      Share your location to see distances
+                    </Text>
+                  </TouchableOpacity>
+                )}
               </View>
               <View>
                 <Image
@@ -157,29 +177,35 @@ const RestaurantHomeScreen = ({ navigation }) => {
               </TouchableOpacity>
             </View>
 
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionHeaderText}>Top Dishes</Text>
-            </View>
-            <View style={styles.emptySection}>
-              <EmptyState
-                compact
-                icon={UtensilsCrossed}
-                title="No top dishes yet"
-                message="Once diners start rating dishes, the highest-rated ones show up here."
-              />
-            </View>
-
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionHeaderText}>Top Restaurants</Text>
-            </View>
-            <View style={[styles.emptySection, styles.emptySectionLast]}>
-              <EmptyState
-                compact
-                icon={Store}
-                title="No top restaurants yet"
-                message="Restaurant rankings appear here as reviews come in."
-              />
-            </View>
+            <TopPicks
+              loading={loadingPicks}
+              dishes={dishes}
+              restaurants={restaurants}
+              reviews={reviews}
+              onSelectDish={dish =>
+                navigation.navigate('DinerDish', {
+                  dishId: dish.dish_id,
+                  restaurantName: dish.restaurant_name,
+                })
+              }
+              onSelectRestaurant={restaurant =>
+                navigation.navigate('DinerRestaurant', {
+                  restaurantId: restaurant.restaurant_id,
+                })
+              }
+              onSelectReview={review =>
+                review.review_kind === 'dish'
+                  ? navigation.navigate('DinerDish', {
+                      dishId: review.dish_id,
+                      restaurantName: review.restaurant_name,
+                    })
+                  : navigation.navigate('RestaurantReviews', {
+                      restaurantId: review.restaurant_id,
+                      restaurantName: review.restaurant_name,
+                    })
+              }
+              onSeeAllReviews={() => navigation.navigate('OwnerReviews')}
+            />
           </View>
         </ScrollView>
 

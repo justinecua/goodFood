@@ -5,6 +5,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 
 from .queries import (
     getRestaurantInfo,
+    getRestaurantDetails,
     addRestaurantInfo,
     addBranch,
     updateBranch,
@@ -17,6 +18,13 @@ class GetRestaurantInfo(APIView):
 
     def post(self, request):
         return Response(getRestaurantInfo(request.data))
+
+
+class GetRestaurantDetails(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        return Response(getRestaurantDetails(request.data))
 
 
 class AddRestaurantInfo(APIView):

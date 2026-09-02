@@ -1,50 +1,32 @@
-import { View, Text, TouchableOpacity, Image } from 'react-native';
-import { MessageSquare } from 'lucide-react-native';
+import { View, Text } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import styles from '../../styles/RestaurantInboxScreenStyle';
 import RestaurantBottomNavbar from '../../components/shared/RestaurantBottomNavbar';
-import EmptyState from '../../components/shared/EmptyState';
-import SearchButton from '../../assets/images/searchbutton.png';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import ConversationList from '../../components/shared/ConversationList';
 
-// Messaging isn't wired to the backend yet, so this shows the empty state.
-// The conversation list will slot in below the search bar once the API exists.
-const RestaurantInboxScreen = ({ navigation }) => {
-  const conversations = [];
-
-  return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <View style={{ flex: 1 }}>
-        <View style={styles.background}>
-          <View style={styles.headerContainer}>
-            <Text style={styles.heading}>Inbox</Text>
-          </View>
-
-          <View style={styles.midContainer}>
-            <TouchableOpacity style={styles.searchInput}>
-              <Text style={styles.placeholderText}>Search</Text>
-              <Image style={styles.searchIcon} source={SearchButton} />
-            </TouchableOpacity>
-
-            {conversations.length === 0 ? (
-              <EmptyState
-                icon={MessageSquare}
-                title="No messages yet"
-                message="Messages from diners about your restaurant will appear here."
-              />
-            ) : (
-              conversations.map(item => (
-                <View key={item.id}>
-                  <Text>{item.name}</Text>
-                </View>
-              ))
-            )}
-          </View>
-
-          <RestaurantBottomNavbar navigation={navigation} />
+// The owner's threads are with diners who wrote in about their restaurant.
+const RestaurantInboxScreen = ({ navigation }) => (
+  <SafeAreaView style={styles.screen}>
+    <View style={styles.screen}>
+      <View style={styles.background}>
+        <View style={styles.headerContainer}>
+          <Text style={styles.heading}>Inbox</Text>
         </View>
+
+        <ConversationList
+          emptyMessage="Messages from diners about your restaurant will appear here."
+          onOpen={conversation =>
+            navigation.navigate('MessageThread', {
+              conversationId: conversation.conversation_id,
+              title: conversation.counterpart_name,
+            })
+          }
+        />
       </View>
-    </SafeAreaView>
-  );
-};
+
+      <RestaurantBottomNavbar navigation={navigation} />
+    </View>
+  </SafeAreaView>
+);
 
 export default RestaurantInboxScreen;

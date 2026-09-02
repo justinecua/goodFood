@@ -2,6 +2,8 @@ import { View, Text, TouchableOpacity, Image } from 'react-native';
 import styles from '../../styles/RestaurantAddDishScreenStyle';
 import { useRoute } from '@react-navigation/native';
 import colors from '../../constants/colors';
+import NavBadge from './NavBadge';
+import { useUnreadCounts } from '../../hooks/useUnreadCounts';
 
 import chatnavbar from '../../assets/navBarIcons/chat_0.png';
 import dishnavbar from '../../assets/navBarIcons/fries_0.png';
@@ -30,6 +32,7 @@ const RestaurantBottomNavbar = ({ navigation }) => {
   const route = useRoute();
   const current = route.name;
   const menuActive = MENU_ROUTES.includes(current);
+  const unread = useUnreadCounts();
 
   return (
     <View style={styles.bottomNavigationBar}>
@@ -37,10 +40,12 @@ const RestaurantBottomNavbar = ({ navigation }) => {
         style={styles.navItem}
         onPress={() => navigation.navigate('RestaurantHome')}
       >
-        <Image
-          style={styles.homeIcon}
-          source={current === 'RestaurantHome' ? homenavbar1 : homenavbar}
-        />
+        <View style={styles.iconWrap}>
+          <Image
+            style={styles.homeIcon}
+            source={current === 'RestaurantHome' ? homenavbar1 : homenavbar}
+          />
+        </View>
 
         <Text
           style={[
@@ -56,10 +61,13 @@ const RestaurantBottomNavbar = ({ navigation }) => {
         style={styles.navItem}
         onPress={() => navigation.navigate('MessageScreen')}
       >
-        <Image
-          style={styles.chatIcon}
-          source={current === 'MessageScreen' ? chatnavbar1 : chatnavbar}
-        />
+        <View style={styles.iconWrap}>
+          <Image
+            style={styles.chatIcon}
+            source={current === 'MessageScreen' ? chatnavbar1 : chatnavbar}
+          />
+          <NavBadge count={unread.messages} />
+        </View>
         <Text
           style={[
             styles.navIconText,
@@ -74,10 +82,12 @@ const RestaurantBottomNavbar = ({ navigation }) => {
         style={styles.navItem}
         onPress={() => navigation.navigate('MyRestaurant')}
       >
-        <Image
-          style={styles.dishIcon}
-          source={menuActive ? dishnavbar1 : dishnavbar}
-        />
+        <View style={styles.iconWrap}>
+          <Image
+            style={styles.dishIcon}
+            source={menuActive ? dishnavbar1 : dishnavbar}
+          />
+        </View>
         <Text
           style={[styles.navIconText, menuActive && { color: colors.button }]}
         >
@@ -89,10 +99,13 @@ const RestaurantBottomNavbar = ({ navigation }) => {
         style={styles.navItem}
         onPress={() => navigation.navigate('Notifications')}
       >
-        <Image
-          style={styles.notifIcon}
-          source={current === 'Notifications' ? notifnavbar1 : notifnavbar}
-        />
+        <View style={styles.iconWrap}>
+          <Image
+            style={styles.notifIcon}
+            source={current === 'Notifications' ? notifnavbar1 : notifnavbar}
+          />
+          <NavBadge count={unread.notifications} />
+        </View>
         <Text
           style={[
             styles.navIconText,
@@ -107,10 +120,12 @@ const RestaurantBottomNavbar = ({ navigation }) => {
         style={styles.navItem}
         onPress={() => navigation.navigate('ProfileScreen')}
       >
-        <Image
-          style={styles.profileIcon}
-          source={current === 'ProfileScreen' ? usercircle1 : usercircle}
-        />
+        <View style={styles.iconWrap}>
+          <Image
+            style={styles.profileIcon}
+            source={current === 'ProfileScreen' ? usercircle1 : usercircle}
+          />
+        </View>
         <Text
           style={[
             styles.navIconText,
